@@ -1,0 +1,12 @@
+ui-2d: hoàn tất 20 hàng, đối chiếu skill hiện tại; nguồn ghi theo dòng.
+1.2 art-direction — chốt ảnh đích và khung kỹ thuật: hoàn tất bảng bài học và đối chiếu skill.
+1.3 art-pipeline — ảnh AI → sprite → atlas/9-slice: hoàn tất bảng bài học và đối chiếu skill.
+1.4 3d-look — hình, material, đèn, render, toon: hoàn tất bảng bài học và đối chiếu skill.
+1.5 unity-verification — cổng logic, hình và thiết bị: hoàn tất bảng bài học và đối chiếu skill.
+1.6 codex-orchestration — brief, vòng lặp và Monitor: hoàn tất bảng bài học và đối chiếu skill.
+1.7 level/puzzle-design — luật, sinh màn, độ khó: hoàn tất bảng bài học và đối chiếu skill.
+1.8 motion/game-feel — phản hồi và hoạt cảnh: hoàn tất bảng bài học và đối chiếu skill.
+1.9 audio — chọn, phối và kiểm âm: hoàn tất bảng bài học và đối chiếu skill.
+1.10 meta/economy — tài nguyên, lịch và giao dịch: hoàn tất bảng bài học và đối chiếu skill.
+1.11 architecture/data — ranh giới luật, dữ liệu và dịch vụ: hoàn tất bảng bài học và đối chiếu skill.
+1.12 release/marketing — phát hành và kiểm giả thuyết thị trường: hoàn tất bảng bài học và đối chiếu skill.
