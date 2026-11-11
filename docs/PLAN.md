@@ -30,7 +30,8 @@ Khung phục vụ cả game 2D lẫn 3D: giao diện luôn là lớp 2D, gamepla
 Quy trình tạo toàn bộ hình ảnh cho các màn hình của khung và cho gameplay:
 - Nhập ý tưởng game; AI vẽ 3 đến 4 phong cách khác nhau để chọn (khi đã chọn concept thì AI sinh phong cách theo concept đó).
 - Chọn xong, phong cách được khóa thành "bảng quy định" (màu, kiểu nút, bo góc, chữ).
-- AI sinh hình theo bảng: nút, bảng thông báo, chữ, nền, biểu tượng, cả đồ vật 3D.
+- AI sinh hình 2D theo bảng: nút, bảng thông báo, chữ, nền, biểu tượng.
+- Đồ vật 3D không dùng AI ảnh-sang-3D mà được dựng bằng code chạy trong Blender, theo ảnh phong cách đã duyệt.
 - Khung nhận hình và tự mặc phong cách đó.
 
 ### Bộ skill
@@ -40,7 +41,7 @@ Hướng dẫn cho trợ lý AI, mỗi skill một việc:
 3. **Phong cách và hình AI:** cách chọn, khóa phong cách và viết yêu cầu vẽ.
 4. **Giao diện 2D:** bố cục, chữ, nút, bảng thông báo.
 5. **Xử lý hình AI:** cắt nền, đóng gói, làm chuyển động.
-6. **Hình 3D phong cách hoạt hình:** đồ vật, ánh sáng, chạy mượt trên máy yếu.
+6. **Đồ vật 3D bằng Blender:** từ ảnh đã duyệt dựng đồ vật bằng code Blender, kiểm từ nhiều góc, đưa vào game với màu và ánh sáng kiểu hoạt hình, chạy mượt trên máy yếu.
 7. **Thiết kế màn chơi / câu đố:** luật, sinh màn, kiểm độ khó.
 8. **Cảm giác chơi, âm thanh, kinh tế game.**
 9. **Phát hành.**
@@ -59,7 +60,7 @@ Hướng dẫn cho trợ lý AI, mỗi skill một việc:
 |---|---|---|
 | A | So sánh phần xung quanh của hai game đã làm, từng chức năng một | Có bảng "chức năng nào cả hai game đều có / chỉ một game có", kiểm lại ngẫu nhiên vài mục |
 | B | Chốt danh sách thứ đưa vào khung | Danh sách được duyệt |
-| C | Xưởng phong cách | Thử với một ý tưởng giả: ra 3-4 phong cách, chọn được một, ra đủ bộ hình đồng nhất |
+| C | Xưởng phong cách | Thử với một ý tưởng giả: ra 3-4 phong cách, chọn được một, ra đủ bộ hình đồng nhất, kèm thử dựng một đồ vật 3D bằng Blender từ phong cách đã chọn |
 | D | Code khung (lưu, vàng / tim, cài đặt, âm, rung, quảng cáo / mua hàng giả, các màn hình dùng hình tạm) | Chạy đúng, có kiểm tra tự động, không lỗi; chạy thử trên điện thoại |
 | E | Thay hình tạm bằng hình của xưởng phong cách | Mỗi màn hình đúng ảnh mẫu đã duyệt, ở 2 kiểu màn hình điện thoại |
 | F | Thử bằng một game mới nhỏ (3 màn) | Chạy được trên điện thoại; ghi số giờ thật để biết tiết kiệm bao nhiêu |

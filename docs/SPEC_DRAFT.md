@@ -109,3 +109,10 @@ Cổng mỗi bước: xanh thì commit + push repo này rồi sang bước kế;
 - Hình hai game cũ lấy từ game gốc nên không dùng lại; chỉ dùng lại cách tổ chức và logic.
 - Phần chỉ có ở một game (Quest, Rolling Offer, Sky Jump...) chưa vào khung.
 - Phân vai: Claude điều phối, đọc, kiểm; Codex viết mã, vẽ ảnh AI, chạy Unity; người làm game chọn, duyệt, thử trên điện thoại.
+
+## 12. Quyết định 3D (2026-11-11, người làm game): dựng đồ vật 3D bằng Claude + Blender, không dùng AI ảnh-sang-3D
+- Bằng chứng ủng hộ: game-3 dựng 3 mesh bằng script Blender (ô 198 tam giác, kiến 1.616, hộp 2.584), quy trình đo số → Blender → nướng AO → shader toon (`knowledge/colony-flow-research/10-mesh-3d-clone-va-bai-hoc.md` dòng 5-45).
+- Bằng chứng phản đối: game-2 dựng bằng script Blender 3 lần "không đạt" cho vật cần chi tiết vẽ tay (vân băng, vết nứt), sau đó chuyển sang AI ảnh-sang-3D và gặp topology xấu (`game-2/docs/ART.md` dòng 69-73, 131-134).
+- Hệ quả: phong cách chọn ở xưởng phải là kiểu mỗi bộ phận một màu, hình khối đơn giản; bước C thử dựng một đồ vật 3D để kiểm.
+- CHƯA KIỂM: dựng đồ vật mới từ ảnh concept (game-3 dựng theo số đo từ game gốc); nguyên nhân thật của 3 lần thất bại ở game-2 (cách viết script hay chủ đề quá khó).
+- Việc chạy Blender: Codex chạy với quyền đầy đủ (`codex exec -s danger-full-access`), plugin sandbox giấu GPU nên có thể làm Blender sập (`~/.claude/CLAUDE.md`). Blender có ở `/Applications/Blender.app`.
