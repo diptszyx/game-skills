@@ -20,6 +20,7 @@ ORCH = "orchestrating-ai-work"
 SHELL = "using-game-shell"
 ART = "styling-ai-art"
 THREED = "building-3d-objects"
+UI = "building-game-ui"
 
 SCENARIOS = [
     dict(id="V1", skill=VERIFY, trigger=True,
@@ -63,6 +64,14 @@ SCENARIOS = [
          rubric={"redirect to Blender code": r"blender|script|code|procedural", "not image-to-3D": r"not (use|rely)|instead|rather than|avoid"}),
     dict(id="B3", skill=THREED, trigger=False,
          prompt="What is the difference between URP and the built-in render pipeline in Unity? Two sentences.", rubric={}),
+    dict(id="U1", skill=UI, trigger=True,
+         prompt="In our Unity portrait mobile game, the Vietnamese title on the shop screen is cut off and the Buy button text overlaps the price. How do you fix it and make sure it stays fixed?",
+         rubric={"fit inside view/factory not separate call": r"inside|factory|when (the )?(label|text|row)|automatic|view", "long string stress test": r"long(est)?|stress|longest|german", "assert in a test": r"test|assert|preferred", "data not literals": r"localization|key|style|config", "look at screenshots": r"screenshot|capture|contact sheet|montage|look", "ratios/safe area": r"9:20|9:16|ratio|safe area|notch"}),
+    dict(id="U2", skill=UI, trigger=True,
+         prompt="I am adding a Pause popup to our Unity mobile game. How should it behave and how do you check it is done?",
+         rubric={"top popup only input": r"top|stack|only the top", "unscaled time": r"unscaled|timescale|time ?scale", "mandatory vs dismissible": r"mandatory|dismiss|back", "screenshot check": r"screenshot|capture|contact sheet", "safe area ratios": r"safe area|notch|9:20|ratio", "data not literals": r"localization|key|style"}),
+    dict(id="U3", skill=UI, trigger=False,
+         prompt="What does the Unity Rigidbody mass property do? One sentence.", rubric={}),
     dict(id="O3", skill=ORCH, trigger=False,
          prompt="Explain the difference between a Sprite and a Texture2D in Unity in two sentences.", rubric={}),
 ]

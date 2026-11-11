@@ -30,7 +30,7 @@ Thời gian đo được từ nhật ký: Codex mất 4 đến 20 phút mỗi vi
 - SDK quảng cáo, mua hàng, bảng xếp hạng thật chưa nối (chỉ bản giả).
 - Skill chưa thử trong phiên làm việc thật (chỉ `claude -p`), chưa cài vào `~/.claude/skills/`; hook chưa cài toàn cục.
 - `game-2-v2` chưa có `.gitignore` và chưa commit; ổ đĩa còn 8,3 GiB.
-- Hẹn giờ 04:12 (CronCreate) chưa kiểm chứng chạy thật.
+- Hẹn giờ 04:12 (CronCreate): đã chạy thật lúc 04:12:05 khi phiên rảnh; chưa kiểm chứng trường hợp phiên bị khóa vì hết hạn mức.
 
 ## Cần bạn quyết
 1. Chọn một trong 4 phong cách (`art/style_trial/montage.png`) để xưởng sinh bộ hình đầy đủ và thay hình tạm của `game-2-v2`.
