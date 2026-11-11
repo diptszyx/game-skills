@@ -11,7 +11,7 @@ Chỉ đọc, không sửa hai game. Đọc ở: game-3 commit `8997bab` (2026-1
 2. **Hai game lưu dữ liệu theo hai cách khác nhau:** game-3 dùng `PlayerPrefs` và lớp tĩnh `HomeState` (3 file chạm `PlayerPrefs`); game-5 dùng một lớp `SaveData` ghi file JSON (16 file dùng). Khung chỉ nên giữ một cách (quy chuẩn "một cách cho một việc"). Đề xuất theo game-5: có kiểm tra số âm, kiểm được bằng test, không phụ thuộc Unity.
 3. **Cả hai đều chưa có đa ngôn ngữ** (không có mã `Localiz`/`Language`). Hybrid-casual thường cần; quy chuẩn chung (`../CLAUDE.md`, mục Definition of Done) cũng nhắc "mọi ngôn ngữ của game". Cần quyết định có đưa vào khung không.
 4. **Game-5 không có màn hình tải riêng và không thấy xử lý vùng an toàn** (grep `SafeArea` 0 file), game-3 có cả hai (`LoadingScreen`, `HomeSafeArea`). Kit cũ `game-kit` đã có `UiSafeArea`.
-5. **"Thưởng hằng ngày" ở hai game là hai thứ khác nhau:** game-3 là điểm danh 7 ô (`DailyRewards`); game-5 là nhiệm vụ theo ngày trong tuần (`DailyChallengeRules`) và không thấy điểm danh đăng nhập. Hai thứ này đều nằm trong danh sách khung.
+5. **"Thưởng hằng ngày" ở hai game là hai thứ khác nhau:** game-3 là điểm danh 5 ô, thưởng luân phiên 2 ngày (`DailyRewards.cs:23-43`; bản đầu ghi nhầm 7 ô, đã sửa sau khi Codex phản biện); game-5 là nhiệm vụ theo ngày trong tuần (`DailyChallengeRules`) và không thấy điểm danh đăng nhập. Hai thứ này đều nằm trong danh sách khung.
 6. **Bảng xếp hạng:** game-3 là giả (màn "đang tải" 0,5 giây rồi hiện danh sách dựng sẵn; không có dịch vụ nào trong `manifest.json`); game-5 không có; game-2 là thật.
 
 ## 2. Bảng chức năng
@@ -97,3 +97,10 @@ Cột "Kết luận": **Cả hai** = cả hai game có; **Một game** = chỉ m
 
 ## 6. Đã quyết ở bước B (2026-11-11, người làm game: "cứ thêm những gì bạn nói")
 Đưa vào khung: điểm danh ngày, màn hình tải, vùng an toàn, thông báo đẩy, cấu hình từ xa, đa ngôn ngữ. Chưa đưa vào: hồ sơ + lọc từ chửi, chọn booster trước ván, Quest, ưu đãi xoay vòng, Sky Jump (chờ lặp ở game thứ ba). Cách lưu theo game-5 (JSON `SaveData`).
+
+## 7. Sửa sau phản biện Codex (2026-11-11, đã kiểm bằng mã)
+- Điểm danh game-3: 5 ô, bảng thưởng luân phiên 2 ngày. Bản trên ghi 7 ô là sai.
+- Ghi lưu game-5 (`SaveData.Save`) xóa bản cũ rồi mới chuyển bản tạm: mất dữ liệu nếu ngắt giữa hai bước. Khung phải ghi nguyên tử.
+- `NotificationPlanner.Plan` dùng `save.Lives` mà không hồi tim trước: khung phải hồi tim trước khi lập lịch.
+- Tim vô hạn: game-3 cộng dồn (`HomeState.AddInfiniteLife`), game-5 giữ thời hạn dài hơn (`ExtendInfiniteLives`, ghi AMBIG). Khung chọn cộng dồn (không mất thời gian đã mua).
+- `SaveData` của game-5 nhúng Quest, RollingOffer, Profile, pre-booster: không bê nguyên, khung thiết kế bản lưu theo phần (mỗi module một phần).
