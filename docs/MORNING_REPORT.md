@@ -16,7 +16,7 @@ Mọi số bên dưới do tôi chạy lại độc lập, trừ chỗ ghi "Code
 | Màn hình và bảng thông báo (T12-T17) | 6 màn, 5 bảng, 2 phong cách, vi + en | Đạt kỹ thuật, chưa đẹp | Unity EditMode 41/41, PlayMode 20/20; 132 ảnh; hình tạm |
 | T18-T19 game thử `game-2-v2` | luật cũ + khung + hình tạm, chạy được vòng chơi | Đạt (sau 1 lần phát hiện sai lệch) | EditMode 325/325, PlayMode 4/4 (2 lần chạy lại), APK 38,5 MB chưa cài điện thoại |
 
-Thời gian đo được từ nhật ký: Codex mất 4 đến 20 phút mỗi việc lớn; cả đêm tới lúc viết báo cáo khoảng 3 giờ (chưa đo chính xác từng khoảng nghỉ chờ).
+Thời gian đo được từ nhật ký: Codex mất 4 đến 20 phút mỗi việc lớn; từ 23:25 (T1a bắt đầu) đến 01:45 là 2 giờ 20 phút, gồm cả lúc chờ.
 
 ## Đã phát hiện và sửa trong đêm
 - Báo cáo của Codex về PlayMode game-2-v2 (4/4) không tái lập được: tôi chạy 4 lần đều 2/4. Nguyên nhân gốc là bài test lệch chỉ số kích thước màn sau khi đổi sang Android; đã sửa, chạy lại 4/4.
