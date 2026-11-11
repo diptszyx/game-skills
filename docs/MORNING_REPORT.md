@@ -10,7 +10,7 @@ Số đo thật ghi kèm nguồn. Mục chưa chạy ghi "chưa".
 | T3 hook | ≥ 3 hook, ca chặn đúng + không chặn nhầm | Đạt | 20/20 script + 3 ca phiên thật; chưa cài toàn cục |
 | T4 xưởng phong cách | 4 bảng phong cách | Có ứng viên, chưa duyệt | `art/style_trial/montage.png`; ảnh 1254 px (brief 2048) |
 | T5 đồ vật 3D | ≤ 2.000 tam giác, 0 cạnh hở, 3 góc | Đạt | 96 tam giác, 0 cạnh hở, 3 ảnh; chạy lại script cho cùng kết quả; Codex 3,8 phút |
-| T6 lớp Unity | adapter + một lần chạy Unity sạch | Chưa | |
+| T6 lớp Unity | adapter + một lần chạy Unity sạch | Đạt | error CS 0, EditMode 19/19; chưa thử trên điện thoại |
 | T8 spec module | spec nháp cho module T1 | Chưa | |
 
 ## Phần tool chưa nằm trong kế hoạch đêm

@@ -41,9 +41,13 @@ status=$?
 [ "$guard_status" -eq 0 ] || status=$guard_status
 if [ -f "$LOG" ]; then cp "$LOG" "$PROJECT/Logs/EditMode-Editor.log"; fi
 python3 - "$RESULT" "$LOG" "$status" <<'PY'
-import sys, pathlib, xml.etree.ElementTree as ET
-expected = {'IndieGame.Shell.Tests.SaveSmokeTests.' + n for n in
-            ('ValidV1Loads', 'CorruptFallsBackToBackup', 'FutureReportsVersionError')}
+import sys, pathlib, json, subprocess, xml.etree.ElementTree as ET
+expected = {'IndieGame.Shell.Tests.UnityAdapterTests.SafeAreaFullScreen', 'IndieGame.Shell.Tests.UnityAdapterTests.LoadingProgressClamp', 'IndieGame.Shell.Tests.UnityAdapterTests.LoadingProgressMonotonic', 'IndieGame.Shell.Tests.UnityAdapterTests.HapticsFlagOn', 'IndieGame.Shell.Tests.UnityAdapterTests.SafeAreaBottomGestureBar', 'IndieGame.Shell.Tests.UnityAdapterTests.HapticsNullPlayerSafe', 'IndieGame.Shell.Tests.SaveSmokeTests.CorruptFallsBackToBackup', 'IndieGame.Shell.Tests.UnityAdapterTests.LoadingNewCycleResetsAndEarlyHideFades', 'IndieGame.Shell.Tests.UnityAdapterTests.LoadingMinimumDisplayTime', 'IndieGame.Shell.Tests.SaveSmokeTests.ValidV1Loads', 'IndieGame.Shell.Tests.UnityAdapterTests.LoadingHideBeforeMinimumWaits', 'IndieGame.Shell.Tests.UnityAdapterTests.LoadingDoubleShowIdempotent', 'IndieGame.Shell.Tests.UnityAdapterTests.SafeAreaZero', 'IndieGame.Shell.Tests.SaveSmokeTests.FutureReportsVersionError', 'IndieGame.Shell.Tests.UnityAdapterTests.HapticsFlagOff', 'IndieGame.Shell.Tests.UnityAdapterTests.LoadingFadeAndLateHide', 'IndieGame.Shell.Tests.UnityAdapterTests.AudioFlagsGatePoolAndRefreshActiveVolumes', 'IndieGame.Shell.Tests.UnityAdapterTests.SafeAreaTopNotch', 'IndieGame.Shell.Tests.UnityAdapterTests.AudioRoutesKeysAndIndependentVolumes'}
+core = pathlib.Path(sys.argv[1]).parents[2] / 'Packages/com.indiegame.shell/Runtime/Core'
+no_engine = json.loads((core / 'IndieGame.Shell.Core.asmdef').read_text()).get('noEngineReferences') is True
+grep = subprocess.run(['grep', '-rn', 'UnityEngine', str(core)], capture_output=True, text=True)
+core_clean = grep.returncode == 1
+print(f'Core noEngineReferences={no_engine}; UnityEngine grep matches={len(grep.stdout.splitlines())}; grep_status={grep.returncode}')
 log = pathlib.Path(sys.argv[2])
 errors = sum('error CS' in line for line in log.read_text(errors='replace').splitlines()) if log.exists() else -1
 print(f'error CS count: {errors}')
@@ -57,7 +61,7 @@ print(f'passed={passed} failed={failed} expected={len(expected)}')
 for c in cases:
     print(c.get('result'), c.get('fullname'))
     if c.get('result') != 'Passed': print(c.findtext('.//message', ''))
-sys.exit(0 if errors == 0 and failed == 0 and passed == len(expected)
+sys.exit(0 if no_engine and core_clean and errors == 0 and failed == 0 and passed == len(expected)
          and {c.get('fullname') for c in cases} == expected and int(sys.argv[3]) == 0 else 1)
 PY
 result=$?

@@ -1,7 +1,8 @@
 {
   "name": "IndieGame.Shell.Tests.EditMode",
   "references": [
-    "IndieGame.Shell.Core"
+    "IndieGame.Shell.Core",
+    "IndieGame.Shell.Unity"
   ],
   "includePlatforms": [
     "Editor"

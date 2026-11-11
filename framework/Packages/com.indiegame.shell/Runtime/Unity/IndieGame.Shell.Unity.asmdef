@@ -1,0 +1,7 @@
+{
+  "name": "IndieGame.Shell.Unity",
+  "rootNamespace": "IndieGame.Shell.Unity",
+  "references": [
+    "IndieGame.Shell.Core"
+  ]
+}
