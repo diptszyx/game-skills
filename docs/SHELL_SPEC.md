@@ -14,8 +14,8 @@ Nguồn sự thật là mã và test trong `framework/`; file này tóm tắt qu
 | Lưu (`SaveStore`) | cả file | Ghi qua file tạm rồi thay thế, giữ `.bak`; đọc hỏng → thử `.bak`; phiên bản mới hơn → báo lỗi và không ghi đè; nâng cấp từng bước bằng hàm migration |
 | Kinh tế (`EconomyService`) | `economy` | Vàng `long`, booster theo id; âm / tràn bị từ chối; giao dịch nhiều món là nguyên tử; sổ mã nhận thưởng |
 | Tim (`LivesService`) | `lives` | Hồi 1 tim mỗi chu kỳ, tính lười theo `IClock`; đồng hồ lùi: không đổi gì (dấu mốc thời gian lưu cả khi nạp lại); tim vô hạn cộng dồn; đầy tim thì không đếm giờ |
-| Điểm danh (`DailyCheckInService`) | `dailycheckin` | 5 ô, 2 bảng thưởng xoay theo ngày UTC; bỏ ngày thì giữ ô kế; mã nhận `checkin:<ngày>` |
-| Nhiệm vụ ngày (`DailyQuestsService`) | `dailyquests` | Danh sách từ cấu hình, chọn tuần hoàn xác định (không ngẫu nhiên); đặt lại 00:00 UTC; danh sách tuần đặt lại thứ Hai UTC; mã nhận `quest:<ngày>:<id>` |
+| Điểm danh (`DailyCheckInService`) | `dailyCheckIn` | 5 ô, 2 bảng thưởng xoay theo ngày UTC; bỏ ngày thì giữ ô kế; mã nhận `checkin:<ngày>` |
+| Nhiệm vụ ngày (`DailyQuestsService`) | `dailyQuests` | Danh sách từ cấu hình, chọn tuần hoàn xác định (không ngẫu nhiên); đặt lại 00:00 UTC; danh sách tuần đặt lại thứ Hai UTC; mã nhận `quest:<ngày>:<id>` |
 | Thông báo (`NotificationPlanner`) | không | Làm mới tim TRƯỚC khi tính giờ đầy tim; danh sách trả về thay hoàn toàn kế hoạch cũ; giờ yên lặng UTC [bắt đầu, kết thúc) |
 | Cài đặt (`SettingsService`) | `settings` | Âm thanh, nhạc, rung, ngôn ngữ; ngôn ngữ lạ → ngôn ngữ mặc định |
 | Đa ngôn ngữ (`LocalizationService`) | không | Bảng khóa→chữ theo ngôn ngữ; rơi về ngôn ngữ mặc định rồi `[khóa]`, ghi lại khóa thiếu; format hỏng không ném lỗi |
