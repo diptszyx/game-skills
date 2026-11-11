@@ -33,3 +33,12 @@ Lưu ý: đề S1, S2 đều nhắc "shared shell package" nên có thể giúp 
 | B3 URP khác built-in | không | không kích hoạt | không kích hoạt |
 
 Lưu ý: A1 chấm lại sau khi nhìn kết quả (có thể thiên vị); A2 chạy lại sau khi sửa mô tả theo đúng đề đó (có thể khớp riêng đề này); B2 skill tự loại trừ ca image-to-3D nên không kích hoạt là hợp lý nhưng chưa phải kết quả "đã giúp"; mỗi đề chạy 1 lần, regex thô.
+
+## Skill 6 (building-game-ui), 2026-11-12
+| Đề | Nên kích hoạt | Có skill | Không skill |
+|---|---|---|---|
+| U1 chữ tiếng Việt bị cắt trên màn cửa hàng | có | kích hoạt, 6/6 | 4/6 |
+| U2 thêm popup tạm dừng | có | kích hoạt, 6/6 | 3/6 |
+| U3 hỏi Rigidbody mass | không | không kích hoạt | không kích hoạt |
+
+Lưu ý: mỗi đề chạy 1 lần, regex thô; không skill vẫn đạt khá cao ở U1 vì đề gợi ý sẵn lỗi cắt chữ.
