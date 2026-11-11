@@ -36,14 +36,18 @@ Khung dùng được cho cả game 2D lẫn 3D vì giao diện luôn là lớp 2
 Chưa đưa vào khung (mới thấy ở một game): hồ sơ người chơi, chọn booster trước ván, nhiệm vụ sự kiện, ưu đãi xoay vòng, Sky Jump. Sẽ cân nhắc khi lặp lại ở game thứ ba.
 
 ## Bộ skill
-Skill là hướng dẫn ngắn cho trợ lý AI, chỉ được mở ra khi việc đang làm khớp. Làm trước hai skill có bằng chứng rõ từ hai game đã làm:
+Skill là hướng dẫn ngắn cho trợ lý AI, chỉ được mở ra khi việc đang làm khớp. Sáu skill làm theo thứ tự, mỗi skill chỉ viết khi đã có bài học nguồn từ hai game trước:
 
-| Skill | Làm gì |
-|---|---|
-| Làm việc với AI | Đầu phiên đọc gì, giao việc, canh việc chạy nền, ghi bài học ngay lúc gặp lỗi |
-| Kiểm tra kết quả | Kiểm tra tự động, chụp màn hình so ảnh mẫu, thử điện thoại; chưa kiểm thì không báo xong |
+| Skill | Làm gì | Viết khi nào |
+|---|---|---|
+| Làm việc với AI | Đầu phiên đọc gì, giao việc, canh việc chạy nền, ghi bài học ngay lúc gặp lỗi | Đầu tiên |
+| Kiểm tra kết quả | Kiểm tra tự động, chụp màn hình so ảnh mẫu, thử điện thoại; chưa kiểm thì không báo xong | Đầu tiên |
+| Phong cách và hình AI | Chọn, khóa phong cách; viết yêu cầu vẽ; cắt nền, đóng gói hình | Cùng bước C |
+| Giao diện 2D | Bố cục, chữ, nút, bảng thông báo | Cùng bước C |
+| Đồ vật 3D bằng Blender | Dựng từ ảnh đã duyệt, kiểm nhiều góc, màu kiểu hoạt hình, chạy mượt trên máy yếu | Cùng bước C |
+| Dùng khung game | Cách dựng một game mới trên khung | Sau bước D |
 
-Các skill khác (hình ảnh, đồ vật 3D, gameplay...) chỉ làm khi có đủ bài học nguồn và sau khi đã dùng thật hai skill đầu.
+Chưa viết, cần nghiên cứu thêm: gameplay hybrid-casual; cảm giác chơi, âm thanh, kinh tế; phát hành.
 
 ## Các bước xây
 
@@ -55,5 +59,5 @@ Các skill khác (hình ảnh, đồ vật 3D, gameplay...) chỉ làm khi có �
 | D | Code khung, các màn hình dùng hình tạm | B (làm song song với C) | Chạy đúng, có kiểm tra tự động, chạy được trên điện thoại | Chưa |
 | E | Thay hình tạm bằng hình của xưởng | C và D | Mỗi màn hình đúng ảnh mẫu đã duyệt, ở 2 kiểu màn hình | Chưa |
 | F | Thử bằng một game mới nhỏ (3 màn) | E | Chạy trên điện thoại, ghi số giờ thật để biết tiết kiệm bao nhiêu | Chưa |
-| G1 | Viết skill 1 và 2 | B (làm được ngay) | Qua thử nghiệm: nên dùng, không nên dùng, so với không có skill | Chưa |
-| G2 | Viết thêm skill khác, nếu cần | F | Như G1, sau khi hai skill đầu đã dùng thật | Chưa |
+| G1 | Viết hai skill đầu (làm việc với AI, kiểm tra kết quả) | B (làm được ngay) | Qua thử nghiệm: nên dùng, không nên dùng, so với không có skill | Chưa |
+| G2 | Viết bốn skill còn lại: ba skill hình ảnh và 3D cùng bước C, skill dùng khung sau bước D | C, D | Như G1 | Chưa |
