@@ -23,6 +23,9 @@ Phần code dùng chung, lấy từ chỗ giống nhau của hai game đã làm:
 - Lưu vàng, tim, booster
 - Âm thanh
 - Rung
+- Xem quảng cáo nhận thưởng (giả)
+- Bảng xếp hạng (dữ liệu giả)
+- Nhiệm vụ ngày
 - Ô cắm quảng cáo (giả)
 - Ô cắm mua hàng (giả)
 
