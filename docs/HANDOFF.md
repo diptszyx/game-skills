@@ -27,6 +27,6 @@ Bạn là Claude Code mở phiên mới trong `~/project/indie-game/game-skills`
 
 ## Cập nhật 2026-11-11 (đọc trước phần trên)
 - Hướng mới: một công cụ = khung game + xưởng phong cách + bộ skill. Plan đọc cho người: `docs/PLAN.md` (không chứa câu hỏi hay ghi chú nội bộ; trao đổi với người làm game ở phiên chat). Bản kỹ thuật: `docs/SPEC_DRAFT.md` (cuối file có câu hỏi mở và điều chưa biết).
-- Trạng thái: chưa viết khung hay skill nào. Việc kế: người làm game duyệt danh sách đưa vào khung, rồi bước A (so sánh vỏ game-3 và game-5, chỉ đọc).
+- Trạng thái: chưa viết khung hay skill nào. Bước A xong (2026-11-11): `docs/SHELL_COMPARE.md`. Việc kế: người làm game trả lời 5 câu ở mục 5 của file đó (bước B: chốt danh sách đưa vào khung).
 - Chỉ đọc, không sửa `game-3`, `game-5`. Repo này được tự commit + push (đường dẫn cụ thể; không `reset --hard`, `pull --rebase`, force push). Vẫn hỏi cho nhánh thật: đổi hướng đã chốt, tiêu tiền, xóa việc của người làm game, art / âm / cảm giác họ phải duyệt.
 - Plan viết cho người đọc: ngắn, không thuật ngữ, không tên file, không liệt kê Claude / Codex / "bạn". Chi tiết để spec.
