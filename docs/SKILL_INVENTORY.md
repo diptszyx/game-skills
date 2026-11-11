@@ -346,3 +346,39 @@ Kết quả lần đầu: 9/10 đầy đủ căn cứ; V08 có phần thêm quá
 - Một số lessons nhắc HANDOFF cũ của G3 nhưng không có bản nguồn đó trong phạm vi docs tìm được; chỉ dùng nội dung lessons đã đọc, không nhận đã mở lại HANDOFF.
 - Đây là kiểm kê tài liệu, không phải thử Unity/SDK, đo hiệu năng mới, kiểm giấy phép hiện tại hoặc kiểm chứng toàn bộ tuyên bố nghiên cứu gốc. Không đọc reference/apk, không truy cập nhị phân, không chạy git/gh/Unity, không đọc .env; chỉ ghi hai file đầu ra được phép.
 - Không còn miền bắt buộc chưa tổng hợp. Những phần thiếu research/MẪU ĐÃ CHỐT nằm trong bảng skill, chưa được lấp bằng suy đoán hoặc bằng sửa kit đang tạm dừng.
+
+## 6. Bổ sung 2026-11-11: game-3 (Colony Flow) và game-5 (Hole it!)
+Nguồn: `game-3/docs/COLONY_FLOW_RETRO.md` (C1-C8), `game-5/docs/HOLEIT_CLONE_RETRO.md` (R0-R9), memory `~/.claude/projects/-Users-tho-project-indie-game-game-3/memory/` (7 mục) và `-Users-tho-project-indie-game/memory/` (2 mục). Cả hai game là clone 1:1 từ APK để học; chỉ phần không phụ thuộc APK mới vào skill. Retro của hai game chưa commit ở repo của chúng (đọc ngày 2026-11-11).
+
+### 6.1 Lỗi lặp qua cả hai game (đáng thành skill)
+| Lỗi | game-3 | game-5 | Skill |
+|---|---|---|---|
+| Báo hình ảnh "xong" khi chưa tự ghép ảnh so với ảnh chuẩn; test xanh nhưng lỗi lọt (bi trắng xám, Home chồng cảnh, bảng thua ghi "Level 10" chữ mẫu) | C7 | R2, R9 | 2 |
+| Nói "không có gì đang chạy" / chuyển tiếp báo cáo "đang chờ" của agent | C4 | R5, R6, R8 | 1 |
+| Số tự đặt hoặc đoán theo mắt, không nguồn | C1 | R1, R4 | 1, 2 |
+| Trả lời "chưa biết" / hỏi người làm game khi dữ liệu đã có (R1: tìm theo TÊN trong khi scene tham chiếu bằng GUID, kết luận "không có số liệu") | C6 | R1 | 1 |
+| Không ghi retro lúc gặp lỗi, phải dựng lại sau | đầu file | R0 | 1 (+ hook) |
+| Chạy quét hàng loạt tốn giờ, số vô nghĩa (574 level, 140/574 sau 1,5 giờ, hộp thời gian 4 s) | C5 | cùng lỗi | 1 |
+| Dừng hỏi từng chút khi đã được giao chạy liên tục (người làm game nhắc 4 lần) | C8 | — | 1 |
+| Chia nhiều agent, mỗi agent tự chạy Unity trên một cây code (mất lượt PlayMode 32 phút, một agent chờ ~50 phút) | — | R5, R8 | 1 |
+
+### 6.2 Chi tiết vận hành chưa có ở mục 1.6 (từ memory game-3)
+- `ListAgents` có thể báo "completed" trong khi `TaskStop` liệt kê agent vẫn chạy: kiểm cả hai nguồn và `ps` (`monitor-delegated-agents`).
+- Lệnh dài phải có `timeout` rõ ràng, nếu không bị đẩy nền và không có thông báo kết thúc.
+- Batch Unity tự chạy phải gọi `EditorApplication.Exit`, nếu không thư mục khóa chặn lần sau; kiểm Unity bằng `ps -ax -o pid,etime,command | grep "MacOS/Unity"` (mẫu `[M]acOS/Unity -` từng bắt hụt); không tự xóa khóa.
+- Codex so ảnh tự mâu thuẫn: coi là gợi ý, số đo quyết định (`colony-flow-identical-clone-goal`).
+- Khi xem kích thước qua symlink dùng `stat -L`.
+- Ước lượng thời gian sai: PlayMode nói ~35 phút, đo thật ~3 phút (R8). Phù hợp quy tắc "mọi số chi phí / thời gian phải từ một lần chạy đã đo".
+
+### 6.3 Số đo tham chiếu (ghi đơn vị và game nguồn)
+- game-5, Galaxy A07, bot level 1, 2026-11-10 10:57: FPS gameplay TB 49,6 (mục tiêu 58, TRƯỢT), p95 16,7 ms (đạt), RAM PSS đỉnh 786 MB (mục tiêu 600, TRƯỢT), APK debug 138 MiB. Nguồn: `game-5/docs/OVERNIGHT_PLAN.md` (nhật ký).
+- game-5, Editor (không phải máy thật): khung CPU 3,35 ms, 259 renderer, ~58 MB asset trùng byte (`game-5/docs/spec/PERF_EDITOR.md`).
+- game-3: kiểm vòng tròn bố cục 0 sai lệch trên khoảng 35 thuộc tính, thử làm hỏng cố ý bắt được 273 lỗi (`game-3/docs/colony_flow/STATUS.md` dòng 20).
+
+### 6.4 Không đưa vào skill (chỉ đúng khi có APK)
+Trích APK, Il2Cpp, typetree, GLSL từ bundle, bảng `docs/spec/*` toàn số đo từ gốc, quy tắc "mọi số đọc từ APK". Giữ lại dạng tổng quát: mỗi số gắn nhãn nguồn (đo / quyết định đã duyệt / TỰ ĐẶT); tìm trong dữ liệu đã có (cả theo tên lẫn GUID) trước khi nói "chưa biết".
+
+### 6.5 Mâu thuẫn ghi nhận
+- Look mục tiêu "kiểu game-3" (PLAN mục 1.3) nhưng game-3 trên máy dùng sprite gốc Colony từ APK (C2), còn quyết định mục 1.2 cấm dùng sprite game thương mại. Xử lý: PLAN mục 1, điểm 7.
+- Memory game-3 chứa bài học của game-5 (`one-unity-run-after-agents-split`, `compare-before-claiming-visual`): memory theo thư mục làm việc nên bài học đi sai chỗ. Xử lý: PLAN mục 1, điểm 9.
+- Chưa kiểm: `game-3/docs/colony_flow/STATUS.md` mục 6 còn bài nào ngoài C1-C8 không.
