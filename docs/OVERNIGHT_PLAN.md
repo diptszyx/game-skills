@@ -19,8 +19,9 @@ Người làm game treo máy, không hỏi. Claude quyết cùng Codex (phản b
 | T4 | Xưởng phong cách (thử): 1 ý tưởng giả, ảnh phong cách | 4 bảng phong cách khác nhau (mỗi bảng đủ nút, bảng thông báo, chữ, nền, 3 biểu tượng); bảng quy định thông số cho bảng được chọn tạm | Codex vẽ, Claude brief |
 | T5 | Dựng thử 1 đồ vật 3D bằng Blender từ 1 bảng phong cách | ≤ 2.000 tam giác; 0 cạnh hở; ảnh 3 góc; màu theo bộ phận; giờ chạy ghi lại | Codex |
 | T6 | Lớp Unity: package, adapter rung/âm/vùng an toàn, màn hình tải; project thử | Một lần chạy Unity: `error CS` = 0, EditMode 0 lỗi, kiểm `asmdef` lõi không tham chiếu `UnityEngine` | Codex, Claude chạy |
-| T9 | Thử khung bằng dữ liệu thật của game-2 (CHỈ ĐỌC, không sửa game-2) | Nạp file lưu thật của game-2 và dữ liệu đa ngôn ngữ / cấu hình của nó vào lõi khung bằng test dotnet; mỗi chỗ lệch ghi lại (khung đúng hay game-2 đúng) | Codex, Claude kiểm |
-| T10 | Bước F rút gọn: game mới nhỏ trên khung, trong `framework/unity-smoke` (không phải bản sao game-2), hình tạm = vài ảnh 2D đã duyệt của game-2 làm phong cách thế vai | Chạy EditMode sạch (error CS 0), build APK, ghi giờ thật; chưa cài lên điện thoại | Codex, Claude chạy Unity |
+| T9 | Game-2 là game thử nghiệm đầu tiên của tool (người làm game chốt 2026-11-12: game-2 làm rất tệ, coi là bản nháp; hình trong game-2 KHÔNG dùng làm tham chiếu). Giữ luật chơi và màn (phần C# thuần + JSON), làm lại phần xung quanh trên khung và hình do xưởng sinh. Không sửa tại chỗ `game-2/` (đang có 843 thay đổi chưa commit): dựng project mới `game-2-v2` ở cùng cấp, chép luật + màn sang | Claude kiểm, Codex làm |
+| T9a | Đọc dữ liệu thật của game-2 (file lưu, đa ngôn ngữ) vào lõi khung bằng `dotnet test`, ghi chỗ lệch | Codex |
+| T10 | T4 làm trên khái niệm thật của game-2 (cánh cụt trượt bụng), 4 bảng phong cách, bạn duyệt sáng mai; trước khi duyệt chỉ dựng `game-2-v2` bằng hình tạm. Kiểm ổ đĩa `df` trước khi tạo project Unity mới (trống 12 GiB) | Codex vẽ, Claude brief |
 | T7 | Docs: spec nháp các module T1, báo cáo sáng mai | `docs/MORNING_REPORT.md` có bảng mục tiêu: đạt / không đạt + số đo | Claude |
 
 Thứ tự: T1 và T4 và T2/T3 song song (không đụng nhau: mã lõi / ảnh / tài liệu). T5 sau T4. T6 sau T1. T7 cuối.
