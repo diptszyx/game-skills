@@ -49,15 +49,7 @@ status=$?
 if [ -f "$LOG" ]; then cp "$LOG" "$PROJECT/Logs/$MODE-Editor.log"; fi
 python3 - "$RESULT" "$LOG" "$status" "$MODE" <<'PY'
 import sys, pathlib, json, subprocess, xml.etree.ElementTree as ET
-expected = {'IndieGame.Shell.Tests.UnityAdapterTests.SafeAreaFullScreen', 'IndieGame.Shell.Tests.UnityAdapterTests.LoadingProgressClamp', 'IndieGame.Shell.Tests.UnityAdapterTests.LoadingProgressMonotonic', 'IndieGame.Shell.Tests.UnityAdapterTests.HapticsFlagOn', 'IndieGame.Shell.Tests.UnityAdapterTests.SafeAreaBottomGestureBar', 'IndieGame.Shell.Tests.UnityAdapterTests.HapticsNullPlayerSafe', 'IndieGame.Shell.Tests.SaveSmokeTests.CorruptFallsBackToBackup', 'IndieGame.Shell.Tests.UnityAdapterTests.LoadingNewCycleResetsAndEarlyHideFades', 'IndieGame.Shell.Tests.UnityAdapterTests.LoadingMinimumDisplayTime', 'IndieGame.Shell.Tests.SaveSmokeTests.ValidV1Loads', 'IndieGame.Shell.Tests.UnityAdapterTests.LoadingHideBeforeMinimumWaits', 'IndieGame.Shell.Tests.UnityAdapterTests.LoadingDoubleShowIdempotent', 'IndieGame.Shell.Tests.UnityAdapterTests.SafeAreaZero', 'IndieGame.Shell.Tests.SaveSmokeTests.FutureReportsVersionError', 'IndieGame.Shell.Tests.UnityAdapterTests.HapticsFlagOff', 'IndieGame.Shell.Tests.UnityAdapterTests.LoadingFadeAndLateHide', 'IndieGame.Shell.Tests.UnityAdapterTests.AudioFlagsGatePoolAndRefreshActiveVolumes', 'IndieGame.Shell.Tests.UnityAdapterTests.SafeAreaTopNotch', 'IndieGame.Shell.Tests.UnityAdapterTests.AudioRoutesKeysAndIndependentVolumes'}
-expected.update({'IndieGame.Shell.Tests.ShellUiFactoryTests.' + n for n in ['BuildsAllPrimitives','MissingRoleFailsByName','LockedButtonUsesLockedSprite','StyleSwitchKeepsTextAndLayout']})
-expected.add('IndieGame.Shell.Tests.ShellUiDependencyTests.RuntimeAssemblyHasNoEditorReferences')
-if sys.argv[4] == 'PlayMode':
-    expected = {'IndieGame.Shell.Tests.PopupHostTests.' + n for n in ['OnlyTopPopupReceivesInput','ReopenLowerMovesToTop','MandatoryPopupRejectsDismissal','TransitionsWorkWhilePaused','PopRestoresFocus']}
-if sys.argv[4] == 'EditMode':
-    expected.update({'IndieGame.Shell.Tests.DataScreenTests.' + n for n in ['CheckInSnapshotMatchesClaim','MidnightRefreshesOpenCheckInView','DuplicateClaimDoesNotGrantAgain','ClaimAndWalletPersistTogether','QuestClaimOnlyWhenComplete','MainRefreshesLivesOnResume','SaveFailureIsSurfacedToView','ShopFailedPurchaseShowsErrorPopup']})
-else:
-    expected.update({'IndieGame.Shell.Tests.DataScreenBuildTests.' + n for n in ['CheckInDark','CheckInBright','QuestsDark','QuestsBright','MainDark','MainBright','ShopDark','ShopBright']})
+expected = {n for n in (pathlib.Path(sys.argv[1]).parents[2] / 'tests' / f'expected_{sys.argv[4]}.txt').read_text().split() if n}
 print('mode=' + sys.argv[4])
 core = pathlib.Path(sys.argv[1]).parents[2] / 'Packages/com.indiegame.shell/Runtime/Core'
 no_engine = json.loads((core / 'IndieGame.Shell.Core.asmdef').read_text()).get('noEngineReferences') is True

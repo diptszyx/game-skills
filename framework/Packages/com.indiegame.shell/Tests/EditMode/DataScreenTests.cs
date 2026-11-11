@@ -40,7 +40,7 @@ namespace IndieGame.Shell.Tests
             Assert.That(session.Economy.Gold,Is.EqualTo(107)); Assert.That(v.Snapshot.Rows[0].Enabled,Is.False);
             var empty=new QuestsView(f,root.transform); var ep=new QuestsPresenter(ScreenTestData.Session(clock,files,true),empty,text,clock); owned.Add(ep); Assert.That(empty.Snapshot.Rows,Is.Empty); Assert.That(empty.Snapshot.Empty,Is.EqualTo("No quests"));
         }
-        sealed class Game : IGameSessionActions { public int Plays; public void Play()=>Plays++; }
+        sealed class Game : IGameSessionActions { public void Retry() {} public void Revive() {} public void NextLevel() {} public void Leave() {} public void Pause() {} public void Resume() {} public int Plays; public void Play()=>Plays++; }
         [Test] public void MainRefreshesLivesOnResume()
         {
             var v=new MainView(f,root.transform); var game=new Game(); ShellScreen? opened=null; var p=new MainPresenter(session,v,text,clock,game,s=>opened=s); owned.Add(p);

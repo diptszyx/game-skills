@@ -34,6 +34,14 @@ namespace IndieGame.Shell.Tests
                 {"shell.shop.title","Shop"},{"shell.shop.empty","No products"},{"shell.product.p","Product"},{"shell.shop.row","{0} {1} {2}"},{"shell.price.iap","Purchase"},{"shell.buy","Buy"},
                 {"shell.error.title","Error"},{"shell.error.commit","Save failed: {0} {1}"},{"shell.error.None",""},{"shell.error.Io","Storage error"},
                 {"shell.error.PurchaseFailed","Purchase failed"},{"shell.error.Cancelled","Cancelled"},{"shell.error.Incomplete","Incomplete"} };
+            foreach(var kind in new[]{"win","lose","revive","pause","leave"}) { table["popup."+kind+".title"]=kind; table["popup."+kind+".body"]=kind; }
+            foreach(var action in new[]{"next","double","retry","revive","ad","gold","resume","sound","music","haptics","leave","confirm","cancel"}) table["popup.action."+action]=action;
+            foreach(var setting in new[]{"sound","music","haptics"}) table["popup.setting."+setting]=setting+" {0}";
+            foreach(var error in new[]{"Failed","Unavailable","Skipped","NotReady","Insufficient"}) table["shell.error."+error]=error;
+            table["shell.retrySave"]="Retry save"; table["shell.on"]="On"; table["shell.off"]="Off"; table["popup.revive.price"]="Gold {0}";
+            table["shell.loading.tip"]="Tip"; table["shell.refresh"]="Refresh"; table["shell.leaderboard.title"]="Leaderboard";
+            table["shell.leaderboard.row"]="{0} {1} {2}"; table["shell.leaderboard.mine"]="My rank {0} {1}";
+            table["shell.leaderboard.loading"]="Loading"; table["shell.leaderboard.empty"]="Empty";
             var l=new LocalizationService(new LocalizationConfig("en")); l.LoadTable("en","{"+string.Join(",",table.Select(p=>"\""+p.Key+"\":\""+p.Value+"\""))+"}"); return l;
         }
     }
