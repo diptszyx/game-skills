@@ -1,4 +1,5 @@
 using System;
+using IndieGame.Shell.Unity.Localization;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -58,6 +59,9 @@ namespace IndieGame.Shell.Unity.UI
             var r = Node(title ? "Title" : "Label", parent); r.sizeDelta = title ? Style.Theme.TitleSize : Style.Theme.BodySize;
             var t = r.gameObject.AddComponent<TextMeshProUGUI>(); t.text = value; t.fontSize = title ? Style.Theme.TitleFontSize : Style.Theme.BodyFontSize;
             t.alignment = TextAlignmentOptions.Center; t.raycastTarget = false; Bind(t, role ?? (title ? "title" : "body"));
+            LocalizedLayout.Text(t,t.fontSize);
+            if(title) LocalizedLayout.Heading(r);
+            if(parent.GetComponent<PopupView>()==null && parent.parent!=null && parent.parent.GetComponentInParent<PopupView>()!=null) LocalizedLayout.PopupChild(r,false);
             r.gameObject.SetActive(true); return t;
         }
         public Button Button(Transform parent, string text, ButtonRole role = ButtonRole.Primary, Action clicked = null)
@@ -67,15 +71,16 @@ namespace IndieGame.Shell.Unity.UI
             var button = r.gameObject.AddComponent<Button>(); button.targetGraphic = image; button.transition = Selectable.Transition.None;
             button.interactable = role != ButtonRole.Locked; if (clicked != null) button.onClick.AddListener(() => clicked());
             var label = Label(r, text); var binding = label.GetComponent<ShellAppearance>(); binding.Role = "buttonText"; binding.ButtonRole = role; binding.Apply(Style);
-            label.fontSize = b.FontSize; label.rectTransform.sizeDelta = b.DefaultSize - b.LabelPadding;
-            GameKit.UI.FaceLabel.CentreOnFace(label.rectTransform, b.DefaultSize.y, b.FaceCentreFromTop);
+            label.fontSize = b.FontSize; LocalizedLayout.Text(label,b.FontSize);
+            LocalizedLayout.ButtonLabel(label.rectTransform);
+            if(parent.GetComponentInParent<PopupView>()!=null) LocalizedLayout.PopupChild(r,true);
             r.gameObject.SetActive(true); return button;
         }
         public RectTransform ListRow(Transform parent, string text)
         {
             var r = Node("List Row", parent); r.sizeDelta = Style.RowSize; Image(r, "row");
             var layout = r.gameObject.AddComponent<LayoutElement>(); layout.preferredHeight = Style.RowSize.y;
-            Stretch(Label(r, text, role: "rowText").rectTransform); r.gameObject.SetActive(true); return r;
+            LocalizedLayout.Row(r,Label(r, text, role: "rowText"),false); r.gameObject.SetActive(true); return r;
         }
         public ScrollRect ScrollList(Transform parent)
         {
@@ -98,6 +103,7 @@ namespace IndieGame.Shell.Unity.UI
             RectTransform slot = null;
             if (contentSlot) { slot = Node("Content", panel); slot.sizeDelta = Style.Theme.BodySize; slot.gameObject.SetActive(true); }
             var view = r.gameObject.AddComponent<PopupView>(); view.Initialize(group, panel, slot, Style.Theme.Motion);
+            LocalizedLayout.Popup(panel,heading.rectTransform,slot);
             scrim.onClick.AddListener(() => view.RequestDismiss()); panel.gameObject.SetActive(true);
             // Remains inactive until a host owns it.
             return view;

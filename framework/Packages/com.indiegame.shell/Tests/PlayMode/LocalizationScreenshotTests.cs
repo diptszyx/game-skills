@@ -52,7 +52,7 @@ namespace IndieGame.Shell.Tests
                         case "loading":
                             var loadingRoot=factory.ScreenRoot(safe,"Loading"); var loading=loadingRoot.gameObject.AddComponent<LoadingScreenView>();
                             loadingRoot.gameObject.AddComponent<LoadingContentView>().Initialize(factory,loading,new ScreenText(session,text),"shell.loading.tip");
-                            var title=factory.Label(loadingRoot,text.Lookup(lang,"shell.loading.title").Value,true); title.rectTransform.anchorMin=title.rectTransform.anchorMax=new Vector2(.5f,1); title.rectTransform.anchoredPosition=new Vector2(0,-50);
+                            factory.Label(loadingRoot,text.Lookup(lang,"shell.loading.title").Value,true);
                             loading.Show(); loading.SetProgress(.65f); break;
                         default:
                             factory.ScreenRoot(safe,"Popup background");
@@ -60,7 +60,6 @@ namespace IndieGame.Shell.Tests
                             if(name=="win") popup.ShowWin("screenshot"); else if(name=="lose") popup.ShowLose(); else if(name=="revive") popup.ShowRevive(); else if(name=="pause") popup.ShowPause(); else popup.ShowLeave();
                             break;
                     }
-                    LocalizedLayout.Fit(root.transform);
                     yield return new WaitForSecondsRealtime(.3f); Canvas.ForceUpdateCanvases();
                     foreach(var label in root.GetComponentsInChildren<TMP_Text>()) { label.ForceMeshUpdate(); Assert.That(label.text,Does.Not.Contain("["),name+":"+lang); Assert.That(label.isTextOverflowing,Is.False,name+":"+lang+":"+label.text);
                         foreach(var character in label.textInfo.characterInfo.Take(label.textInfo.characterCount)) if(character.isVisible) Assert.That(character.textElement.glyph.index,Is.Not.EqualTo(0),"Missing glyph: "+label.text); }

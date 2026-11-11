@@ -24,7 +24,7 @@ namespace IndieGame.Shell.Unity.Screens
         public MainView(ShellUiFactory f, Transform parent)
         {
             Root=f.ScreenRoot(parent,"Main"); Lifetime=Root.gameObject.AddComponent<ScreenLifetime>(); title=ScreenWidgets.Heading(f,Root);
-            var body=ScreenWidgets.Body(f,Root); var layout=body.gameObject.AddComponent<VerticalLayoutGroup>(); layout.spacing=f.Style.Spacing; layout.childControlHeight=false; layout.childForceExpandHeight=false;
+            var body=ScreenWidgets.Body(f,Root); var layout=body.gameObject.AddComponent<VerticalLayoutGroup>(); layout.spacing=f.Style.Spacing; layout.childControlWidth=true; layout.childForceExpandWidth=true; layout.childControlHeight=false; layout.childForceExpandHeight=false;
             gold=f.Label(body,""); hearts=f.Label(body,""); countdown=f.Label(body,"");
             play=f.Button(body,"",clicked:RequestPlay); checkIn=f.Button(body,"",clicked:()=>RequestOpen(ShellScreen.CheckIn));
             quests=f.Button(body,"",clicked:()=>RequestOpen(ShellScreen.Quests)); shop=f.Button(body,"",clicked:()=>RequestOpen(ShellScreen.Shop)); error=f.Label(body,"");

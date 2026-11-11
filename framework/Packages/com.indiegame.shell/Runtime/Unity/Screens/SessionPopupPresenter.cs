@@ -71,7 +71,7 @@ namespace IndieGame.Shell.Unity.Screens
             popups[kind]=p;
             p.View.Policy=kind==SessionPopupKind.Pause||kind==SessionPopupKind.Leave?DismissalPolicy.Dismissible:DismissalPolicy.Mandatory;
             p.View.Panel.sizeDelta=new Vector2(p.View.Panel.sizeDelta.x,800);
-            p.View.Content.sizeDelta=new Vector2(p.View.Panel.sizeDelta.x-40,650);
+
             var layout=p.View.Content.gameObject.AddComponent<VerticalLayoutGroup>(); layout.childControlHeight=false; layout.childForceExpandHeight=false; layout.spacing=factory.Style.Spacing;
             factory.Label(p.View.Content,text.Get("popup."+kind.ToString().ToLowerInvariant()+".body"));
             if(kind==SessionPopupKind.Win) factory.Label(p.View.Content,text.Reward(config.WinReward));

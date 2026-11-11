@@ -1,4 +1,5 @@
 using System;
+using IndieGame.Shell.Unity.Localization;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -37,19 +38,19 @@ namespace IndieGame.Shell.Unity.Screens
         internal static RectTransform Body(ShellUiFactory f, RectTransform root)
         {
             var body=ShellUiFactory.Node("Body",root); ShellUiFactory.Stretch(body);
-            body.offsetMin=new Vector2(f.Style.Spacing,f.Style.Spacing); body.offsetMax=new Vector2(-f.Style.Spacing,-120);
+            LocalizedLayout.Body(body,f.Style.Spacing);
             body.gameObject.SetActive(true); return body;
         }
         internal static TMP_Text Heading(ShellUiFactory f, RectTransform root)
-        { var t=f.Label(root,"",true); t.rectTransform.anchorMin=t.rectTransform.anchorMax=new Vector2(.5f,1); t.rectTransform.anchoredPosition=new Vector2(0,-50); return t; }
+        { return f.Label(root,"",true); }
         internal static void Rows(ShellUiFactory f, RectTransform content, IReadOnlyList<RowDisplay> rows, Action<string> clicked)
         {
             for(int i=content.childCount-1;i>=0;i--) { var child=content.GetChild(i); child.gameObject.SetActive(false); if(Application.isPlaying) UnityEngine.Object.Destroy(child.gameObject); else UnityEngine.Object.DestroyImmediate(child.gameObject); }
             foreach(var row in rows)
             {
                 var r=f.ListRow(content,""); var text=r.GetComponentInChildren<TMP_Text>(); text.text=row.Text;
-                text.rectTransform.anchorMax=new Vector2(.64f,1); text.alignment=TextAlignmentOptions.Left;
-                text.rectTransform.offsetMin=new Vector2(f.Style.Spacing,0); text.rectTransform.offsetMax=Vector2.zero;
+                text.alignment=TextAlignmentOptions.Left;
+                LocalizedLayout.Row(r,text,!string.IsNullOrEmpty(row.Action));
                 if(row.Progress>=0)
                 {
                     var track=ShellUiFactory.Node("Progress",r); track.anchorMin=new Vector2(0,0); track.anchorMax=new Vector2(.64f,0); track.sizeDelta=new Vector2(0,8);
@@ -60,7 +61,7 @@ namespace IndieGame.Shell.Unity.Screens
                 if(!string.IsNullOrEmpty(row.Action))
                 { var b=f.Button(r,row.Action,clicked:()=>clicked(row.Id)); b.interactable=row.Enabled;
                   var rt=(RectTransform)b.transform; rt.anchorMin=new Vector2(.66f,.1f); rt.anchorMax=new Vector2(.98f,.9f); rt.offsetMin=rt.offsetMax=Vector2.zero;
-                  ShellUiFactory.Stretch(b.GetComponentInChildren<TMP_Text>().rectTransform); }
+ }
             }
         }
     }
