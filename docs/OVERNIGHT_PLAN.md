@@ -31,5 +31,6 @@ Thứ tự: T1 và T4 và T2/T3 song song (không đụng nhau: mã lõi / ảnh
 - Quyền commit + push ở repo này đã được cấp (HANDOFF, memory `feedback-autonomy-game-kit`).
 
 ## Nhật ký (mới nhất ở trên)
+- T2 đạt: 6 đề (2 skill × 3, mỗi skill 1 ca không nên kích hoạt), có skill 5/5, 5/5, 4/4, 3/3 so với không skill 0/5, 1/5, 2/4, 1/3; hai ca âm không kích hoạt. Chi tiết `docs/SKILL_EVAL.md`.
 - Codex phản biện xong (`work/critique1.log`, đã kiểm 4 phát hiện đều đúng); skill 1 và 2 viết bản đầu (commit 5927f54); 3 hook + 20 ca thử đạt 20/20 (commit 086b475); thử `claude -p` có skill: skill kích hoạt đúng và từ chối báo xong khi thiếu bằng chứng (1 mẫu, chưa phải đánh giá).
 - 2026-11-11 khởi động: tạo kế hoạch; kiểm môi trường: dotnet 10.0.403, Unity 6000.3.25f1, Codex 0.160.1 (luna, low), A07 cắm USB, không có Unity đang chạy, ổ đĩa trống 13 GiB.
