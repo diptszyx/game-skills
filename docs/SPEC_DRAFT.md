@@ -100,3 +100,12 @@ Cổng mỗi bước: xanh thì commit + push repo này rồi sang bước kế;
 | R3 | Lặp lỗi kit cũ: làm lâu, kết quả xấu | Giai đoạn 1 không có UI; popup chỉ làm khi có ảnh chuẩn do người làm game duyệt |
 | R4 | Hai game đang được phiên khác sửa, đọc phải bản lệch | Ghi commit / thời điểm đọc vào `SHELL_COMPARE.md`; không sửa hai game |
 | R5 | Con số "nhanh hơn" không có nguồn | Giữ nhãn TỰ ĐẶT tới S7 |
+
+## 11. Câu hỏi mở và điều chưa biết (2026-11-11, chuyển từ plan người đọc)
+- Cần người làm game duyệt: danh sách thứ đưa vào khung; làm chức năng nền (D) trước rồi đo, mới làm màn hình (E); bắt đầu bước A.
+- Tiết kiệm bao nhiêu giờ: chưa đo, chỉ biết sau bước F.
+- AI có vẽ ra bộ hình nhất quán không: chưa thử trong công cụ này (bước C kiểm); hình AI hay lệch phong cách, viền xấu khi cắt (SKILL_INVENTORY mục 1.3).
+- Mới có 2 game để so, cùng thể loại, đều là clone; chỉ đưa vào khung phần thật sự giống nhau.
+- Hình hai game cũ lấy từ game gốc nên không dùng lại; chỉ dùng lại cách tổ chức và logic.
+- Phần chỉ có ở một game (Quest, Rolling Offer, Sky Jump...) chưa vào khung.
+- Phân vai: Claude điều phối, đọc, kiểm; Codex viết mã, vẽ ảnh AI, chạy Unity; người làm game chọn, duyệt, thử trên điện thoại.
