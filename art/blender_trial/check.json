@@ -1,0 +1,170 @@
+{
+  "boundary_edges": 0,
+  "bounds_max": [
+    0.5,
+    0.5,
+    0.3
+  ],
+  "bounds_min": [
+    -0.5,
+    -0.5,
+    0.0
+  ],
+  "connected_closed_shells": 2,
+  "glb": {
+    "mesh_count": 1,
+    "position_max": [
+      0.5,
+      0.3,
+      0.5
+    ],
+    "position_min": [
+      -0.5,
+      0,
+      -0.5
+    ],
+    "up_axis": "Y"
+  },
+  "ice_block_size": [
+    1.0,
+    1.0,
+    0.25
+  ],
+  "ice_materials_used": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6
+  ],
+  "ice_top_z_spread": 0.0,
+  "materials_used": 10,
+  "non_manifold_edges": 0,
+  "origin": [
+    0.0,
+    0.0,
+    0.0
+  ],
+  "palette": [
+    {
+      "hex": "#B6E2FD",
+      "name": "Ice pale",
+      "pixel": [
+        402,
+        350
+      ]
+    },
+    {
+      "hex": "#A4DBFC",
+      "name": "Ice light",
+      "pixel": [
+        390,
+        370
+      ]
+    },
+    {
+      "hex": "#8BCEFD",
+      "name": "Ice blue",
+      "pixel": [
+        420,
+        420
+      ]
+    },
+    {
+      "hex": "#72C4FA",
+      "name": "Ice facet",
+      "pixel": [
+        460,
+        410
+      ]
+    },
+    {
+      "hex": "#5BBFF1",
+      "name": "Ice bevel",
+      "pixel": [
+        375,
+        446
+      ]
+    },
+    {
+      "hex": "#319BDE",
+      "name": "Ice side",
+      "pixel": [
+        477,
+        442
+      ]
+    },
+    {
+      "hex": "#36A3E9",
+      "name": "Ice edge",
+      "pixel": [
+        488,
+        411
+      ]
+    },
+    {
+      "hex": "#FDFCFC",
+      "name": "Snow white",
+      "pixel": [
+        480,
+        22
+      ]
+    },
+    {
+      "hex": "#F6F3FD",
+      "name": "Snow shade",
+      "pixel": [
+        469,
+        24
+      ]
+    },
+    {
+      "hex": "#BFCEFA",
+      "name": "Snow blue",
+      "pixel": [
+        111,
+        30
+      ]
+    }
+  ],
+  "passes": {
+    "dimensions_and_origin": true,
+    "flat_ice_top": true,
+    "materials_and_flat_shading": true,
+    "renders": true,
+    "triangles": true,
+    "watertight": true,
+    "y_up_export": true
+  },
+  "remaining_modifiers": 0,
+  "renders": {
+    "front": {
+      "height": 512,
+      "width": 512
+    },
+    "iso": {
+      "height": 512,
+      "width": 512
+    },
+    "top": {
+      "height": 512,
+      "width": 512
+    }
+  },
+  "size": [
+    1.0,
+    1.0,
+    0.3
+  ],
+  "smooth_shaded_faces": 0,
+  "snow_height_max": 0.3,
+  "snow_materials_used": [
+    7,
+    8,
+    9
+  ],
+  "top_surface_z": 0.25,
+  "triangle_count": 96
+}

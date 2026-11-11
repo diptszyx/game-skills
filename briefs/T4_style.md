@@ -1,0 +1,9 @@
+# T4: four style boards for a penguin belly-slide puzzle (trial, NOT user-approved)
+
+Game concept (read only): puzzle hybrid-casual mobile, portrait. Many colored penguins on an ice board; swipe one to belly-slide until it hits an obstacle or another penguin; 3 same-color penguins touching huddle and leave the board. Ice cracks, holes, fish as stop markers, seals as blockers. Do NOT look at or copy any existing art in game-2 or any other game; the user said that art is not a reference.
+
+Goal: use your image_gen tool to make FOUR clearly different style boards, each a single PNG, 2048x2048 or the largest image_gen allows, saved to /Users/tho/project/indie-game/game-skills/art/style_trial/board_<N>_<name>.png.
+Styles (one each): 1 soft 3D-clay toy look; 2 flat vector, bold outlines, bright; 3 hand-painted storybook, warm; 4 low-poly isometric diorama.
+Each board must show, on one sheet: a primary button (normal+pressed), a secondary button, a modal panel with title bar and close button, three icons (gold coin, heart, settings gear), a title logo "Belly Slide" lettering sample, one ice-board tile set (plain ice, cracked ice, hole), one penguin in 3 poses (idle, sliding, huddled) in red, blue and yellow, a fish and a seal. Same layout order on every board so they can be compared side by side. Portrait phone UI sample in the lower third: a Win popup using the board's own pieces.
+Rules: write exactly the prompt you used for each board into art/style_trial/PROMPTS.md (append, with board number). One generation attempt per board, retry only on a clearly broken result (no text garbage in the logo is NOT required; judge layout and style distinctness). Edit only files under art/style_trial/. No git. Cap 30 minutes. If image_gen is unavailable in this sandbox say so and stop.
+Report: art/style_trial/REPORT.md listing each file, size in pixels, which required items are present or missing per board (honest, from looking at the image), minutes spent.
