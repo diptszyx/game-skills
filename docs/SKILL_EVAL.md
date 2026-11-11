@@ -12,3 +12,12 @@ Cách thử: `tests/skill_eval.py`. Mỗi đề chạy 2 lần bằng `claude -p
 | O3 hỏi Sprite khác Texture2D | làm việc với AI | không | không kích hoạt | không kích hoạt |
 
 Giới hạn: regex chấm thô (có thể trúng nhầm/trượt); đề chỉ là văn bản, chưa có dự án thật; chưa thử "phiên mới thật trong repo game".
+
+## Skill 3 (using-game-shell), 2026-11-12
+| Đề | Nên kích hoạt | Có skill | Không skill |
+|---|---|---|---|
+| S1 thêm thưởng cuối tuần | có | kích hoạt, 6/6 | 3/6 |
+| S2 thêm popup kho đồ | có | kích hoạt, 6/6 | 2/6 |
+| S3 hỏi struct và class | không | không kích hoạt | không kích hoạt |
+
+Lưu ý: đề S1, S2 đều nhắc "shared shell package" nên có thể giúp kích hoạt; bảng chấm là regex thô; mỗi đề chạy 1 lần.

@@ -17,6 +17,7 @@ TIMEOUT = 300
 
 VERIFY = "verifying-game-results"
 ORCH = "orchestrating-ai-work"
+SHELL = "using-game-shell"
 
 SCENARIOS = [
     dict(id="V1", skill=VERIFY, trigger=True,
@@ -36,6 +37,14 @@ SCENARIOS = [
     dict(id="O2", skill=ORCH, trigger=True,
          prompt="I started a Codex background job 40 minutes ago to export UI prefabs. The user asks: is anything still running? Answer them.",
          rubric={"two sources": r"two sources|task list|\bps\b", "monitor": r"monitor|watch", "no premature none": r"not (yet )?(done|finished)|still|check"}),
+    dict(id="S1", skill=SHELL, trigger=True,
+         prompt="Our Unity game uses the shared game shell package. Add a weekend bonus: players who open the game on Saturday get 50 gold once per weekend. Explain exactly how you would implement it, step by step.",
+         rubric={"claim id idempotent": r"claim ?id|claimid|grant\(", "Commit once": r"commit", "IClock/UTC": r"iclock|utc|fake clock", "localization keys not literals": r"localization|string table|key", "config not hardcoded": r"config", "tests first/edge cases": r"duplicate|clock (going )?back|corrupt|edge"}),
+    dict(id="S2", skill=SHELL, trigger=True,
+         prompt="We use the shared shell package in our Unity game. I want a new Inventory popup that lists booster counts from the player's economy and lets them use one. How do you build it and how do you prove it is done?",
+         rubric={"view+presenter via session": r"presenter|session", "Commit": r"commit", "expected test names": r"expected_|expected test|exact", "screenshots both ratios": r"720|1080|20:9|16:9|screenshot", "style/localization": r"shellstyle|style|localization", "UnityEngine not in Core": r"unityengine|noenginereferences|pure c#|core"}),
+    dict(id="S3", skill=SHELL, trigger=False,
+         prompt="Explain the difference between a C# struct and a class in three sentences.", rubric={}),
     dict(id="O3", skill=ORCH, trigger=False,
          prompt="Explain the difference between a Sprite and a Texture2D in Unity in two sentences.", rubric={}),
 ]
