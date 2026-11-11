@@ -121,3 +121,8 @@ Cổng mỗi bước: xanh thì commit + push repo này rồi sang bước kế;
 - Hệ quả: khung gần như cố định giữa các game; rủi ro R1 (2 mẫu cùng thể loại, game mới khác) giảm đáng kể, vẫn còn vì mới có 2 mẫu.
 - Skill 7 trong SKILL_INVENTORY mục 1.7 dựa trên bài học câu đố (game-1, game-2); cần bổ sung nguồn về gameplay hybrid-casual (game-3, game-5, `knowledge/`) trước khi viết. CHƯA CÓ research.
 - Skill 9 (phát hành) và các ô cắm quảng cáo / mua hàng / cấu hình từ xa quan trọng hơn với hybrid-casual; chưa có research (SKILL_INVENTORY mục 1.12).
+
+## 14. Bảng xếp hạng làm thật (2026-11-11, người làm game)
+- Nguồn dùng lại: game-2, `unity/Assets/Scripts/View/Leaderboard/UnityLeaderboardService.cs` + `docs/LEADERBOARD_PLAN.md`: package `com.unity.services.leaderboards` 2.3.4 và `com.unity.services.authentication` 3.8.0, đăng nhập ẩn danh, lớp trung gian `ILeaderboardService` (bản giả cho test), bộ nhớ đệm trên đĩa.
+- Rủi ro: Unity ghi "Free for a limited time" không ngày hết hạn (game-2 kiểm 2026-10-16; chưa kiểm lại). Việc làm tay mỗi game: người làm game liên kết Unity Cloud project và tạo bảng.
+- CHƯA KIỂM: bản game-2 đã chạy thử trên máy thật chưa; chức năng tương ứng ở game-3 (`Home/HomeLeaderboardPage.cs`, `LeaderboardJumpButtons.cs`) thật hay giả.

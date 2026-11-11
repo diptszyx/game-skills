@@ -24,7 +24,7 @@ Phần code dùng chung, lấy từ chỗ giống nhau của hai game đã làm:
 - Âm thanh
 - Rung
 - Xem quảng cáo nhận thưởng (giả)
-- Bảng xếp hạng (dữ liệu giả)
+- Bảng xếp hạng (dùng Unity Leaderboards như game-2; có bản giả để kiểm tra)
 - Nhiệm vụ ngày
 - Ô cắm quảng cáo (giả)
 - Ô cắm mua hàng (giả)
