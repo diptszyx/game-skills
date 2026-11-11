@@ -1,0 +1,3 @@
+/Users/tho/project/indie-game/game-3
+/Users/tho/project/indie-game/game-5
+/Users/tho/project/indie-game/game-kit
