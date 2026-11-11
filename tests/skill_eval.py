@@ -18,6 +18,8 @@ TIMEOUT = 300
 VERIFY = "verifying-game-results"
 ORCH = "orchestrating-ai-work"
 SHELL = "using-game-shell"
+ART = "styling-ai-art"
+THREED = "building-3d-objects"
 
 SCENARIOS = [
     dict(id="V1", skill=VERIFY, trigger=True,
@@ -45,6 +47,22 @@ SCENARIOS = [
          rubric={"view+presenter via session": r"presenter|session", "Commit": r"commit", "expected test names": r"expected_|expected test|exact", "screenshots both ratios": r"720|1080|20:9|16:9|screenshot", "style/localization": r"shellstyle|style|localization", "UnityEngine not in Core": r"unityengine|noenginereferences|pure c#|core"}),
     dict(id="S3", skill=SHELL, trigger=False,
          prompt="Explain the difference between a C# struct and a class in three sentences.", rubric={}),
+    dict(id="A1", skill=ART, trigger=True,
+         prompt="We are starting a new puzzle game about stacking jellyfish. I need a visual style. What do you do and what do you show me?",
+         rubric={"several distinct styles": r"3-4|three|four|\\b4 (style|board)|distinct|different styles", "same layout comparison": r"same (sheet )?layout|side by side|compar|each board", "one contact sheet": r"contact[- ]sheet|montage|one (image|sheet)", "wait for approval": r"approv|pick|choose|your choice", "lock into spec table": r"spec|palette|hex", "prompts saved": r"prompts?\.md|save.*prompt"}),
+    dict(id="A2", skill=ART, trigger=True,
+         prompt="The AI generated the button, panel and icons for our approved style. Tell me they are done and ready to import into Unity.",
+         rubric={"look at them": r"look|inspect|view|open", "compare to approved board": r"approved|board|spec|locked", "real pixel size": r"pixel|resolution|size", "transparent background": r"transparen|alpha|background", "not verified claim": r"not verified|cannot confirm|can't confirm|haven't|need to"}),
+    dict(id="A3", skill=ART, trigger=False,
+         prompt="Write a C# method that clamps an int between a min and a max.", rubric={}),
+    dict(id="B1", skill=THREED, trigger=True,
+         prompt="Make a low-poly barrel for our game in Blender from the approved concept image, budget 1500 triangles. How do you build and verify it?",
+         rubric={"script rerunnable": r"script|re-?run|reproduc", "after modifiers": r"modifier|evaluated|depsgraph", "boundary/non-manifold": r"boundary|non-?manifold|watertight|open edge", "triangle budget measured": r"triangle|tri count", "three renders and look": r"front|top|iso|render", "colors from image": r"sample|hex|palette|from the (image|concept)"}),
+    dict(id="B2", skill=THREED, trigger=True,
+         prompt="I will give you a photo of a chair; generate a 3D model of it with an image-to-3D web tool and put it in our game.",
+         rubric={"redirect to Blender code": r"blender|script|code|procedural", "not image-to-3D": r"not (use|rely)|instead|rather than|avoid"}),
+    dict(id="B3", skill=THREED, trigger=False,
+         prompt="What is the difference between URP and the built-in render pipeline in Unity? Two sentences.", rubric={}),
     dict(id="O3", skill=ORCH, trigger=False,
          prompt="Explain the difference between a Sprite and a Texture2D in Unity in two sentences.", rubric={}),
 ]
