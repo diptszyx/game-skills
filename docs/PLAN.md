@@ -30,4 +30,4 @@ Khung phục vụ cả game 2D lẫn 3D: giao diện luôn là lớp 2D, gamepla
 | F | Thử bằng một game mới nhỏ (3 màn) | Chạy được trên điện thoại; ghi số giờ thật để biết tiết kiệm bao nhiêu |
 | G | Viết bộ skill | Mỗi skill qua thử nghiệm: tình huống nên dùng, không nên dùng, so với không có skill |
 
-Thứ tự: A → B, rồi C và D làm song song (C là vẽ ảnh, D là mã, không đụng nhau) → E → F. Hai skill đầu (quy trình làm việc và kiểm tra kết quả) không cần chờ khung, viết ngay sau B, dùng thử vài phiên rồi mới viết tiếp. Mỗi bước xong là kiểm bằng số hoặc ảnh; không đạt thì dừng và báo bạn.
+Thứ tự: A → B, rồi C và D làm song song (C là vẽ ảnh, D là mã, không đụng nhau) → E → F. Hai skill đầu (quy trình làm việc và kiểm tra kết quả) không cần chờ khung, viết ngay sau B, dùng thử vài phiên rồi mới viết tiếp. Mỗi bước xong là kiểm bằng số hoặc ảnh; không đạt thì dừng lại.
