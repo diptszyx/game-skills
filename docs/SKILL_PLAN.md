@@ -2,7 +2,7 @@
 Người làm game: solo, Unity, làm cùng AI (Claude điều phối, Codex viết mã/chạy Unity). Mục tiêu: một BỘ SKILL cho Claude để game mới làm nhanh, đẹp, ít lặp lỗi. Không viết skill nào nếu chưa có bài học nguồn và cách kiểm.
 
 ## 0. Việc đang dở / bắt đầu phiên mới đọc cái này trước
-- Repo này: `~/project/indie-game/game-skills/` (skill sống ở `skills/<tên>/SKILL.md`, symlink từ `~/.claude/skills/`). Đang ở (2026-11-11): đã đọc game-5 và retro game-3, đã chốt lại hướng (mục 1, điểm 5-9). **CHƯA viết skill hay kit nào**: người làm game còn muốn làm rõ thêm nhiều vấn đề trước khi bắt đầu.
+- Repo này: `~/project/indie-game/game-skills/` (skill sống ở `skills/<tên>/SKILL.md`, symlink từ `~/.claude/skills/`). Đang ở (2026-11-11): đã đọc game-5 và retro game-3, đã chốt lại hướng (mục 1, điểm 5-9). **CHƯA viết skill hay mã khung nào**; việc kế là duyệt `docs/SHELL_PLAN.md` (mục 6 của nó): người làm game còn muốn làm rõ thêm nhiều vấn đề trước khi bắt đầu.
 - Đọc theo thứ tự: file này → `docs/SKILL_INVENTORY.md` (182 bài học + mục 6 bổ sung game-3/game-5) → `docs/SKILL_AUTHORING_OFFICIAL.md` (10 quy tắc viết skill) → `../knowledge/game-kit/GAME_KIT_PLAN.md` mục 9-10 (kit, tạm dừng).
 - Nguồn bằng chứng mới: `../game-3/docs/COLONY_FLOW_RETRO.md` (C1-C8, chưa commit ở game-3), `../game-5/docs/HOLEIT_CLONE_RETRO.md` (R0-R9, chưa commit ở game-5). Chỉ ĐỌC, không sửa game-3 / game-5.
 - Quyền tự chạy ở repo này: commit + push tự động (đường dẫn cụ thể), không `reset --hard`, không `pull --rebase`, không force push. Vẫn hỏi cho nhánh thật: đổi hướng đã khóa, tiêu tiền, xóa việc của người làm game, art / âm / cảm giác họ phải duyệt. Nguồn: memory `feedback-autonomy-game-kit` (2026-11-06) và `docs/HANDOFF.md`.
@@ -17,6 +17,7 @@ Người làm game: solo, Unity, làm cùng AI (Claude điều phối, Codex vi�
 7. **Skill art (3-4) dạy TẠO và KHÓA một phong cách bằng AI** (Claude viết brief, Codex `image_gen`, người làm game duyệt, khóa thành style frame + bảng thông số). Không dùng ảnh game-3 làm tài nguyên (look game-3 trên máy là sprite gốc Colony lấy từ APK, mâu thuẫn với điểm 2). game-3 và game-5 chỉ là MỨC CHẤT LƯỢNG THAM CHIẾU bằng số, mỗi game một vai: game-3 cho bố cục UI 2D và popup, game-5 cho 3D toon và hiệu năng trên máy yếu (A07: FPS 49,6 và RAM PSS 786 MB, mục tiêu 58 và 600, đo 2026-11-10). Ghi đơn vị và game nguồn cạnh mỗi số.
 8. **Skill 1 có bước đầu phiên: đọc quyền tự chạy** (memory + docs) và hỏi một lần nếu chưa có; kèm danh sách nhánh vẫn phải hỏi (C8: người làm game nhắc 4 lần "đừng dừng hỏi từng chút").
 9. **Bài học ghi vào `docs/` của repo NGAY lúc gặp lỗi**, memory chỉ là đường tắt: memory nằm theo thư mục làm việc (game-5 không có thư mục memory riêng; bài học game-5 bị ghi vào memory của game-3) và cả hai retro tự nhận phải dựng lại sau (C0, R0). Ứng viên hook / bước bắt buộc trong skill 1.
+10. (2026-11-11) **Gộp kit và skill thành một công cụ: khung game (package Unity) + skill hướng dẫn dùng**, cùng repo này. Đổi hướng "chỉ skill". Lý do: phần lặp thật giữa game-3 và game-5 là mã vỏ (Home, Shop, Daily, Audio, Haptics, Settings), kit cũ không có các phần đó. Plan riêng: `docs/SHELL_PLAN.md`. Chưa viết mã.
 
 ## 2. Bộ skill đề xuất (Claude gộp 25 → 9; là đề xuất, không phải quy tắc Anthropic)
 | # | Skill | Gộp từ (SKILL_INVENTORY mục 3) | Trạng thái |
@@ -36,7 +37,7 @@ Chưa có bằng chứng "9 skill nhỏ" tốt hơn "1 skill + references theo m
 ## 3. Lỗi lặp cần skill chặn (bằng chứng trong SKILL_INVENTORY mục 2.2-2.3)
 Không đọc nền tảng theo lớp; làm lại asset đã duyệt (HOME_RETRO:16, LOSE_MODAL_RETRO:5); cắt ảnh còn viền mờ; brief gom nhiều việc; job nền không có cơ chế quay lại; shader mất trên build. Gốc [suy luận của Codex]: thiếu cơ chế buộc ÁP DỤNG tài liệu theo trigger (đòi bằng chứng đã áp dụng, không chỉ "đã đọc").
 
-## 4. Kit (code) hiện trạng
+## 4. Kit (code) hiện trạng (đã quyết gộp vào khung game, xem mục 1 điểm 10 và `SHELL_PLAN.md`)
 `~/project/indie-game/game-kit/` (repo riêng, private github.com/diptszyx/game-kit, commit 8a23228 + ce3e483): package `com.indiegame.ui`, Theme Kenney + gallery. EditMode 38/38, PlayMode 10/10. Tạm dừng thêm thành phần (toggle/slider/tab/toast/HUD) tới khi có mẫu UI. Bản trùng trong `game-2/unity/Packages/` chưa xóa. Skill cũ ghi nơi sửa kit là game-2: lỗi thời.
 
 ## 5. Cách theo dõi (monitor) mọi việc
