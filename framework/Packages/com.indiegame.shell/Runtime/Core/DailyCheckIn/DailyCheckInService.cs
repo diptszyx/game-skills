@@ -31,6 +31,17 @@ namespace IndieGame.Shell
         public IReadOnlyList<IReadOnlyList<Reward>> RewardTables { get; }
         public DailyCheckInConfig(IReadOnlyList<IReadOnlyList<Reward>> rewardTables) { RewardTables = rewardTables; }
     }
+    public sealed class DailyCheckInPreview
+    {
+        public int NextSlot { get; }
+        public Reward? Reward { get; }
+        public bool CanClaimNow => Error == DailyError.None;
+        public DateTime? NextClaimAtUtc { get; }
+        public DailyError Error { get; }
+        public bool Success => Error == DailyError.None || Error == DailyError.AlreadyClaimed;
+        internal DailyCheckInPreview(int slot, Reward? reward, DateTime? nextClaimAtUtc, DailyError error)
+        { NextSlot = slot; Reward = reward; NextClaimAtUtc = nextClaimAtUtc; Error = error; }
+    }
     public sealed class DailyCheckInService
     {
         readonly IClock clock;
@@ -53,13 +64,26 @@ namespace IndieGame.Shell
             }
             valid = true;
         }
+        DailyError Eligibility(int today) => !valid ? DailyError.InvalidConfig :
+            today < day ? DailyError.ClockReversed : claimedDay == today ? DailyError.AlreadyClaimed : DailyError.None;
+        Reward RewardFor(int today) => tables[today % tables.Count][nextSlot];
+        // Read-only: does not advance the observed date, slot, ledger or clock watermark.
+        public DailyCheckInPreview Preview()
+        {
+            if (!valid) return new DailyCheckInPreview(nextSlot, null, null, DailyError.InvalidConfig);
+            int today = DailyRules.Day(clock);
+            int nextDay = Math.Max(today, day) + 1;
+            DateTime? next = DailyRules.ValidDay(nextDay)
+                ? new DateTime((long)nextDay * TimeSpan.TicksPerDay, DateTimeKind.Utc) : (DateTime?)null;
+            return new DailyCheckInPreview(nextSlot, RewardFor(today), next, Eligibility(today));
+        }
         public DailyResult Claim()
         {
             if (!valid) return new DailyResult(DailyError.InvalidConfig);
             int today = DailyRules.Day(clock);
-            if (today < day) return new DailyResult(DailyError.ClockReversed);
-            if (claimedDay == today) return new DailyResult(DailyError.AlreadyClaimed);
-            var outcome = grantor.Grant("checkin:" + DailyRules.DateId(today), tables[today % tables.Count][nextSlot]);
+            var eligibility = Eligibility(today);
+            if (eligibility != DailyError.None) return new DailyResult(eligibility);
+            var outcome = grantor.Grant("checkin:" + DailyRules.DateId(today), RewardFor(today));
             if (outcome == GrantOutcome.Rejected) return new DailyResult(DailyError.GrantRejected);
             day = today; claimedDay = today; nextSlot = (nextSlot + 1) % tables[0].Count;
             return new DailyResult(outcome == GrantOutcome.AlreadyClaimed ? DailyError.AlreadyClaimed : DailyError.None);
