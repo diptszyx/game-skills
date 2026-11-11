@@ -1,27 +1,39 @@
-# Báo cáo sáng (khung, cập nhật trong đêm 2026-11-11)
+# Báo cáo sáng (đêm 2026-11-11 sang 12)
 
-Số đo thật ghi kèm nguồn. Mục chưa chạy ghi "chưa".
+Mọi số bên dưới do tôi chạy lại độc lập, trừ chỗ ghi "Codex báo". Chi tiết từng bước: `docs/OVERNIGHT_PLAN.md` (nhật ký), `docs/SKILL_EVAL.md`, `docs/SHELL_SPEC.md`, `framework/REPORT*.md`.
 
-| Mục | Mục tiêu | Trạng thái | Số đo / bằng chứng |
+## Mục tiêu đêm và kết quả
+| Mục | Mục tiêu | Kết quả | Số đo |
 |---|---|---|---|
-| T1a lát cắt dọc | build 0 lỗi, test 0 lỗi, Unity error CS = 0, APK build | Đạt | 21 test dotnet; Unity EditMode 3/3, error CS 0; APK 17,8 MB; commit 917f48d |
-| T1 lõi khung (10 module) | test hành vi bắt buộc chạy thật | Đạt | 137 test dotnet; 3 lần phá cố ý đều đỏ; Codex 5,9 + 8,4 + 8,0 phút |
-| T2 skill | ≥ 3 tình huống mỗi skill + baseline | Đạt cho cả 6 skill (viết vượt kế hoạch đêm) | `docs/SKILL_EVAL.md`; thử bằng `claude -p`, mỗi đề 1 lần, regex thô; chưa cài toàn cục |
-| T3 hook | ≥ 3 hook, ca chặn đúng + không chặn nhầm | Đạt | 20/20 script + 3 ca phiên thật; chưa cài toàn cục |
-| T4 xưởng phong cách | 4 bảng phong cách | Có ứng viên, chưa duyệt | `art/style_trial/montage.png`; ảnh 1254 px (brief 2048) |
-| T5 đồ vật 3D | ≤ 2.000 tam giác, 0 cạnh hở, 3 góc | Đạt | 96 tam giác, 0 cạnh hở, 3 ảnh; chạy lại script cho cùng kết quả; Codex 3,8 phút |
-| T6 lớp Unity | adapter + một lần chạy Unity sạch | Đạt | error CS 0, EditMode 19/19; chưa thử trên điện thoại |
-| T8 spec module | spec nháp cho module T1 | Đạt (nháp) | `docs/SHELL_SPEC.md` |
-| T11-T16 màn hình, bảng thông báo | 6 màn + 5 bảng, 2 phong cách, vi + en | Đạt kỹ thuật, chưa đẹp | dotnet 168; Unity EditMode 40/40, PlayMode 20/20; 132 ảnh; hình tạm; `art/shell_ui_montage_*.png` |
+| T1a lát cắt dọc | build 0 lỗi, test 0 lỗi, Unity error CS = 0, APK build | Đạt | dotnet 21 test lúc đầu; Unity EditMode đúng danh sách; APK 17,8 MB |
+| T1 lõi khung (10 module) | test hành vi bắt buộc chạy thật | Đạt | 168 test dotnet; phá cố ý 5 chỗ đều làm test đỏ; Codex 5,9 + 8,4 + 8,0 phút |
+| T2 skill | ≥ 3 tình huống mỗi skill + baseline | Đạt cho 6 skill (vượt kế hoạch) | `docs/SKILL_EVAL.md`; thử bằng `claude -p`, mỗi đề 1 lần, regex thô |
+| T3 hook | ≥ 3 hook, ca chặn đúng và không chặn nhầm | Đạt | 20/20 script + 3 ca phiên thật; chưa cài toàn cục |
+| T4 xưởng phong cách | 4 bảng phong cách | Có ứng viên, CHƯA duyệt | `art/style_trial/montage.png`; ảnh 1254 px (brief 2048) |
+| T5 đồ vật 3D | ≤ 2.000 tam giác, 0 cạnh hở | Đạt | 96 tam giác, 0 cạnh hở; chạy lại script cho cùng kết quả |
+| T6 lớp Unity | adapter + chạy Unity sạch | Đạt | error CS 0 |
+| T8 spec | spec module | Đạt (nháp) | `docs/SHELL_SPEC.md` |
+| Màn hình và bảng thông báo (T12-T17) | 6 màn, 5 bảng, 2 phong cách, vi + en | Đạt kỹ thuật, chưa đẹp | Unity EditMode 41/41, PlayMode 20/20; 132 ảnh; hình tạm |
+| T18-T19 game thử `game-2-v2` | luật cũ + khung + hình tạm, chạy được vòng chơi | Đạt (sau 1 lần phát hiện sai lệch) | EditMode 325/325, PlayMode 4/4 (2 lần chạy lại), APK 38,5 MB chưa cài điện thoại |
 
-## Phần tool chưa nằm trong kế hoạch đêm
-4 skill còn lại (phong cách và hình AI, giao diện 2D, đồ vật 3D, dùng khung game), bước E (thay hình tạm), bước F (thử bằng game mới nhỏ). Phụ thuộc ảnh phong cách bạn phải duyệt.
+Thời gian đo được từ nhật ký: Codex mất 4 đến 20 phút mỗi việc lớn; cả đêm tới lúc viết báo cáo khoảng 3 giờ (chưa đo chính xác từng khoảng nghỉ chờ).
 
-## Chưa kiểm
-APK chưa cài lên điện thoại; hook chưa cài toàn cục; thời gian cả đêm chưa đo.
+## Đã phát hiện và sửa trong đêm
+- Báo cáo của Codex về PlayMode game-2-v2 (4/4) không tái lập được: tôi chạy 4 lần đều 2/4. Nguyên nhân gốc là bài test lệch chỉ số kích thước màn sau khi đổi sang Android; đã sửa, chạy lại 4/4.
+- Runner Unity viết cứng số test nên báo đỏ trên bộ xanh: chuyển sang file danh sách tên test.
+- APK build lần đầu lỗi (Mono không có ARM64): đổi sang IL2CPP.
+- Chữ dài bị cắt trong màn hình: gộp bước vừa chữ vào bên trong view.
+
+## Chưa làm / chưa kiểm
+- Điện thoại: không có máy cắm, chưa cài APK nào. Cảm giác chạm, âm thanh, nút Back Android chưa kiểm.
+- Hình là hình tạm. Chưa có phong cách được duyệt nên chưa sinh bộ hình đầy đủ (bước E).
+- SDK quảng cáo, mua hàng, bảng xếp hạng thật chưa nối (chỉ bản giả).
+- Skill chưa thử trong phiên làm việc thật (chỉ `claude -p`), chưa cài vào `~/.claude/skills/`; hook chưa cài toàn cục.
+- `game-2-v2` chưa có `.gitignore` và chưa commit; ổ đĩa còn 8,3 GiB.
+- Hẹn giờ 04:12 (CronCreate) chưa kiểm chứng chạy thật.
 
 ## Cần bạn quyết
-1. **Hai skill UI chồng nhau:** `skills/game-ui-workflow` (có từ trước, dựa trên game-kit) và `skills/building-game-ui` (mới, dựa trên khung). Hiện tôi để cả hai và thêm dòng chỉ chéo; nên gộp hay bỏ một cái?
-2. **Chọn một trong 4 phong cách** (`art/style_trial/montage.png`) để xưởng sinh bộ hình đầy đủ và thay hình tạm.
-3. **Cài hook và skill toàn cục** (`~/.claude/settings.json`, `~/.claude/skills/`): chưa làm, vì sửa cấu hình chung của bạn.
-4. **Đổi tên repo** `game-skills` (hiện chứa cả khung, xưởng, skill, hook).
+1. Chọn một trong 4 phong cách (`art/style_trial/montage.png`) để xưởng sinh bộ hình đầy đủ và thay hình tạm của `game-2-v2`.
+2. Hai skill giao diện chồng nhau: `skills/game-ui-workflow` (cũ, dựa trên game-kit) và `skills/building-game-ui` (mới, dựa trên khung). Gộp hay bỏ một cái?
+3. Cài hook và skill toàn cục (sửa `~/.claude/settings.json` và `~/.claude/skills/`): làm hay chưa?
+4. Đổi tên repo `game-skills` (hiện chứa khung, xưởng, skill, hook); commit `game-2-v2` vào repo `indie-game` (cần thêm `.gitignore`).
