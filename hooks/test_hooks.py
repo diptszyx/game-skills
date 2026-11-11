@@ -4,6 +4,7 @@ import os
 import subprocess
 import sys
 import tempfile
+import uuid
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 
@@ -58,13 +59,13 @@ def main():
 
     code_repo = make_repo(["a.cs"])
     clean_repo = make_repo(["notes.md"])
-    first = {"cwd": code_repo, "session_id": "t1", "stop_hook_active": False}
+    first = {"cwd": code_repo, "session_id": uuid.uuid4().hex, "stop_hook_active": False}
     stop_cases = [
         ("blocks when code changed", first, 2),
         ("allows same changes second time", first, 0),
-        ("allows when stop_hook_active", {"cwd": code_repo, "session_id": "t2", "stop_hook_active": True}, 0),
-        ("allows docs-only change", {"cwd": clean_repo, "session_id": "t3", "stop_hook_active": False}, 0),
-        ("allows outside a git repo", {"cwd": tempfile.mkdtemp(), "session_id": "t4", "stop_hook_active": False}, 0),
+        ("allows when stop_hook_active", {"cwd": code_repo, "session_id": uuid.uuid4().hex, "stop_hook_active": True}, 0),
+        ("allows docs-only change", {"cwd": clean_repo, "session_id": uuid.uuid4().hex, "stop_hook_active": False}, 0),
+        ("allows outside a git repo", {"cwd": tempfile.mkdtemp(), "session_id": uuid.uuid4().hex, "stop_hook_active": False}, 0),
     ]
     for name, payload, expected in stop_cases:
         got = run("stop_selfcheck.py", payload)
