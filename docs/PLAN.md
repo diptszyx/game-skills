@@ -41,18 +41,14 @@ Khung dùng được cho cả game 2D lẫn 3D vì giao diện luôn là lớp 2
 Chưa đưa vào khung (mới thấy ở một game): hồ sơ người chơi, chọn booster trước ván, nhiệm vụ sự kiện, ưu đãi xoay vòng, Sky Jump. Sẽ cân nhắc khi lặp lại ở game thứ ba.
 
 ## Bộ skill
+Skill là hướng dẫn ngắn cho trợ lý AI, chỉ được mở ra khi việc đang làm khớp. Làm trước hai skill có bằng chứng rõ từ hai game đã làm:
 
-| # | Skill | Làm gì |
-|---|---|---|
-| 1 | Làm việc với AI | Đầu phiên đọc gì, giao việc, canh việc chạy nền, ghi bài học ngay lúc gặp lỗi |
-| 2 | Kiểm tra kết quả | Kiểm tra tự động, chụp màn hình so ảnh mẫu, thử điện thoại; chưa kiểm thì không báo xong |
-| 3 | Phong cách và hình AI | Chọn, khóa phong cách, viết yêu cầu vẽ |
-| 4 | Giao diện 2D | Bố cục, chữ, nút, bảng thông báo |
-| 5 | Xử lý hình AI | Cắt nền, đóng gói, làm chuyển động |
-| 6 | Đồ vật 3D bằng Blender | Dựng từ ảnh đã duyệt, kiểm nhiều góc, màu kiểu hoạt hình, chạy mượt trên máy yếu |
-| 7 | Gameplay và màn chơi | Luật, sinh màn, kiểm độ khó (hybrid-casual) |
-| 8 | Cảm giác, âm thanh, kinh tế | Phản hồi khi chơi, âm, vàng / tim |
-| 9 | Phát hành | Chuẩn bị đưa lên cửa hàng |
+| Skill | Làm gì |
+|---|---|
+| Làm việc với AI | Đầu phiên đọc gì, giao việc, canh việc chạy nền, ghi bài học ngay lúc gặp lỗi |
+| Kiểm tra kết quả | Kiểm tra tự động, chụp màn hình so ảnh mẫu, thử điện thoại; chưa kiểm thì không báo xong |
+
+Các skill khác (hình ảnh, đồ vật 3D, gameplay...) chỉ làm khi có đủ bài học nguồn và sau khi đã dùng thật hai skill đầu.
 
 ## Các bước xây
 
@@ -65,7 +61,7 @@ flowchart LR
   C --> E["E. Thay hình thật"]
   D --> E
   E --> F["F. Thử bằng game nhỏ"]
-  F --> G2["G2. Các skill còn lại"]
+  F --> G2["G2. Skill khác, nếu cần"]
   classDef done fill:#cfe8cf,stroke:#4a8a4a,color:#000
   class A,B done
 ```
@@ -79,4 +75,4 @@ flowchart LR
 | E | Thay hình tạm bằng hình của xưởng | Mỗi màn hình đúng ảnh mẫu đã duyệt, ở 2 kiểu màn hình |
 | F | Thử bằng một game mới nhỏ (3 màn) | Chạy trên điện thoại, ghi số giờ thật để biết tiết kiệm bao nhiêu |
 | G1 | Viết skill 1 và 2 | Qua thử nghiệm: nên dùng, không nên dùng, so với không có skill |
-| G2 | Viết các skill còn lại | Như G1, mỗi skill sau khi skill trước đã dùng thật |
+| G2 | Viết thêm skill khác, nếu cần | Như G1, sau khi hai skill đầu đã dùng thật |
