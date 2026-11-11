@@ -5,6 +5,8 @@ Chi tiết kỹ thuật (spec) viết sau.
 ## 1. Mục tiêu
 Khi có ý tưởng game mới, người làm game chỉ cần nghĩ gameplay. Phần xung quanh và hình ảnh được làm sẵn. Bộ công cụ có ba phần: khung game, xưởng phong cách, bộ skill.
 
+Các game làm sau này chủ yếu thuộc thể loại hybrid-casual, nên phần khung gần như không phải thay đổi giữa các game; chỉ gameplay và phong cách hình khác nhau.
+
 ## 2. Ba phần của bộ công cụ
 
 ### Khung game
@@ -42,7 +44,7 @@ Hướng dẫn cho trợ lý AI, mỗi skill một việc:
 4. **Giao diện 2D:** bố cục, chữ, nút, bảng thông báo.
 5. **Xử lý hình AI:** cắt nền, đóng gói, làm chuyển động.
 6. **Đồ vật 3D bằng Blender:** từ ảnh đã duyệt dựng đồ vật bằng code Blender, kiểm từ nhiều góc, đưa vào game với màu và ánh sáng kiểu hoạt hình, chạy mượt trên máy yếu.
-7. **Thiết kế màn chơi / câu đố:** luật, sinh màn, kiểm độ khó.
+7. **Thiết kế gameplay và màn chơi (hybrid-casual):** luật, sinh màn, kiểm độ khó.
 8. **Cảm giác chơi, âm thanh, kinh tế game.**
 9. **Phát hành.**
 

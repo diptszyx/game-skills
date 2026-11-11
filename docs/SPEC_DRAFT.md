@@ -116,3 +116,8 @@ Cổng mỗi bước: xanh thì commit + push repo này rồi sang bước kế;
 - Hệ quả: phong cách chọn ở xưởng phải là kiểu mỗi bộ phận một màu, hình khối đơn giản; bước C thử dựng một đồ vật 3D để kiểm.
 - CHƯA KIỂM: dựng đồ vật mới từ ảnh concept (game-3 dựng theo số đo từ game gốc); nguyên nhân thật của 3 lần thất bại ở game-2 (cách viết script hay chủ đề quá khó).
 - Việc chạy Blender: Codex chạy với quyền đầy đủ (`codex exec -s danger-full-access`), plugin sandbox giấu GPU nên có thể làm Blender sập (`~/.claude/CLAUDE.md`). Blender có ở `/Applications/Blender.app`.
+
+## 13. Phạm vi thể loại (2026-11-11, người làm game): các game sau chủ yếu hybrid-casual
+- Hệ quả: khung gần như cố định giữa các game; rủi ro R1 (2 mẫu cùng thể loại, game mới khác) giảm đáng kể, vẫn còn vì mới có 2 mẫu.
+- Skill 7 trong SKILL_INVENTORY mục 1.7 dựa trên bài học câu đố (game-1, game-2); cần bổ sung nguồn về gameplay hybrid-casual (game-3, game-5, `knowledge/`) trước khi viết. CHƯA CÓ research.
+- Skill 9 (phát hành) và các ô cắm quảng cáo / mua hàng / cấu hình từ xa quan trọng hơn với hybrid-casual; chưa có research (SKILL_INVENTORY mục 1.12).
