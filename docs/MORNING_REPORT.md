@@ -19,3 +19,9 @@ Số đo thật ghi kèm nguồn. Mục chưa chạy ghi "chưa".
 
 ## Chưa kiểm
 APK chưa cài lên điện thoại; hook chưa cài toàn cục; thời gian cả đêm chưa đo.
+
+## Cần bạn quyết
+1. **Hai skill UI chồng nhau:** `skills/game-ui-workflow` (có từ trước, dựa trên game-kit) và `skills/building-game-ui` (mới, dựa trên khung). Hiện tôi để cả hai và thêm dòng chỉ chéo; nên gộp hay bỏ một cái?
+2. **Chọn một trong 4 phong cách** (`art/style_trial/montage.png`) để xưởng sinh bộ hình đầy đủ và thay hình tạm.
+3. **Cài hook và skill toàn cục** (`~/.claude/settings.json`, `~/.claude/skills/`): chưa làm, vì sửa cấu hình chung của bạn.
+4. **Đổi tên repo** `game-skills` (hiện chứa cả khung, xưởng, skill, hook).
