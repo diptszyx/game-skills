@@ -1,74 +1,82 @@
 # Kế hoạch: bộ công cụ làm game nhanh (cập nhật 2026-11-11)
 
-Chi tiết kỹ thuật (spec) viết sau.
+Khi có ý tưởng game mới, người làm game chỉ cần nghĩ gameplay. Phần xung quanh và hình ảnh được làm sẵn. Các game làm sau chủ yếu thuộc thể loại hybrid-casual, nên phần khung gần như không đổi giữa các game. Chi tiết kỹ thuật (spec) viết sau.
 
-## 1. Mục tiêu
-Khi có ý tưởng game mới, người làm game chỉ cần nghĩ gameplay. Phần xung quanh và hình ảnh được làm sẵn. Bộ công cụ có ba phần: khung game, xưởng phong cách, bộ skill.
+## Bộ công cụ làm việc thế nào
 
-Các game làm sau này chủ yếu thuộc thể loại hybrid-casual, nên phần khung gần như không phải thay đổi giữa các game; chỉ gameplay và phong cách hình khác nhau.
+```mermaid
+flowchart LR
+  A["Ý tưởng game"] --> B["Xưởng phong cách<br/>AI vẽ vài phong cách, chọn một"]
+  B --> C["Hình 2D<br/>nút, bảng, chữ, nền"]
+  B --> D["Đồ vật 3D<br/>dựng bằng code Blender"]
+  C --> E["Khung game<br/>làm sẵn, tự mặc phong cách"]
+  D --> F["Gameplay riêng<br/>viết cho từng game"]
+  E --> G["Game hoàn chỉnh"]
+  F --> G
+  G --> H["Kiểm: chụp màn hình so ảnh mẫu<br/>thử trên điện thoại"]
+  S["Bộ skill<br/>hướng dẫn trợ lý AI"] -.-> B
+  S -.-> E
+  S -.-> F
+  S -.-> H
+```
 
-## 2. Ba phần của bộ công cụ
+Khung dùng được cho cả game 2D lẫn 3D vì giao diện luôn là lớp 2D. Hình không gắn cứng vào khung, nên viết code khung trước với hình tạm rồi thay hình thật sau.
 
-### Khung game
-Phần code dùng chung, lấy từ chỗ giống nhau của hai game đã làm:
-- Màn hình chính
-- Cửa hàng
-- Thưởng hằng ngày
-- Cài đặt
-- Tạm dừng
-- Thắng
-- Thua
-- Hồi sinh
-- Màn hình tải
-- Lưu vàng, tim, booster
-- Âm thanh
-- Rung
-- Xem quảng cáo nhận thưởng (giả)
-- Bảng xếp hạng (dùng Unity Leaderboards như game-2; có bản giả để kiểm tra)
-- Nhiệm vụ ngày
-- Ô cắm quảng cáo (giả)
-- Ô cắm mua hàng (giả)
+## Khung game gồm những gì
 
-Khung phục vụ cả game 2D lẫn 3D: giao diện luôn là lớp 2D, gameplay bên dưới là gì cũng được. Hình ảnh không gắn cứng vào khung mà thay được, nên có thể viết code khung trước với hình tạm, rồi thay hình thật khi phong cách đã chốt.
-
-### Xưởng phong cách
-Quy trình tạo toàn bộ hình ảnh cho các màn hình của khung và cho gameplay:
-- Nhập ý tưởng game; AI vẽ 3 đến 4 phong cách khác nhau để chọn (khi đã chọn concept thì AI sinh phong cách theo concept đó).
-- Chọn xong, phong cách được khóa thành "bảng quy định" (màu, kiểu nút, bo góc, chữ).
-- AI sinh hình 2D theo bảng: nút, bảng thông báo, chữ, nền, biểu tượng.
-- Đồ vật 3D không dùng AI ảnh-sang-3D mà được dựng bằng code chạy trong Blender, theo ảnh phong cách đã duyệt.
-- Khung nhận hình và tự mặc phong cách đó.
-
-### Bộ skill
-Hướng dẫn cho trợ lý AI, mỗi skill một việc:
-1. **Làm việc với AI:** đầu phiên đọc gì, giao việc thế nào, canh việc chạy nền, ghi bài học ngay lúc gặp lỗi, khi nào được tự chạy không cần hỏi.
-2. **Kiểm tra kết quả:** chạy kiểm tra tự động, chụp màn hình so với ảnh mẫu đã duyệt, thử trên điện thoại; chưa kiểm thì không báo xong.
-3. **Phong cách và hình AI:** cách chọn, khóa phong cách và viết yêu cầu vẽ.
-4. **Giao diện 2D:** bố cục, chữ, nút, bảng thông báo.
-5. **Xử lý hình AI:** cắt nền, đóng gói, làm chuyển động.
-6. **Đồ vật 3D bằng Blender:** từ ảnh đã duyệt dựng đồ vật bằng code Blender, kiểm từ nhiều góc, đưa vào game với màu và ánh sáng kiểu hoạt hình, chạy mượt trên máy yếu.
-7. **Thiết kế gameplay và màn chơi (hybrid-casual):** luật, sinh màn, kiểm độ khó.
-8. **Cảm giác chơi, âm thanh, kinh tế game.**
-9. **Phát hành.**
-
-## 3. Làm một game mới sẽ thế nào
-1. Nói ý tưởng game.
-2. AI vẽ 3 đến 4 phong cách khác nhau; chọn một.
-3. Phong cách được khóa lại thành bảng quy định.
-4. AI sinh hình theo bảng; duyệt vài ảnh mẫu của từng màn hình.
-5. Khung nhận hình, các màn hình dựng xong và chạy được.
-6. Viết riêng phần gameplay.
-7. Chụp từng màn hình, so với ảnh mẫu đã duyệt, thử trên điện thoại.
-
-## 4. Các giai đoạn xây
-| # | Việc | Xong khi nào |
+| Nền tảng và dữ liệu | Màn hình | Bảng thông báo |
 |---|---|---|
-| A | So sánh phần xung quanh của hai game đã làm, từng chức năng một | Có bảng "chức năng nào cả hai game đều có / chỉ một game có", kiểm lại ngẫu nhiên vài mục |
-| B | Chốt danh sách thứ đưa vào khung | Danh sách được duyệt |
-| C | Xưởng phong cách | Thử với một ý tưởng giả: ra 3-4 phong cách, chọn được một, ra đủ bộ hình đồng nhất, kèm thử dựng một đồ vật 3D bằng Blender từ phong cách đã chọn |
-| D | Code khung (lưu, vàng / tim, cài đặt, âm, rung, quảng cáo / mua hàng giả, các màn hình dùng hình tạm) | Chạy đúng, có kiểm tra tự động, không lỗi; chạy thử trên điện thoại |
-| E | Thay hình tạm bằng hình của xưởng phong cách | Mỗi màn hình đúng ảnh mẫu đã duyệt, ở 2 kiểu màn hình điện thoại |
-| F | Thử bằng một game mới nhỏ (3 màn) | Chạy được trên điện thoại; ghi số giờ thật để biết tiết kiệm bao nhiêu |
-| G | Viết bộ skill | Mỗi skill qua thử nghiệm: tình huống nên dùng, không nên dùng, so với không có skill |
+| Lưu dữ liệu | Màn hình chính | Thắng |
+| Vàng, tim, booster | Cửa hàng | Thua |
+| Âm thanh | Điểm danh ngày | Hồi sinh |
+| Rung | Nhiệm vụ ngày | Tạm dừng |
+| Cài đặt | Bảng xếp hạng (Unity Leaderboards) | Rời ván |
+| Đa ngôn ngữ | Màn hình tải | |
+| Vùng an toàn (tai thỏ) | | |
+| Xem quảng cáo nhận thưởng (giả) | | |
+| Mua hàng (giả) | | |
+| Thông báo đẩy | | |
+| Cấu hình từ xa | | |
 
-Thứ tự: A → B, rồi C và D làm song song (C là vẽ ảnh, D là code, không đụng nhau) → E → F. Hai skill đầu (làm việc với AI, kiểm tra kết quả) không cần chờ khung, viết ngay sau B, dùng thử vài phiên rồi mới viết tiếp. Mỗi bước xong được kiểm bằng số hoặc ảnh; không đạt thì dừng lại.
+Chưa đưa vào khung (mới thấy ở một game): hồ sơ người chơi, chọn booster trước ván, nhiệm vụ sự kiện, ưu đãi xoay vòng, Sky Jump. Sẽ cân nhắc khi lặp lại ở game thứ ba.
+
+## Bộ skill
+
+| # | Skill | Làm gì |
+|---|---|---|
+| 1 | Làm việc với AI | Đầu phiên đọc gì, giao việc, canh việc chạy nền, ghi bài học ngay lúc gặp lỗi |
+| 2 | Kiểm tra kết quả | Kiểm tra tự động, chụp màn hình so ảnh mẫu, thử điện thoại; chưa kiểm thì không báo xong |
+| 3 | Phong cách và hình AI | Chọn, khóa phong cách, viết yêu cầu vẽ |
+| 4 | Giao diện 2D | Bố cục, chữ, nút, bảng thông báo |
+| 5 | Xử lý hình AI | Cắt nền, đóng gói, làm chuyển động |
+| 6 | Đồ vật 3D bằng Blender | Dựng từ ảnh đã duyệt, kiểm nhiều góc, màu kiểu hoạt hình, chạy mượt trên máy yếu |
+| 7 | Gameplay và màn chơi | Luật, sinh màn, kiểm độ khó (hybrid-casual) |
+| 8 | Cảm giác, âm thanh, kinh tế | Phản hồi khi chơi, âm, vàng / tim |
+| 9 | Phát hành | Chuẩn bị đưa lên cửa hàng |
+
+## Các bước xây
+
+```mermaid
+flowchart LR
+  A["A. So sánh 2 game<br/>XONG"] --> B["B. Chốt danh sách khung<br/>XONG"]
+  B --> C["C. Xưởng phong cách"]
+  B --> D["D. Code khung"]
+  B --> G1["G1. Skill 1 và 2"]
+  C --> E["E. Thay hình thật"]
+  D --> E
+  E --> F["F. Thử bằng game nhỏ"]
+  F --> G2["G2. Các skill còn lại"]
+  classDef done fill:#cfe8cf,stroke:#4a8a4a,color:#000
+  class A,B done
+```
+
+| Bước | Việc | Xong khi |
+|---|---|---|
+| A | So sánh phần xung quanh của hai game đã làm | Có bảng từng chức năng, kiểm lại ngẫu nhiên |
+| B | Chốt danh sách đưa vào khung | Danh sách được duyệt |
+| C | Xưởng phong cách | Thử với một ý tưởng giả: ra 3-4 phong cách, chọn một, ra đủ bộ hình đồng nhất, dựng thử một đồ vật 3D |
+| D | Code khung, các màn hình dùng hình tạm | Chạy đúng, có kiểm tra tự động, chạy được trên điện thoại |
+| E | Thay hình tạm bằng hình của xưởng | Mỗi màn hình đúng ảnh mẫu đã duyệt, ở 2 kiểu màn hình |
+| F | Thử bằng một game mới nhỏ (3 màn) | Chạy trên điện thoại, ghi số giờ thật để biết tiết kiệm bao nhiêu |
+| G1 | Viết skill 1 và 2 | Qua thử nghiệm: nên dùng, không nên dùng, so với không có skill |
+| G2 | Viết các skill còn lại | Như G1, mỗi skill sau khi skill trước đã dùng thật |

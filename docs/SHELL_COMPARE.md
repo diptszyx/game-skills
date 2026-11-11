@@ -94,3 +94,6 @@ Cột "Kết luận": **Cả hai** = cả hai game có; **Một game** = chỉ m
 3. Đưa **hồ sơ + lọc từ chửi**, **chọn booster trước ván**, **thông báo đẩy**, **cấu hình từ xa** (chỉ game-5) vào khung?
 4. **Đa ngôn ngữ**: có đưa vào khung không?
 5. Quest, ưu đãi xoay vòng, Sky Jump: giữ ngoài khung tới khi lặp ở game thứ ba (theo plan)?
+
+## 6. Đã quyết ở bước B (2026-11-11, người làm game: "cứ thêm những gì bạn nói")
+Đưa vào khung: điểm danh ngày, màn hình tải, vùng an toàn, thông báo đẩy, cấu hình từ xa, đa ngôn ngữ. Chưa đưa vào: hồ sơ + lọc từ chửi, chọn booster trước ván, Quest, ưu đãi xoay vòng, Sky Jump (chờ lặp ở game thứ ba). Cách lưu theo game-5 (JSON `SaveData`).
