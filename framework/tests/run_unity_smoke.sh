@@ -54,6 +54,10 @@ expected.update({'IndieGame.Shell.Tests.ShellUiFactoryTests.' + n for n in ['Bui
 expected.add('IndieGame.Shell.Tests.ShellUiDependencyTests.RuntimeAssemblyHasNoEditorReferences')
 if sys.argv[4] == 'PlayMode':
     expected = {'IndieGame.Shell.Tests.PopupHostTests.' + n for n in ['OnlyTopPopupReceivesInput','ReopenLowerMovesToTop','MandatoryPopupRejectsDismissal','TransitionsWorkWhilePaused','PopRestoresFocus']}
+if sys.argv[4] == 'EditMode':
+    expected.update({'IndieGame.Shell.Tests.DataScreenTests.' + n for n in ['CheckInSnapshotMatchesClaim','MidnightRefreshesOpenCheckInView','DuplicateClaimDoesNotGrantAgain','ClaimAndWalletPersistTogether','QuestClaimOnlyWhenComplete','MainRefreshesLivesOnResume','SaveFailureIsSurfacedToView','ShopFailedPurchaseShowsErrorPopup']})
+else:
+    expected.update({'IndieGame.Shell.Tests.DataScreenBuildTests.' + n for n in ['CheckInDark','CheckInBright','QuestsDark','QuestsBright','MainDark','MainBright','ShopDark','ShopBright']})
 print('mode=' + sys.argv[4])
 core = pathlib.Path(sys.argv[1]).parents[2] / 'Packages/com.indiegame.shell/Runtime/Core'
 no_engine = json.loads((core / 'IndieGame.Shell.Core.asmdef').read_text()).get('noEngineReferences') is True
