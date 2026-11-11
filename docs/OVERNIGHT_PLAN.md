@@ -31,6 +31,7 @@ Thứ tự: T1 và T4 và T2/T3 song song (không đụng nhau: mã lõi / ảnh
 - Quyền commit + push ở repo này đã được cấp (HANDOFF, memory `feedback-autonomy-game-kit`).
 
 ## Nhật ký (mới nhất ở trên)
+- T1a đạt trọn: Unity 6000.3.25f1 nhập package, error CS = 0, EditMode 3/3 đúng danh sách (Claude chạy lại tự kiểm), APK debug build được (17,8 MB, 45 giây). Codex build APK lần đầu lỗi "Target architecture not specified"; Claude sửa: Mono không hỗ trợ ARM64 nên đổi sang IL2CPP + ARM64. Chưa cài/chạy APK trên điện thoại. Thời gian Codex T1b đo được: 174 giây.
 - T3 đạt thêm bằng phiên `claude -p` thật (settings dự án): `git reset --hard` bị chặn (bản staged còn nguyên); ghi vào game-3 bị chặn (file không tạo); ghi ok.txt + `git status` không bị chặn nhầm; hook Stop chạy sau khi tạo notes.py và model trả bản tự kiểm 7 mục (trả lời "not verified" đúng cho ca không có Unity). Lưu ý: hook Stop hơi ồn với việc nhỏ không liên quan game. Hook vẫn CHƯA cài toàn cục.
 - T1b (Unity) giao Codex lúc này, Monitor `bti3drcpx`.
 - T1a phần dotnet xong, Claude tự kiểm: build 0 lỗi 0 cảnh báo; 21 test qua; 0 dòng UnityEngine trong Core; cố ý phá logic bản sao lưu → 2 test đỏ, khôi phục → 21 xanh. Còn lại của T1a: dự án Unity nhập package + EditMode + APK. Job Codex mất ~4 phút (đo: giờ ghi file pid 23:25:58 đến giờ ghi cuối của log 23:29:54).

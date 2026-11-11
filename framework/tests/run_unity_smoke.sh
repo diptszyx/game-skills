@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+set -u
+PROJECT=$(cd "$(dirname "$0")/../unity-smoke" && pwd)
+LOG="$HOME/Library/Logs/Unity/Editor.log"
+RESULT="$PROJECT/Logs/EditMode.xml"
+STALL=${UNITY_STALL_SECONDS:-180}
+HARD=${UNITY_HARD_SECONDS:-2400}
+[ "$HARD" -le 2400 ] || HARD=2400
+if pgrep -fl 'Unity.app/Contents/MacOS/Unity'; then
+  echo 'Refusing to run: Unity Editor already running.'; exit 1
+fi
+mkdir -p "$PROJECT/Logs"
+rm -f "$RESULT"
+start=$(date +%s)
+echo "$start" > "$PROJECT/Logs/test-start.txt"
+"$HOME/.unity/bin/unity" test "$PROJECT" --mode EditMode --output "$RESULT" --timeout "$HARD" --non-interactive > "$PROJECT/Logs/EditMode-cli.log" 2>&1 &
+cli=$!
+stop_unity() {
+  pkill -f "Unity.app/Contents/MacOS/Unity.*$PROJECT" 2>/dev/null || true
+  kill "$cli" 2>/dev/null || true
+}
+trap 'stop_unity; exit 130' INT TERM
+last_change=$start
+last_report=$start
+last_count=-1
+guard_status=0
+while kill -0 "$cli" 2>/dev/null; do
+  sleep 5
+  now=$(date +%s)
+  count=$(awk '!/Scanning for USB devices/{n++} END{print n+0}' "$LOG" 2>/dev/null) || count=0
+  if [ "$count" != "$last_count" ]; then last_count=$count; last_change=$now; fi
+  if [ $((now-last_report)) -ge 30 ]; then
+    echo "[guard] $((now-start))s log_lines=$count idle=$((now-last_change))s"; last_report=$now
+  fi
+  if [ $((now-last_change)) -ge "$STALL" ] || [ $((now-start)) -ge "$HARD" ]; then
+    echo '[guard] stalled or hard timeout'; stop_unity; guard_status=124; break
+  fi
+done
+wait "$cli"
+status=$?
+[ "$guard_status" -eq 0 ] || status=$guard_status
+if [ -f "$LOG" ]; then cp "$LOG" "$PROJECT/Logs/EditMode-Editor.log"; fi
+python3 - "$RESULT" "$LOG" "$status" <<'PY'
+import sys, pathlib, xml.etree.ElementTree as ET
+expected = {'IndieGame.Shell.Tests.SaveSmokeTests.' + n for n in
+            ('ValidV1Loads', 'CorruptFallsBackToBackup', 'FutureReportsVersionError')}
+log = pathlib.Path(sys.argv[2])
+errors = sum('error CS' in line for line in log.read_text(errors='replace').splitlines()) if log.exists() else -1
+print(f'error CS count: {errors}')
+try:
+    cases = list(ET.parse(sys.argv[1]).getroot().iter('test-case'))
+except (OSError, ET.ParseError) as error:
+    print(f'passed=0 failed=unknown expected={len(expected)}; no readable results: {error}'); sys.exit(1)
+passed = sum(c.get('result') == 'Passed' for c in cases)
+failed = sum(c.get('result') == 'Failed' for c in cases)
+print(f'passed={passed} failed={failed} expected={len(expected)}')
+for c in cases:
+    print(c.get('result'), c.get('fullname'))
+    if c.get('result') != 'Passed': print(c.findtext('.//message', ''))
+sys.exit(0 if errors == 0 and failed == 0 and passed == len(expected)
+         and {c.get('fullname') for c in cases} == expected and int(sys.argv[3]) == 0 else 1)
+PY
+result=$?
+end=$(date +%s)
+echo "wall_seconds=$((end-start)) cli_status=$status runner_status=$result"
+printf '%s\n' "$((end-start))" > "$PROJECT/Logs/test-wall-seconds.txt"
+exit "$result"

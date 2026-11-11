@@ -1,0 +1,3 @@
+/Users/tho/project/indie-game/game-skills/framework/unity-smoke/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/src/main/cpp/CMakeLists.txt
+/Users/tho/project/indie-game/game-skills/framework/unity-smoke/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/src/main/cpp/FramePacing/CMakeLists.txt
+/Users/tho/project/indie-game/game-skills/framework/unity-smoke/Library/Bee/Android/Prj/IL2CPP/Gradle/unityLibrary/src/main/cpp/GameActivity/CMakeLists.txt

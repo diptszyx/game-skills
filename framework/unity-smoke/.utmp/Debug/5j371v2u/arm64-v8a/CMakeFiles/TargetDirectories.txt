@@ -1,0 +1,8 @@
+/Users/tho/project/indie-game/game-skills/framework/unity-smoke/.utmp/Debug/5j371v2u/arm64-v8a/CMakeFiles/edit_cache.dir
+/Users/tho/project/indie-game/game-skills/framework/unity-smoke/.utmp/Debug/5j371v2u/arm64-v8a/CMakeFiles/rebuild_cache.dir
+/Users/tho/project/indie-game/game-skills/framework/unity-smoke/.utmp/Debug/5j371v2u/arm64-v8a/GameActivity/CMakeFiles/game.dir
+/Users/tho/project/indie-game/game-skills/framework/unity-smoke/.utmp/Debug/5j371v2u/arm64-v8a/GameActivity/CMakeFiles/edit_cache.dir
+/Users/tho/project/indie-game/game-skills/framework/unity-smoke/.utmp/Debug/5j371v2u/arm64-v8a/GameActivity/CMakeFiles/rebuild_cache.dir
+/Users/tho/project/indie-game/game-skills/framework/unity-smoke/.utmp/Debug/5j371v2u/arm64-v8a/FramePacing/CMakeFiles/swappywrapper.dir
+/Users/tho/project/indie-game/game-skills/framework/unity-smoke/.utmp/Debug/5j371v2u/arm64-v8a/FramePacing/CMakeFiles/edit_cache.dir
+/Users/tho/project/indie-game/game-skills/framework/unity-smoke/.utmp/Debug/5j371v2u/arm64-v8a/FramePacing/CMakeFiles/rebuild_cache.dir

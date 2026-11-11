@@ -1,0 +1,12 @@
+{
+  "name": "IndieGame.Shell.Tests.EditMode",
+  "references": [
+    "IndieGame.Shell.Core"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
+}
