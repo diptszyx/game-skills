@@ -2,7 +2,10 @@
   "name": "IndieGame.Shell.Tests.EditMode",
   "references": [
     "IndieGame.Shell.Core",
-    "IndieGame.Shell.Unity"
+    "IndieGame.Shell.Unity",
+    "GameKit.UI",
+    "UnityEngine.UI",
+    "Unity.TextMeshPro"
   ],
   "includePlatforms": [
     "Editor"

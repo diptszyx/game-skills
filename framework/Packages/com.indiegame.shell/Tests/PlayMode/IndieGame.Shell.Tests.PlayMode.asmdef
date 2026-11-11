@@ -1,0 +1,13 @@
+{
+  "name": "IndieGame.Shell.Tests.PlayMode",
+  "references": [
+    "IndieGame.Shell.Unity",
+    "GameKit.UI",
+    "UnityEngine.UI",
+    "Unity.TextMeshPro",
+    "Unity.InputSystem"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
+}

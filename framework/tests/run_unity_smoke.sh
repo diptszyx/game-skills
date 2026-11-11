@@ -1,8 +1,15 @@
 #!/usr/bin/env bash
 set -u
+MODE=EditMode
+if [ "$#" -gt 0 ]; then
+  if [ "$#" -ne 2 ] || [ "$1" != --mode ] || { [ "$2" != EditMode ] && [ "$2" != PlayMode ]; }; then
+    echo 'Usage: run_unity_smoke.sh [--mode EditMode|PlayMode]'; exit 2
+  fi
+  MODE=$2
+fi
 PROJECT=$(cd "$(dirname "$0")/../unity-smoke" && pwd)
 LOG="$HOME/Library/Logs/Unity/Editor.log"
-RESULT="$PROJECT/Logs/EditMode.xml"
+RESULT="$PROJECT/Logs/$MODE.xml"
 STALL=${UNITY_STALL_SECONDS:-180}
 HARD=${UNITY_HARD_SECONDS:-2400}
 [ "$HARD" -le 2400 ] || HARD=2400
@@ -13,7 +20,7 @@ mkdir -p "$PROJECT/Logs"
 rm -f "$RESULT"
 start=$(date +%s)
 echo "$start" > "$PROJECT/Logs/test-start.txt"
-"$HOME/.unity/bin/unity" test "$PROJECT" --mode EditMode --output "$RESULT" --timeout "$HARD" --non-interactive > "$PROJECT/Logs/EditMode-cli.log" 2>&1 &
+"$HOME/.unity/bin/unity" test "$PROJECT" --mode "$MODE" --output "$RESULT" --timeout "$HARD" --non-interactive > "$PROJECT/Logs/$MODE-cli.log" 2>&1 &
 cli=$!
 stop_unity() {
   pkill -f "Unity.app/Contents/MacOS/Unity.*$PROJECT" 2>/dev/null || true
@@ -39,10 +46,15 @@ done
 wait "$cli"
 status=$?
 [ "$guard_status" -eq 0 ] || status=$guard_status
-if [ -f "$LOG" ]; then cp "$LOG" "$PROJECT/Logs/EditMode-Editor.log"; fi
-python3 - "$RESULT" "$LOG" "$status" <<'PY'
+if [ -f "$LOG" ]; then cp "$LOG" "$PROJECT/Logs/$MODE-Editor.log"; fi
+python3 - "$RESULT" "$LOG" "$status" "$MODE" <<'PY'
 import sys, pathlib, json, subprocess, xml.etree.ElementTree as ET
 expected = {'IndieGame.Shell.Tests.UnityAdapterTests.SafeAreaFullScreen', 'IndieGame.Shell.Tests.UnityAdapterTests.LoadingProgressClamp', 'IndieGame.Shell.Tests.UnityAdapterTests.LoadingProgressMonotonic', 'IndieGame.Shell.Tests.UnityAdapterTests.HapticsFlagOn', 'IndieGame.Shell.Tests.UnityAdapterTests.SafeAreaBottomGestureBar', 'IndieGame.Shell.Tests.UnityAdapterTests.HapticsNullPlayerSafe', 'IndieGame.Shell.Tests.SaveSmokeTests.CorruptFallsBackToBackup', 'IndieGame.Shell.Tests.UnityAdapterTests.LoadingNewCycleResetsAndEarlyHideFades', 'IndieGame.Shell.Tests.UnityAdapterTests.LoadingMinimumDisplayTime', 'IndieGame.Shell.Tests.SaveSmokeTests.ValidV1Loads', 'IndieGame.Shell.Tests.UnityAdapterTests.LoadingHideBeforeMinimumWaits', 'IndieGame.Shell.Tests.UnityAdapterTests.LoadingDoubleShowIdempotent', 'IndieGame.Shell.Tests.UnityAdapterTests.SafeAreaZero', 'IndieGame.Shell.Tests.SaveSmokeTests.FutureReportsVersionError', 'IndieGame.Shell.Tests.UnityAdapterTests.HapticsFlagOff', 'IndieGame.Shell.Tests.UnityAdapterTests.LoadingFadeAndLateHide', 'IndieGame.Shell.Tests.UnityAdapterTests.AudioFlagsGatePoolAndRefreshActiveVolumes', 'IndieGame.Shell.Tests.UnityAdapterTests.SafeAreaTopNotch', 'IndieGame.Shell.Tests.UnityAdapterTests.AudioRoutesKeysAndIndependentVolumes'}
+expected.update({'IndieGame.Shell.Tests.ShellUiFactoryTests.' + n for n in ['BuildsAllPrimitives','MissingRoleFailsByName','LockedButtonUsesLockedSprite','StyleSwitchKeepsTextAndLayout']})
+expected.add('IndieGame.Shell.Tests.ShellUiDependencyTests.RuntimeAssemblyHasNoEditorReferences')
+if sys.argv[4] == 'PlayMode':
+    expected = {'IndieGame.Shell.Tests.PopupHostTests.' + n for n in ['OnlyTopPopupReceivesInput','ReopenLowerMovesToTop','MandatoryPopupRejectsDismissal','TransitionsWorkWhilePaused','PopRestoresFocus']}
+print('mode=' + sys.argv[4])
 core = pathlib.Path(sys.argv[1]).parents[2] / 'Packages/com.indiegame.shell/Runtime/Core'
 no_engine = json.loads((core / 'IndieGame.Shell.Core.asmdef').read_text()).get('noEngineReferences') is True
 grep = subprocess.run(['grep', '-rn', 'UnityEngine', str(core)], capture_output=True, text=True)

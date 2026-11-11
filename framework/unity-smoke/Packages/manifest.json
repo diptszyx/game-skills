@@ -5,7 +5,10 @@
     "com.indiegame.shell": "file:../../Packages/com.indiegame.shell",
     "com.unity.nuget.newtonsoft-json": "3.2.1",
     "com.unity.test-framework": "1.6.0",
-    "com.unity.modules.androidjni": "1.0.0"
+    "com.unity.modules.androidjni": "1.0.0",
+    "com.indiegame.ui": "file:../../../../game-kit/Packages/com.indiegame.ui",
+    "com.unity.ugui": "2.0.0",
+    "com.unity.inputsystem": "1.20.0"
   },
   "testables": [
     "com.indiegame.shell"

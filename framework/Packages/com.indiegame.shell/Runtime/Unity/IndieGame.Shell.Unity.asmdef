@@ -2,6 +2,10 @@
   "name": "IndieGame.Shell.Unity",
   "rootNamespace": "IndieGame.Shell.Unity",
   "references": [
-    "IndieGame.Shell.Core"
+    "IndieGame.Shell.Core",
+    "GameKit.UI",
+    "UnityEngine.UI",
+    "Unity.TextMeshPro",
+    "Unity.InputSystem"
   ]
 }
