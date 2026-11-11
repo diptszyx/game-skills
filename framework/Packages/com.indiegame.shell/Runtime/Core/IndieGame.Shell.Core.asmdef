@@ -1,0 +1,8 @@
+{
+  "name": "IndieGame.Shell.Core",
+  "rootNamespace": "IndieGame.Shell",
+  "references": [],
+  "noEngineReferences": true,
+  "overrideReferences": true,
+  "precompiledReferences": ["Newtonsoft.Json.dll"]
+}
