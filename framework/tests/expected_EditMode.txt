@@ -36,3 +36,5 @@ IndieGame.Shell.Tests.UnityAdapterTests.SafeAreaBottomGestureBar
 IndieGame.Shell.Tests.UnityAdapterTests.SafeAreaFullScreen
 IndieGame.Shell.Tests.UnityAdapterTests.SafeAreaTopNotch
 IndieGame.Shell.Tests.UnityAdapterTests.SafeAreaZero
+IndieGame.Shell.Tests.LocalizationTableTests.EveryRegisteredKeyExistsInBothLanguages
+IndieGame.Shell.Tests.LocalizationTableTests.RegistryCoversPresenterLiteralsAndDynamicFamilies
