@@ -14,6 +14,7 @@ namespace IndieGame.Shell.Unity.UI
         [Serializable] public sealed class TabIconEntry { public string Key; public Sprite Sprite; }
         public List<TabIconEntry> TabIcons = new List<TabIconEntry>();
         public Color TabSelectedTint = Color.white, TabUnselectedTint = new Color(.7f,.7f,.8f); public Color TabLabelColor = Color.white;
+        public Color ScreenTitleColorOverride = Color.clear;
         public Sprite TabIcon(string key)
         {
             var entry = TabIcons.Find(e => e != null && e.Key == key);

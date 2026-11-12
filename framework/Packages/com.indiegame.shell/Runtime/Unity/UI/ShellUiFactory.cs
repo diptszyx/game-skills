@@ -46,6 +46,7 @@ namespace IndieGame.Shell.Unity.UI
                     var b = ButtonRole == ButtonRole.Secondary ? s.Theme.Secondary : s.Theme.Primary;
                     text.color = Role == "chromeText" ? Color.white : b.LabelColor; if (b.LabelMaterial != null) text.fontSharedMaterial = b.LabelMaterial;
                 }
+                else if (Role == "screenTitle") { text.color = s.ScreenTitleColorOverride.a > 0 ? s.ScreenTitleColorOverride : s.TitleColor; text.fontStyle = FontStyles.Bold; if (s.Theme.BodyMaterial != null) text.fontSharedMaterial = s.Theme.BodyMaterial; }
                 else if (Role == "tabLabel") { text.color = s.TabLabelColor; if (s.Theme.BodyMaterial != null) text.fontSharedMaterial = s.Theme.BodyMaterial; }
                 else { var m = Role == "title" ? s.Theme.TitleMaterial : s.Theme.BodyMaterial; if (m != null) text.fontSharedMaterial = m; }
             }

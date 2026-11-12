@@ -57,7 +57,7 @@ namespace IndieGame.Shell.Tests
             s.CurrencyIcon=ChunkySprite("icons_1"); s.HeartIcon=ChunkySprite("icons_2"); s.BoosterIcon=ChunkySprite("icons_5");
             s.Theme.CloseSprite=ChunkySprite("btn_close"); s.Theme.ToggleOn=ChunkySprite("toggle_1"); s.Theme.ToggleOff=ChunkySprite("toggle_2");
             var plum=new Color32(0x30,0x0c,0x31,255); var cream=new Color32(0xfe,0xe9,0xd1,255);
-            s.TabLabelColor=plum; s.TabUnselectedTint=new Color(.92f,.92f,.95f); s.SurfaceColor=s.ScreenColor=Color.white; s.TitleColor=Color.white; s.Theme.PanelSize=new Vector2(620f,400f);
+            s.TabLabelColor=plum; s.ScreenTitleColorOverride=plum; s.TabUnselectedTint=new Color(.92f,.92f,.95f); s.SurfaceColor=s.ScreenColor=Color.white; s.TitleColor=Color.white; s.Theme.PanelSize=new Vector2(620f,400f);
             s.ListRowColor=cream; s.ListRowTextColor=plum; s.Theme.BodyColor=cream;
             s.ProgressTrackColor=new Color32(0xd9,0xd6,0xf0,255); s.ProgressFillColor=new Color32(0xd7,0x44,0x49,255);
             s.Theme.Primary.LabelColor=s.Theme.Secondary.LabelColor=Color.white;

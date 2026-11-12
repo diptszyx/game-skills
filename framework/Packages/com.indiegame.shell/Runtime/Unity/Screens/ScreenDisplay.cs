@@ -43,7 +43,7 @@ namespace IndieGame.Shell.Unity.Screens
             body.gameObject.SetActive(true); return body;
         }
         internal static TMP_Text Heading(ShellUiFactory f, RectTransform root)
-        { var label=f.Label(root,"",true); if(f.Style.EnableHomeChrome) label.rectTransform.anchoredPosition+=new Vector2(0,-110); return label; }
+        { var label=f.Label(root,"",true,"screenTitle"); if(f.Style.EnableHomeChrome) label.rectTransform.anchoredPosition+=new Vector2(0,-110); return label; }
         internal static void Rows(ShellUiFactory f, RectTransform content, IReadOnlyList<RowDisplay> rows, Action<string> clicked)
         {
             for(int i=content.childCount-1;i>=0;i--) { var child=content.GetChild(i); child.gameObject.SetActive(false); if(Application.isPlaying) UnityEngine.Object.Destroy(child.gameObject); else UnityEngine.Object.DestroyImmediate(child.gameObject); }

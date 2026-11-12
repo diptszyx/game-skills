@@ -148,6 +148,15 @@ namespace IndieGame.Shell.Tests
                 Assert.That(label.color,Is.EqualTo(Color.white));
             }
         }
+        [Test] public void ScreenTitleRoleUsesOverrideAndFallsBackToTitleColor()
+        {
+            var screenTitle=factory.Label(root.transform,"x",true,"screenTitle"); var popupTitle=factory.Label(root.transform,"y",true);
+            Assert.That(screenTitle.color,Is.EqualTo(style.TitleColor));
+            style.ScreenTitleColorOverride=new Color(.2f,.05f,.2f,1);
+            screenTitle.GetComponent<ShellAppearance>().Apply(style); popupTitle.GetComponent<ShellAppearance>().Apply(style);
+            Assert.That(screenTitle.color,Is.EqualTo(style.ScreenTitleColorOverride));
+            Assert.That(popupTitle.color,Is.EqualTo(style.TitleColor));
+        }
         [Test] public void TabSelectionSwapsCellsAndRetiredSlotsAndAssetsAreAbsent()
         {
             style.TabCellBackground=AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/KitChunky/tab_cell.png");

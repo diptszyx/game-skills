@@ -21,12 +21,12 @@ namespace IndieGame.Shell.Unity.Screens
             homeRoot=factory.ScreenRoot(parent,"CheckIn"); homeLifetime=homeRoot.gameObject.AddComponent<ScreenLifetime>();
             var content=ShellUiFactory.Node("Check-in content",homeRoot); ShellUiFactory.Stretch(content);
             content.offsetMin=new Vector2(24,240); content.offsetMax=new Vector2(-24,-110); content.gameObject.SetActive(true);
-            heading=factory.Label(content,"",true); TopBarView.Place(heading.rectTransform,new Vector2(0,.82f),Vector2.one);
+            heading=factory.Label(content,"",true,"screenTitle"); TopBarView.Place(heading.rectTransform,new Vector2(0,.82f),Vector2.one);
             cells=new DayCellView[5];
             for(int i=0;i<5;i++)
             {
                 cells[i]=new DayCellView(factory,content); int col=i<3?i:i-3;
-                TopBarView.Place(cells[i].Root,new Vector2(.02f+col*.33f,i<3?.49f:.20f),new Vector2(.31f+col*.33f,i<3?.78f:.49f));
+                float shift=i<3?0f:.165f; TopBarView.Place(cells[i].Root,new Vector2(.02f+col*.33f+shift,i<3?.49f:.20f),new Vector2(.31f+col*.33f+shift,i<3?.78f:.49f));
             }
             claim=factory.Button(content,"",clicked:RequestClaim);
             var label=claim.GetComponentInChildren<TMP_Text>(); label.fontSize=label.fontSizeMax=40; label.fontStyle=FontStyles.Bold; TopBarView.Place((RectTransform)claim.transform,new Vector2(.17f,.05f),new Vector2(.83f,.17f));
