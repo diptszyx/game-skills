@@ -65,7 +65,7 @@ namespace IndieGame.Shell.Tests
         Button MainButton(string key)=>app.Main.Root.GetComponentsInChildren<Button>().Single(b=>b.GetComponentInChildren<TMP_Text>().text==app.Text.Format("en",key).Value);
         IEnumerator Tap(Button button)
         {
-            Canvas.ForceUpdateCanvases();
+            yield return null; Canvas.ForceUpdateCanvases();
             var position=RectTransformUtility.WorldToScreenPoint(null,button.transform.TransformPoint(((RectTransform)button.transform).rect.center));
             var hits=new List<RaycastResult>(); EventSystem.current.RaycastAll(new PointerEventData(EventSystem.current){position=position},hits);
             Assert.That(hits.Count,Is.GreaterThan(0),button.name); Assert.That(hits[0].gameObject.GetComponentInParent<Button>(),Is.SameAs(button),button.name);
@@ -157,6 +157,25 @@ namespace IndieGame.Shell.Tests
             InputSystem.QueueStateEvent(keyboard,new KeyboardState()); yield return new WaitForSecondsRealtime(.15f);
             Assert.That(app.Popups.Top,Is.SameAs(app.Flow.Popups[SessionPopupKind.Pause].View));
             Assert.That(Time.timeScale,Is.Zero); Assert.That(game.Resumes,Is.Zero);
+        }
+        [UnityTest] public IEnumerator HomeTabsPlayAndClaimUseRealPointerInput()
+        {
+            config.Style=demos.MakeChunky(); yield return Boot();
+            Assert.That(app.GetComponentInChildren<GraphicRaycaster>(),Is.Not.Null);
+            var chrome=app.Screens.ChromeRoot;
+            Button Tab(string key)=>chrome.Find("TabBar/Tabs/Tab "+key).GetComponent<Button>();
+            yield return Tap(Tab("quests")); Assert.That(app.Screens.Current.name,Is.EqualTo("Quests")); Assert.That(chrome.gameObject.activeInHierarchy,Is.True);
+            app.Navigate(ShellScreen.CheckIn);
+            Assert.That(chrome.Find("TabBar/Tabs/Tab checkin/Cell").GetComponent<ShellAppearance>().Selected,Is.True);
+            yield return Tap(Tab("home")); Assert.That(app.Screens.Current,Is.SameAs(app.Main.Root));
+            yield return Tap(Tab("checkin")); var claim=app.Screens.Current.GetComponentsInChildren<Button>().Single(b=>b.name!="Shell Back");
+            var gold=app.Session.Economy.Gold; yield return Tap(claim); yield return Tap(claim);
+            Assert.That(app.Session.Economy.Gold,Is.EqualTo(gold+1));
+            Assert.That(chrome.Find("TabBar/Tabs/Tab checkin/Icon/Badge").gameObject.activeSelf,Is.False);
+            app.Back(); yield return Tap(MainButton("shell.play")); Assert.That(game.Plays,Is.EqualTo(1));
+            Assert.That(chrome.Find("TabBar").gameObject.activeSelf,Is.False); Assert.That(chrome.Find("TopBar").gameObject.activeSelf,Is.False);
+            app.Back(); Assert.That(app.Popups.Top,Is.Not.Null); app.Back(); yield return new WaitForSecondsRealtime(.15f);
+            app.ShowMain(); Assert.That(chrome.Find("TabBar").gameObject.activeSelf,Is.True);
         }
         void SetPortrait()
         {

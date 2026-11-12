@@ -42,7 +42,7 @@ namespace IndieGame.Shell.Tests
             chunkyAtlas=UnityEditor.AssetDatabase.LoadAssetAtPath<UnityEngine.U2D.SpriteAtlas>("Assets/Art/KitChunky/KitChunkyUi.spriteatlas");
             if(chunkyAtlas==null) throw new System.InvalidOperationException("Missing chunky atlas");
 #endif
-            s.EnableHomeChrome=true;
+            s.EnableHomeChrome=true; s.Logo=ChunkySprite("logo"); s.Mascot=ChunkySprite("penguin_red_idle");
             s.TabBarPlainBackground=ChunkySprite("tab_bar_plain"); s.DayCellCollected=ChunkySprite("day_cell_1");
             s.DayCellToday=ChunkySprite("day_cell_2"); s.DayCellLocked=ChunkySprite("day_cell_3");
             s.BadgeSprite=ChunkySprite("badge_1"); s.PlainPillBackground=ChunkySprite("pill_plain");
@@ -53,7 +53,7 @@ namespace IndieGame.Shell.Tests
             s.Theme.Primary.Enabled=ChunkySprite("btn_primary");
             s.Theme.Secondary.Enabled=ChunkySprite("btn_secondary");
             s.Theme.Primary.Locked=s.Theme.Secondary.Locked=s.LockedButtonSprite=ChunkySprite("btn_locked");
-            s.ListRowSprite=ChunkySprite("list_row"); s.ScreenBackground=ChunkySprite("bg_play");
+            s.ListRowSprite=ChunkySprite("list_row"); s.ScreenBackground=ChunkySprite("bg_home");
             s.CurrencyIcon=ChunkySprite("icons_1"); s.HeartIcon=ChunkySprite("icons_2"); s.BoosterIcon=ChunkySprite("icons_5");
             s.Theme.CloseSprite=ChunkySprite("btn_close"); s.Theme.ToggleOn=ChunkySprite("toggle_1"); s.Theme.ToggleOff=ChunkySprite("toggle_2");
             var plum=new Color32(0x30,0x0c,0x31,255); var cream=new Color32(0xfe,0xe9,0xd1,255);

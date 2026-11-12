@@ -63,6 +63,7 @@ namespace IndieGame.Shell.Unity.UI
                 pair.Value.Icon.transform.localScale=Vector3.one*(selected?1.15f:1);
             }
         }
+        public void SetLabel(string key,string label) { tabs[key].Button.GetComponentInChildren<TMPro.TMP_Text>().text=label; }
         public void SetBadge(string key,bool visible) { tabs[key].Badge.SetActive(visible); }
     }
 }

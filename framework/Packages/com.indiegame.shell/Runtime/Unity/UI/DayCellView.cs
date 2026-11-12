@@ -16,9 +16,10 @@ namespace IndieGame.Shell.Unity.UI
             Root=ShellUiFactory.Node("DayCell",parent); Root.sizeDelta=new Vector2(180,250);
             background=factory.AppearanceImage(Root,"State","dayLocked",true);
             TopBarView.Place(background.rectTransform,new Vector2(0,.18f),new Vector2(1,.82f));
-            day=factory.Label(Root,""); TopBarView.Place(day.rectTransform,new Vector2(0,.82f),Vector2.one);
-            reward=factory.Label(Root,""); TopBarView.Place(reward.rectTransform,Vector2.zero,new Vector2(1,.18f));
-            day.fontSize=reward.fontSize=22; Root.gameObject.SetActive(true);
+            day=factory.Label(Root,"",role:"tabLabel"); TopBarView.Place(day.rectTransform,new Vector2(0,.82f),Vector2.one);
+            reward=factory.Label(Root,"",role:"tabLabel"); TopBarView.Place(reward.rectTransform,Vector2.zero,new Vector2(1,.18f));
+            day.fontSize=day.fontSizeMax=22; day.fontSizeMin=18;
+            reward.fontSize=reward.fontSizeMax=20; reward.fontSizeMin=14; Root.gameObject.SetActive(true);
         }
         public void Render(string dayLabel,string rewardText,DayState state)
         {

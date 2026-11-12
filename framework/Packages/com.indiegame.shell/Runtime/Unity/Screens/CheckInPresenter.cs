@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using IndieGame.Shell.Unity.UI;
 namespace IndieGame.Shell.Unity.Screens
 {
     public sealed class CheckInPresenter : IDisposable
@@ -20,6 +21,20 @@ namespace IndieGame.Shell.Unity.Screens
             for(int i=0;i<5;i++) rows.Add(new RowDisplay(i.ToString(),text.Get("shell.checkin.slot",i+1,
                 i==p.NextSlot?text.Reward(p.Reward):text.Get("shell.checkin.other")),i==p.NextSlot?text.Get("shell.claim"):"",i==p.NextSlot&&p.CanClaimNow));
             view.Render(new ListDisplay(text.Get("shell.checkin.title"),rows));
+            if(view.UsesDayCells)
+            {
+            var labels=new string[5]; var rewards=new string[5]; var states=new DayState[5];
+            // NextSlot advances immediately after a claim and wraps modulo five. At wrap,
+            // retain the completed cycle until the next UTC day becomes claimable.
+            int collected=p.NextSlot==0 && p.Error==DailyError.AlreadyClaimed?5:p.NextSlot;
+            for(int i=0;i<5;i++)
+            {
+                labels[i]=text.Get("shell.checkin.day",i+1);
+                rewards[i]=i==p.NextSlot?text.Reward(p.Reward):"";
+                states[i]=i<collected?DayState.Collected:i==p.NextSlot&&p.CanClaimNow?DayState.Today:DayState.Locked;
+            }
+            view.RenderDays(labels,rewards,states);
+            }
             if(!p.Success) view.ShowError(text.Get("shell.error."+p.Error));
         }
         void Claim()

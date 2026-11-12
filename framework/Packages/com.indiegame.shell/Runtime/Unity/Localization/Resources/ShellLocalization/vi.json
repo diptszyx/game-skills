@@ -1,7 +1,7 @@
 {
   "shell.back": "Quay lại",
   "en": "vi",
-  "shell.checkin.title": "Quay lại mỗi ngày để nhận những phần thưởng điểm danh vô cùng hấp dẫn",
+  "shell.checkin.title": "Điểm danh",
   "shell.checkin.slot": "Ngày {0}: {1}",
   "shell.checkin.other": "Sắp tới",
   "shell.claim": "Nhận",
@@ -10,7 +10,7 @@
   "shell.reward": "{0}",
   "shell.separator": ", ",
   "shell.reward.unavailable": "Chưa sẵn sàng",
-  "shell.quests.title": "Hoàn thành nhiệm vụ phiêu lưu hằng ngày và nhận phần thưởng tuyệt vời",
+  "shell.quests.title": "Nhiệm vụ",
   "shell.quests.empty": "Chưa có nhiệm vụ",
   "shell.quest.q": "Hoàn thành hai vòng chơi",
   "shell.quest.row": "{0} {1}/{2} {3}",
@@ -18,7 +18,7 @@
   "shell.play": "Chơi",
   "shell.lives.full": "Đã đầy trái tim",
   "shell.lives.countdown": "Đầy sau {0} giây",
-  "shell.shop.title": "Khám phá bộ sưu tập vật phẩm hữu ích cho hành trình phiêu lưu tuyệt vời",
+  "shell.shop.title": "Cửa hàng",
   "shell.shop.empty": "Chưa có sản phẩm",
   "shell.product.p": "Gói vàng",
   "shell.shop.row": "{0} · {1} · {2}",
@@ -37,7 +37,7 @@
   "popup.revive.price": "Vàng {0}",
   "shell.loading.tip": "Hãy nghỉ một chút — hành trình tiếp theo sắp sẵn sàng.",
   "shell.refresh": "Làm mới",
-  "shell.leaderboard.title": "Tôn vinh thành tích xuất sắc của những nhà thám hiểm trên khắp thế giới",
+  "shell.leaderboard.title": "Bảng xếp hạng",
   "shell.leaderboard.row": "#{0}  {1} · {2} điểm",
   "shell.leaderboard.mine": "Hạng của bạn: #{0} · {1} điểm",
   "shell.leaderboard.loading": "Đang tải",
@@ -89,5 +89,7 @@
   "shell.error.NotReady": "Chưa sẵn sàng",
   "shell.booster": "{0} × {1}",
   "shell.booster.hint": "Gợi ý",
-  "shell.loading.title": "Đang chuẩn bị mọi thứ cho hành trình phiêu lưu kỳ diệu tiếp theo của bạn"
+  "shell.loading.title": "Đang chuẩn bị mọi thứ cho hành trình phiêu lưu kỳ diệu tiếp theo của bạn",
+  "shell.tab.home": "Trang chủ",
+  "shell.checkin.day": "Ngày {0}"
 }

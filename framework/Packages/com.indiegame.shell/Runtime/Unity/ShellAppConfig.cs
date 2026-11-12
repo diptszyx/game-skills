@@ -25,6 +25,7 @@ namespace IndieGame.Shell.Unity
     public sealed class ShellAppConfig
     {
         public ShellStyle Style;
+        public Func<string> PlayLabel;
         public IDictionary<string,TextAsset> LanguageTables;
         public string SavePath;
         // ShellSession's existing injectable storage seam is SaveStore(ISaveFileSystem).

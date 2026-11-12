@@ -10,6 +10,7 @@ namespace IndieGame.Shell.Unity.UI
         bool tabBarVisible;
         public LoadingScreenView Loading { get; private set; }
         public RectTransform Current { get; private set; }
+        public event Action<RectTransform> Shown;
         public void Initialize(ShellUiFactory factory)
         {
             if (SafeRoot != null) throw new InvalidOperationException("ScreenHost already initialized");
@@ -37,7 +38,7 @@ namespace IndieGame.Shell.Unity.UI
             foreach (Transform child in SafeRoot) if (child != ChromeRoot && child.GetComponent<PopupView>() == null) child.gameObject.SetActive(false);
             screen.SetParent(SafeRoot, false); ShellUiFactory.Stretch(screen); Current = screen; screen.gameObject.SetActive(true);
             screen.SetAsFirstSibling();
-            Loading.transform.SetAsLastSibling();
+            Loading.transform.SetAsLastSibling(); Shown?.Invoke(screen);
         }
     }
 }

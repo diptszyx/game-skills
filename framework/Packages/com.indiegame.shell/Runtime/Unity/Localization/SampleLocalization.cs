@@ -40,6 +40,8 @@ namespace IndieGame.Shell.Unity.Localization
             "shell.buy",
             "shell.checkin.other",
             "shell.checkin.slot",
+            "shell.checkin.day",
+            "shell.tab.home",
             "shell.checkin.title",
             "shell.claim",
             "shell.error.AlreadyClaimed",

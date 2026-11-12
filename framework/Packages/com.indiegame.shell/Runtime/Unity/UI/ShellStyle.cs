@@ -9,6 +9,7 @@ namespace IndieGame.Shell.Unity.UI
     public sealed class ShellStyle : ScriptableObject
     {
         public bool EnableHomeChrome;
+        public Sprite Logo, Mascot;
         public Sprite TabBarPlainBackground, DayCellCollected, DayCellToday, DayCellLocked, BadgeSprite, PlainPillBackground, TabCellBackground, TabCellSelectedBackground;
         [Serializable] public sealed class TabIconEntry { public string Key; public Sprite Sprite; }
         public List<TabIconEntry> TabIcons = new List<TabIconEntry>();

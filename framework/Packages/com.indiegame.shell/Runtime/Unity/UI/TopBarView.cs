@@ -34,7 +34,7 @@ namespace IndieGame.Shell.Unity.UI
                 text.fontSize=28; text.fontSizeMin=24; text.fontSizeMax=28;
                 text.alignment=TextAlignmentOptions.MidlineLeft; text.textWrappingMode=TextWrappingModes.NoWrap;
             }
-            countdown.fontSize=26; countdown.fontSizeMax=26; Root.gameObject.SetActive(true);
+            countdown.fontSize=26; countdown.fontSizeMax=26; countdown.fontSizeMin=18; Root.gameObject.SetActive(true);
         }
         internal static void Place(RectTransform r, Vector2 min, Vector2 max)
         { r.anchorMin=min; r.anchorMax=max; r.offsetMin=r.offsetMax=Vector2.zero; }

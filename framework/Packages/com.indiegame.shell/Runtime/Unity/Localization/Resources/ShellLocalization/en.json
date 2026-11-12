@@ -1,7 +1,7 @@
 {
   "shell.back": "Back",
   "en": "vi",
-  "shell.checkin.title": "Come back every day to collect your extraordinary daily rewards",
+  "shell.checkin.title": "Check in",
   "shell.checkin.slot": "Slot {0}: {1}",
   "shell.checkin.other": "Upcoming",
   "shell.claim": "Claim",
@@ -10,7 +10,7 @@
   "shell.reward": "{0}",
   "shell.separator": ", ",
   "shell.reward.unavailable": "Unavailable",
-  "shell.quests.title": "Complete your daily adventures and earn wonderful quest rewards",
+  "shell.quests.title": "Quests",
   "shell.quests.empty": "No quests",
   "shell.quest.q": "Complete two rounds",
   "shell.quest.row": "{0} {1}/{2} {3}",
@@ -18,7 +18,7 @@
   "shell.play": "Play",
   "shell.lives.full": "Full",
   "shell.lives.countdown": "Full in {0}s",
-  "shell.shop.title": "Discover the wonderful collection of helpful adventure supplies",
+  "shell.shop.title": "Shop",
   "shell.shop.empty": "No products",
   "shell.product.p": "Gold bundle",
   "shell.shop.row": "{0} · {1} · {2}",
@@ -37,7 +37,7 @@
   "popup.revive.price": "Gold {0}",
   "shell.loading.tip": "Take a breath — your next adventure is almost ready.",
   "shell.refresh": "Refresh",
-  "shell.leaderboard.title": "Celebrate the remarkable achievements of our worldwide adventurers",
+  "shell.leaderboard.title": "Leaderboard",
   "shell.leaderboard.row": "#{0}  {1}  ·  {2} points",
   "shell.leaderboard.mine": "Your rank: #{0} · {1} points",
   "shell.leaderboard.loading": "Loading",
@@ -89,5 +89,7 @@
   "shell.error.NotReady": "Not Ready",
   "shell.booster": "{0} × {1}",
   "shell.booster.hint": "Hint",
-  "shell.loading.title": "Loading your next extraordinary adventure and preparing everything for you"
+  "shell.loading.title": "Loading your next extraordinary adventure and preparing everything for you",
+  "shell.tab.home": "Home",
+  "shell.checkin.day": "Day {0}"
 }

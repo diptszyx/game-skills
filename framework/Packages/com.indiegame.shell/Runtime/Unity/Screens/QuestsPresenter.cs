@@ -21,9 +21,10 @@ namespace IndieGame.Shell.Unity.Screens
             var rows=new List<RowDisplay>();
             foreach(var q in session.DailyQuests.Quests)
                 rows.Add(new RowDisplay(q.Template.Id,text.Get("shell.quest.row",text.Get("shell.quest."+q.Template.Id),q.Progress,q.Template.Target,text.Reward(q.Template.Reward)),
-                    text.Get("shell.claim"),!q.Claimed&&q.Progress>=q.Template.Target,(float)q.Progress/q.Template.Target));
+                    text.Get("shell.claim"),CanClaim(q),(float)q.Progress/q.Template.Target));
             view.Render(new ListDisplay(text.Get("shell.quests.title"),rows,text.Get("shell.quests.empty")));
         }
+        public static bool CanClaim(QuestStatus quest) => !quest.Claimed && quest.Progress>=quest.Template.Target;
         void Claim(string id)
         {
             if(busy) return; busy=true;

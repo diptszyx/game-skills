@@ -2,6 +2,8 @@ using System.Collections;
 using System.IO;
 using System.Linq;
 using IndieGame.Shell.Unity.UI;
+using IndieGame.Shell.Unity.Screens;
+using IndieGame.Shell.Unity.Localization;
 using IndieGame.Shell.Unity;
 using NUnit.Framework;
 using TMPro;
@@ -96,5 +98,74 @@ namespace IndieGame.Shell.Tests
                 }
             }
         }
+        [UnityTest] public IEnumerator HomeAndCheckInRespectSafeAreaAndHaveNoOverflow()
+        {
+            foreach(var width in new[]{720,1080}) foreach(var lang in new[]{"en","vi"}) foreach(var screen in new[]{"Main","CheckIn"})
+            {
+                int height=width==720?1600:2340;
+                var demos=new DemoStyles(); GameObject root=null,camObject=null; RenderTexture target=null; Texture2D pixels=null;
+                try
+                {
+                    camObject=new GameObject("Chrome camera",typeof(Camera)); var camera=camObject.GetComponent<Camera>();
+                    camera.clearFlags=CameraClearFlags.SolidColor; camera.backgroundColor=Color.black; camera.orthographic=true;
+                    camera.transform.position=new Vector3(0,0,-10); camera.nearClipPlane=.1f; camera.farClipPlane=100;
+                    target=new RenderTexture(width,height,24); target.Create(); camera.targetTexture=target;
+                    root=new GameObject("Chrome canvas",typeof(RectTransform),typeof(Canvas),typeof(CanvasScaler));
+                    var canvas=root.GetComponent<Canvas>(); canvas.renderMode=RenderMode.ScreenSpaceCamera; canvas.worldCamera=camera; canvas.planeDistance=10;
+                    var scaler=root.GetComponent<CanvasScaler>(); scaler.uiScaleMode=CanvasScaler.ScaleMode.ScaleWithScreenSize;
+                    scaler.referenceResolution=new Vector2(720,1600); scaler.matchWidthOrHeight=0;
+                    var factory=new ShellUiFactory(demos.MakeChunky()); var host=root.AddComponent<ScreenHost>(); host.Initialize(factory);
+                    // Deterministic notch simulation on the SAME safe root, with no nested fitter.
+                    host.SafeRoot.GetComponent<SafeAreaFitter>().enabled=false;
+                    var safe=SafeAreaMath.ToAnchors(new Rect(0,60,width,height-140),new Vector2(width,height));
+                    host.SafeRoot.anchorMin=safe.min; host.SafeRoot.anchorMax=safe.max;
+                    var clock=new ScreenClock(); var session=ScreenTestData.Session(clock,new ScreenFiles()); session.LoadAll(); session.Settings.SetLanguage(lang);
+                    var text=SampleLocalization.Load();
+                    var main=new MainView(factory,host.SafeRoot); var game=factory.ScreenRoot(host.SafeRoot,"Game");
+                    using(var mainPresenter=new MainPresenter(session,main,text,clock,new ShotGame(),_=>{}))
+                    using(var chrome=new ChromePresenter(session,text,clock,factory,host,main.Root,game,()=>host.Show(main.Root),_=>{}))
+                    {
+                    var check=new CheckInView(factory,host.SafeRoot);
+                    using(var checkPresenter=new CheckInPresenter(session,check,text,clock))
+                    {
+                    host.Show(screen=="Main"?main.Root:check.Root);
+                    var top=chrome.TopBar; var tabs=chrome.TabBar;
+                    yield return null; yield return null; Canvas.ForceUpdateCanvases();
+                    Rect Bounds(RectTransform rect) { var c=new Vector3[4]; rect.GetWorldCorners(c); return new Rect(c[0],c[2]-c[0]); }
+                    var safeBounds=Bounds(host.SafeRoot); var topBounds=Bounds(top.Root); var tabBounds=Bounds(tabs.Root);
+                    foreach(var button in host.Current.GetComponentsInChildren<Button>().Concat(tabs.Root.GetComponentsInChildren<Button>()))
+                    {
+                        var bounds=Bounds((RectTransform)button.transform);
+                        Assert.That(safeBounds.Contains(bounds.min)&&safeBounds.Contains(bounds.max),Is.True,button.name);
+                        if(button.transform.IsChildOf(host.Current)) { Assert.That(bounds.Overlaps(topBounds),Is.False); Assert.That(bounds.Overlaps(tabBounds),Is.False); }
+                    }
+                    foreach(var label in root.GetComponentsInChildren<TMP_Text>())
+                    {
+                        label.ForceMeshUpdate(); Assert.That(label.isTextOverflowing,Is.False,label.text);
+                        foreach(var c in label.textInfo.characterInfo.Take(label.textInfo.characterCount)) if(c.isVisible) Assert.That(c.textElement.glyph.index,Is.Not.Zero,label.text);
+                    }
+                    camera.Render(); var previous=RenderTexture.active; RenderTexture.active=target;
+                    pixels=new Texture2D(width,height,TextureFormat.RGB24,false); pixels.ReadPixels(new Rect(0,0,width,height),0,0); pixels.Apply(); RenderTexture.active=previous;
+                    var folder=Path.GetFullPath(Path.Combine(Application.dataPath,"../Logs/shots")); Directory.CreateDirectory(folder);
+                    File.WriteAllBytes(Path.Combine(folder,"T28e_"+screen+"_"+width+"x"+height+"_"+lang+".png"),CapturePng.Encode(pixels));
+                    if(screen=="Main" && width==720 && lang=="en")
+                    {
+                        // Same composition, alternate supplied background, for the requested visual comparison.
+                        main.Root.GetComponent<Image>().sprite=UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Art/KitChunky/bg_play.png");
+                        camera.Render(); previous=RenderTexture.active; RenderTexture.active=target;
+                        pixels.ReadPixels(new Rect(0,0,width,height),0,0); pixels.Apply(); RenderTexture.active=previous;
+                        File.WriteAllBytes(Path.Combine(folder,"T28e_compare_bg_play.png"),CapturePng.Encode(pixels));
+                    }
+                    } }
+                }
+                finally
+                {
+                    if(root!=null) Object.DestroyImmediate(root); if(camObject!=null) Object.DestroyImmediate(camObject);
+                    if(pixels!=null) Object.DestroyImmediate(pixels); if(target!=null) { target.Release(); Object.DestroyImmediate(target); } demos.Dispose();
+                }
+            }
+        }
+        sealed class ShotGame : IGameSessionActions
+        { public void Play() {} public void Retry() {} public void Revive() {} public void NextLevel() {} public void Leave() {} public void Pause() {} public void Resume() {} }
     }
 }

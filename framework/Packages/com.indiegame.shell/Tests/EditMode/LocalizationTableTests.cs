@@ -40,7 +40,7 @@ namespace IndieGame.Shell.Tests
                 Assert.That(SampleLocalization.Keys,Does.Contain("popup.action."+action));
             foreach(var key in new[]{"shell.product.p","shell.quest.q","shell.booster.hint","shell.loading.tip"}) Assert.That(SampleLocalization.Keys,Does.Contain(key));
             var text=SampleLocalization.Load();
-            foreach(var lang in new[]{"en","vi"}) foreach(var screen in new[]{"main","shop","checkin","quests","leaderboard","loading"})
+            foreach(var lang in new[]{"en","vi"}) foreach(var screen in new[]{"main","loading"})
                 Assert.That(text.Lookup(lang,"shell."+screen+".title").Value.Length,Is.GreaterThan(60));
         }
     }

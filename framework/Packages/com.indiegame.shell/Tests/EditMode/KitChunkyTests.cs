@@ -38,6 +38,7 @@ namespace IndieGame.Shell.Tests
         {
             Assert.That(EditorSettings.spritePackerMode,Is.EqualTo(SpritePackerMode.AlwaysOnAtlas));
             var atlas=AssetDatabase.LoadAssetAtPath<SpriteAtlas>(Folder+"/KitChunkyUi.spriteatlas"); Assert.That(atlas,Is.Not.Null);
+            // Mascot is a regular single UI sprite: atlas packing preserves its aspect and alpha.
             var ui=Sources().Where(p=>!Singles.Contains(Path.GetFileNameWithoutExtension(p))).ToArray();
             SpriteAtlasUtility.PackAtlases(new[]{atlas},EditorUserBuildSettings.activeBuildTarget,false);
             Assert.That(atlas.spriteCount,Is.EqualTo(ui.Length));
@@ -60,7 +61,7 @@ namespace IndieGame.Shell.Tests
                 Assert.That(style.Theme.Secondary.Locked.name,Is.EqualTo("btn_locked"));
                 Assert.That(style.ListRowSprite.name,Is.EqualTo("list_row"));
                 Assert.That(style.CurrencyIcon.name,Is.EqualTo("icons_1")); Assert.That(style.HeartIcon.name,Is.EqualTo("icons_2"));
-                Assert.That(style.BoosterIcon.name,Is.EqualTo("icons_5")); Assert.That(style.ScreenBackground.name,Is.EqualTo("bg_play"));
+                Assert.That(style.BoosterIcon.name,Is.EqualTo("icons_5")); Assert.That(style.ScreenBackground.name,Is.EqualTo("bg_home"));
                 Assert.That(style.Theme.CloseSprite.name,Is.EqualTo("btn_close"));
                 Assert.That(style.Theme.ToggleOn.name,Is.EqualTo("toggle_1")); Assert.That(style.Theme.ToggleOff.name,Is.EqualTo("toggle_2"));
             }

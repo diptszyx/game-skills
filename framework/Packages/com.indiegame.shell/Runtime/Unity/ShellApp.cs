@@ -75,7 +75,8 @@ namespace IndieGame.Shell.Unity
                 if(GameRoot==null) throw new InvalidOperationException("GameScreenFactory returned null");
                 GameRoot.SetParent(Screens.SafeRoot,false); GameRoot.gameObject.SetActive(false);
                 Main=new MainView(factory,Screens.SafeRoot);
-                MainPresenter=new MainPresenter(Session,Main,Text,clock,actions,Navigate); owned.Add(MainPresenter);
+                MainPresenter=new MainPresenter(Session,Main,Text,clock,actions,Navigate,config.PlayLabel); owned.Add(MainPresenter);
+                if(config.Style.EnableHomeChrome) owned.Add(new ChromePresenter(Session,Text,clock,factory,Screens,Main.Root,GameRoot,ShowMain,Navigate,error=>ErrorLabel.text=error));
                 Screens.Show(Main.Root);
                 Screens.Loading.gameObject.AddComponent<LoadingContentView>().Initialize(factory,Screens.Loading,screenText,"shell.loading.tip");
                 Screens.Loading.transform.SetAsLastSibling(); Screens.Loading.Show(); Screens.Loading.SetProgress(1); Screens.Loading.Hide();
@@ -116,7 +117,7 @@ namespace IndieGame.Shell.Unity
                     default: throw new InvalidOperationException("Unavailable ShellScreen: "+screen);
                 }
                 var back=factory.Button(root,screenText.Get("shell.back"),clicked:Back); back.name="Shell Back";
-                var rect=(RectTransform)back.transform; rect.anchorMin=rect.anchorMax=new Vector2(.5f,0); rect.anchoredPosition=new Vector2(0,68); rect.sizeDelta=new Vector2(220,64);
+                var rect=(RectTransform)back.transform; rect.anchorMin=rect.anchorMax=new Vector2(.5f,0); rect.anchoredPosition=new Vector2(0,config.Style.EnableHomeChrome?200:68); rect.sizeDelta=new Vector2(220,64);
                 cached.Add(screen,root);
             }
             root.Find("Shell Back").GetComponentInChildren<TMP_Text>().text=screenText.Get("shell.back"); Screens.Show(root);
