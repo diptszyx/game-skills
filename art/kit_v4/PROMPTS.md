@@ -1,0 +1,63 @@
+
+## tab_home
+
+Chunky 2D cartoon: flat colour blocks, ONE dark plum outline of constant thickness, tiny hard-edged highlight, NO glossy plastic sheen, NO smooth gradients, light from upper left.
+Large simple shapes, constant outline, flat fills, one small hard highlight. Use one dark plum outline about #3a1238, never black, navy, or maroon; same colour on every piece. Palette only: red #d74449 / #e94232, coral-orange #fd7252, cream #fee9d1 / #fcf8f8, lavender #d9d6f0 / #ab94d0, periwinkle #98aceb / #728dd2, plum shadow #433359, pale gold #e6d59a, green #4fbf3a family. At most two tones per colour (base + one darker bottom edge). One small crisp upper-left highlight, never large or soft. No glossy plastic look, big specular blobs, glass/candy sheen, gradients, glow, bevel, texture, noise, scratches, thin hairline outlines, or hues outside palette.
+Match the attached exemplar art/style_lock/exemplars/tab_icons.png for chunky rounded icon proportions and match art/kit_v3/icons.png for the heavy plum outline weight. Asset: one simple home tab icon, a little house with a red roof (#d74449) and cream walls (#fee9d1), chunky rounded silhouette, small cream door/window details, one tiny hard highlight. The house itself fills about 70% of the square canvas and has the same visual size feel as one icon in the exemplar. ONE icon only, large and centered, flat solid #FF00FF background, wide margin, no text, flat colour fills, ONE plum outline of constant weight.
+
+Retry (only retry):
+Chunky 2D cartoon: flat colour blocks, ONE dark plum outline of constant thickness, tiny hard-edged highlight, NO glossy plastic sheen, NO smooth gradients, light from upper left.
+Large simple shapes, constant outline, flat fills, one small hard highlight. Use one dark plum outline about #3a1238, never black, navy, or maroon; same colour on every piece. Palette only: red #d74449 / #e94232, coral-orange #fd7252, cream #fee9d1 / #fcf8f8, lavender #d9d6f0 / #ab94d0, periwinkle #98aceb / #728dd2, plum shadow #433359, pale gold #e6d59a, green #4fbf3a family. At most two tones per colour (base + one darker bottom edge). One small crisp upper-left highlight, never large or soft. No glossy plastic look, big specular blobs, glass/candy sheen, gradients, glow, bevel, texture, noise, scratches, thin hairline outlines, or hues outside palette.
+CRITICAL: every fill is a single perfectly uniform flat solid color with absolutely no shading or gradients; only one small hard-edged highlight.
+Match the attached exemplar art/style_lock/exemplars/tab_icons.png for chunky rounded icon proportions and match art/kit_v3/icons.png for the heavy plum outline weight. Asset: one simple home tab icon, a little house with a red roof (#d74449) and cream walls (#fee9d1), chunky rounded silhouette, small cream door/window details, one tiny hard highlight. The house itself fills about 70% of the square canvas and has the same visual size feel as one icon in the exemplar. ONE icon only, large and centered, flat solid #FF00FF background, wide margin, no text, flat colour fills, ONE plum outline of constant weight.
+
+## tab_checkin
+
+Chunky 2D cartoon: flat colour blocks, ONE dark plum outline of constant thickness, tiny hard-edged highlight, NO glossy plastic sheen, NO smooth gradients, light from upper left.
+Large simple shapes, constant outline, flat fills, one small hard highlight. Use one dark plum outline about #3a1238, never black, navy, or maroon; same colour on EVERY piece. Outline about 1.3% of object height, matching the attached references. Palette only: red #d74449 / #e94232, coral-orange #fd7252, cream #fee9d1 / #fcf8f8, lavender #d9d6f0 / #ab94d0, periwinkle #98aceb / #728dd2, plum shadow #433359, pale gold #e6d59a, green #4fbf3a family. At most two tones per colour (base + one darker bottom edge). One small crisp upper-left highlight, never large or soft. No glossy plastic look, big specular blobs, glass/candy sheen, gradients, glow, bevel, texture, noise, scratches, thin hairline outlines, or hues outside palette.
+Match attached art/style_lock/exemplars/tab_icons.png for chunky rounded icon proportions and attached art/kit_v3/icons.png for icon weight. Asset: one calendar page check-in tab icon with a cream page (#fee9d1), red top binding (#d74449), and one gold check mark (#e6d59a). Bold chunky rounded silhouette. The page fills about 70% of the square canvas with the same visual size feel as one icon in the attached exemplar. ONE icon only, large and centered, flat solid #FF00FF background, wide margin, no text, flat colour fills, ONE plum outline of constant weight.
+
+## tab_quests
+
+Chunky 2D cartoon: flat colour blocks, ONE dark plum outline of constant thickness, tiny hard-edged highlight, NO glossy plastic sheen, NO smooth gradients, light from upper left.
+Large simple shapes, constant outline, flat fills, one small hard highlight. Use one dark plum outline about #3a1238, never black, navy, or maroon; same colour on EVERY piece. Outline about 1.3% of object height, matching the attached references. Palette only: red #d74449 / #e94232, coral-orange #fd7252, cream #fee9d1 / #fcf8f8, lavender #d9d6f0 / #ab94d0, periwinkle #98aceb / #728dd2, plum shadow #433359, pale gold #e6d59a, green #4fbf3a family. At most two tones per colour (base + one darker bottom edge). One small crisp upper-left highlight, never large or soft. No glossy plastic look, big specular blobs, glass/candy sheen, gradients, glow, bevel, texture, noise, scratches, thin hairline outlines, or hues outside palette.
+Match attached art/style_lock/exemplars/tab_icons.png for chunky rounded icon proportions and attached art/kit_v3/icons.png for icon weight. Asset: one clipboard quests tab icon, cream clipboard sheet (#fee9d1), a bold rounded red top clip (#d74449), exactly three short plum lines and one pale gold five-point star (#e6d59a) on the sheet. Chunky simple silhouette. Icon fills about 70% of the square canvas and has same visual size feel as one icon in the exemplar. ONE icon only, centered, flat solid #FF00FF background, wide margin, no text, flat colour fills, ONE plum outline of constant weight.
+
+## tab_shop
+
+Chunky 2D cartoon: flat colour blocks, ONE dark plum outline of constant thickness, tiny hard-edged highlight, NO glossy plastic sheen, NO smooth gradients, light from upper left.
+Large simple shapes, constant outline, flat fills, one small hard highlight. Use one dark plum outline about #3a1238, never black, navy, or maroon; same colour on EVERY piece. Outline about 1.3% of object height, matching the attached references. Palette only: red #d74449 / #e94232, coral-orange #fd7252, cream #fee9d1 / #fcf8f8, lavender #d9d6f0 / #ab94d0, periwinkle #98aceb / #728dd2, plum shadow #433359, pale gold #e6d59a, green #4fbf3a family. At most two tones per colour (base + one darker bottom edge). One small crisp upper-left highlight, never large or soft. No glossy plastic look, big specular blobs, glass/candy sheen, gradients, glow, bevel, texture, noise, scratches, thin hairline outlines, or hues outside palette.
+Match attached art/style_lock/exemplars/tab_icons.png for chunky rounded icon proportions and attached art/kit_v3/icons.png for icon weight. Asset: one shopping bag shop tab icon, a chunky periwinkle-blue (#98aceb) bag with cream front panel (#fee9d1), simple rounded handles, one pale gold coin (#e6d59a) peeking from the bag. Bold simple silhouette. Icon fills about 70% of the square canvas and has same visual size feel as one icon in the exemplar. ONE icon only, centered, flat solid #FF00FF background, wide margin, no text, flat colour fills, ONE plum outline of constant weight.
+
+## tab_trophy
+
+Chunky 2D cartoon: flat colour blocks, ONE dark plum outline of constant thickness, tiny hard-edged highlight, NO glossy plastic sheen, NO smooth gradients, light from upper left.
+Large simple shapes, constant outline, flat fills, one small hard highlight. Use one dark plum outline about #3a1238, never black, navy, or maroon; same colour on EVERY piece. Outline about 1.3% of object height, matching the attached references. Palette only: red #d74449 / #e94232, coral-orange #fd7252, cream #fee9d1 / #fcf8f8, lavender #d9d6f0 / #ab94d0, periwinkle #98aceb / #728dd2, plum shadow #433359, pale gold #e6d59a, green #4fbf3a family. At most two tones per colour (base + one darker bottom edge). One small crisp upper-left highlight, never large or soft. No glossy plastic look, big specular blobs, glass/candy sheen, gradients, glow, bevel, texture, noise, scratches, thin hairline outlines, or hues outside palette.
+Match attached art/style_lock/exemplars/tab_icons.png for chunky rounded icon proportions and attached art/kit_v3/icons.png for icon weight. Asset: one golden trophy cup tab icon, a bold simple pale gold cup (#e6d59a) with two rounded handles and a short stem on a small base. Add one tiny hard-edged cream highlight. Chunky rounded silhouette. Icon fills about 70% of the square canvas and has same visual size feel as one icon in the exemplar. ONE icon only, centered, flat solid #FF00FF background, wide margin, no text, flat colour fills, ONE plum outline of constant weight.
+
+## tab_bar_plain
+
+# STYLE BRIEF: system prompt for every image request in this game's art kit
+
+## Source of truth
+Locked reference art/style_lock/reference_chunky.png (chunky 2D cartoon). Match the attached nearest exemplar. If it does not look like the same hand drew it, it is wrong.
+
+## Style in one sentence
+Chunky 2D cartoon: flat colour blocks, ONE dark plum outline of constant thickness, tiny hard-edged highlight, NO glossy plastic sheen, NO smooth gradients, light from upper left.
+
+## Measured facts
+- Outline colour dark plum #300c31 to #471d51, never black, navy, or maroon.
+- Outline thickness about 1.3% of object height, constant.
+- Palette: red #d74449 / #e94232, coral-orange #fd7252, cream #fee9d1 / #fcf8f8, lavender #d9d6f0 / #ab94d0, periwinkle #98aceb / #728dd2, plum shadow #433359, pale gold #e6d59a, green #4fbf3a family.
+- At most 2 tones per colour. One small crisp highlight upper left, never large or soft.
+- Large simple shapes, constant outline, flat fills. No gloss, gradients, glow, bevel, texture, noise, scratches, or colours outside palette.
+
+Asset: exactly one plain tab bar background, matching the attached art/kit_v3_cut/tab_bar.png in silhouette and proportions: same wide rounded bar, same rounded end caps, about 4:1 wide. ONE object only, centered with wide margin on flat solid #FF00FF background. Keep the bar's ENTIRE interior perfectly uniform flat solid BLUE #4460B9, exactly the same blue as the attached bar reference. No gradient, no shading, no second blue, no highlight, no rim line. Thick constant dark plum #3a1238 outline matching reference weight. Completely empty uninterrupted blue interior: no cells, divisions, buttons, icons, symbols, text, highlights, or other marks. Match the attached art/style_lock/exemplars/tab_icons.png chunky flat cartoon style. No other objects.
+
+## tab_bar_plain
+
+Chunky 2D cartoon: flat colour blocks, ONE dark plum outline of constant thickness, tiny hard-edged highlight, NO glossy plastic sheen, NO smooth gradients, light from upper left. Large simple shapes, constant outline, flat fills. Use one dark plum outline about #3a1238, never black, navy, or maroon; same colour on every piece. Match attached exemplar art/style_lock/exemplars/tab_icons.png and match art/kit_v3_cut/tab_bar.png shape, proportions, blue family, end caps, and plum outline weight. Asset: one plain wide rounded horizontal tab bar, about 4:1 wide. CRITICAL: the entire interior is one perfectly uniform flat solid blue color, no gradient, no shading, no top-to-bottom variation, no highlights, no squares, no cells, no buttons, no icons, no inset panels, no decoration. Only solid blue interior and plum outline. Flat solid #FF00FF background, centered, wide margin, no text.
+
+Retry (only retry):
+
+Chunky 2D cartoon flat colour blocks, ONE dark plum outline of constant thickness, no glossy plastic sheen, no smooth gradients, light from upper left. Use dark plum #3a1238 outline. Match attached exemplar art/style_lock/exemplars/tab_icons.png and match art/kit_v3_cut/tab_bar.png shape, proportions, blue family, end caps, and outline weight. Asset: one plain wide rounded horizontal tab bar, about 4:1 wide. CRITICAL: the entire interior is one perfectly uniform flat solid blue color, no gradient, no shading, no top-to-bottom variation, no highlights, no squares, no cells, no buttons, no icons, no inset panels, no decoration. Only solid blue interior and plum outline. Flat solid #FF00FF background, centered, wide margin, no text.
