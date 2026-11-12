@@ -1,0 +1,4 @@
+# T28c: ONE piece, plain tab bar background in the locked style
+Follow AGENTS.md and art/style_lock/STYLE_BRIEF.md (paste its text into the request). ATTACH as reference images: art/kit_v3_cut/tab_bar.png (same bar, but it has 4 baked cells) and art/style_lock/exemplars/tab_icons.png.
+Asset: art/kit_v4/tab_bar_plain.png = the SAME wide rounded bar (same blue, same plum outline weight, same end caps, same proportions about 4:1 wide) but with NO cells, NO buttons, NO icons, NO highlights squares inside: a plain flat blue interior with only the plum outline and at most one thin lighter top rim line. Flat #FF00FF background, centred, wide margin.
+Then open the saved file, check: no cells inside, outline plum, same blue as reference. One retry max. Append prompt to art/kit_v4/PROMPTS.md. Edit only art/kit_v4/. No git. Cap 10 minutes.

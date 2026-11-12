@@ -1,0 +1,11 @@
+# T28b DRAFT: shell home composition + new components (for read-only critique, then real brief)
+Repo framework/. Existing: ShellStyle (slots), ShellUiFactory (Node/Label/Button/Image roles screen,row,panel,scrim), ScreenHost, MainView (title + gold/hearts/countdown labels + 4 buttons play/checkin/quests/shop), MainPresenter (Refresh from session), CheckInView, QuestsView, ShopView, LeaderboardView, ScreenDisplay, Localization en/vi, tests expected_EditMode 46 / expected_PlayMode 20.
+Goal: Main becomes a real HOME like Colony Flow / Hole It: top bar, logo, mascot, ONE big primary button, bottom tab bar; Check-in screen shows day cells; badges on tabs.
+Proposal:
+1. ShellStyle new OPTIONAL-by-role sprite slots (validated only when HomeLayout enabled): HomeBackground, Logo, Mascot, CurrencyPill, LivesPill, RoundButton (settings), TabBar, TabIcons[5], Badge, DayCellCollected/Today/Locked. Colours remain.
+2. New small views under Runtime/Unity/UI: TopBar (currency pill + lives pill + settings round button; shows gold, hearts, countdown text inside lives pill), TabBar (N tabs: icon + selected state by scale/tint; event TabSelected; badge dot per tab), Badge.
+3. MainView rebuilt on those: background, TopBar, Logo, Mascot, big primary Play button labelled by presenter ("Level 12"), TabBar (Home, CheckIn, Quests, Shop, Leaderboard). Presenter keeps current logic; tab tap opens screens via existing Open(ShellScreen). One Play button only (no separate Level label).
+4. CheckInView: day cells grid using the 3 day-cell sprites (collected/today/locked) instead of text rows.
+5. SafeArea: TopBar and TabBar inside SafeAreaFitter. Localized text must fit (stress strings already exist).
+6. Tests: EditMode build-without-throw for every new view with chunky style; PlayMode screenshot montages at 720x1600 and 1080x2340 for Main/CheckIn in en+vi; a test that every tap target >= 44dp and nothing leaves the safe area; Badge visible only when claimable.
+Open questions for critic: (a) keep old text-list MainView for games that want it, or replace (one way per job)? (b) slot names/validation; (c) TabBar generic vs fixed 4; (d) risks with TMP font / localized length; (e) which tests would NOT catch a real regression; (f) anything missing from comparing with Colony Flow home (avatar, level progress bar, event cards).
