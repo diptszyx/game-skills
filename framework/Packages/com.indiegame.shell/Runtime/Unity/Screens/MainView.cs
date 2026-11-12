@@ -6,7 +6,7 @@ using IndieGame.Shell.Unity.UI;
 namespace IndieGame.Shell.Unity.Screens
 {
     public interface IGameSessionActions { void Play(); void Retry(); void Revive(); void NextLevel(); void Leave(); void Pause(); void Resume(); }
-    public enum ShellScreen { CheckIn, Quests, Shop }
+    public enum ShellScreen { CheckIn, Quests, Shop, Leaderboard }
     public sealed class MainDisplay
     {
         public string Title,Gold,Hearts,Countdown,Play,CheckIn,Quests,Shop;

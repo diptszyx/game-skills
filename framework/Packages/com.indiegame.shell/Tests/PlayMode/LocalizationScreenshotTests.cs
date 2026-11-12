@@ -19,9 +19,9 @@ namespace IndieGame.Shell.Tests
         [UnityTest] public IEnumerator EveryScreenAndPopupInBothStylesAndLanguages()
         {
             var shots=Path.GetFullPath(Path.Combine(Application.dataPath,"../Logs/shots")); Directory.CreateDirectory(shots);
-            for(int config=0;config<3;config++) foreach(bool bright in new[]{false,true}) foreach(var lang in new[]{"en","vi"}) foreach(var name in Names)
+            for(int config=0;config<4;config++) foreach(var styleName in new[]{"dark-flat","bright-rounded","chunky"}) foreach(var lang in new[]{"en","vi"}) foreach(var name in Names)
             {
-                int width=config==0?720:1080,height=config==0?1600:1920; bool notch=config==2;
+                int width=config==0?720:1080,height=config==0?1600:config==3?2340:1920; bool notch=config==2;
                 var demos=new DemoStyles(); GameObject root=null,camObject=null; RenderTexture target=null; Texture2D pixels=null;
                 IDisposable presenter=null; SessionPopupPresenter popup=null;
                 try
@@ -37,7 +37,7 @@ namespace IndieGame.Shell.Tests
                     var safe=ShellUiFactory.Node("Simulated safe area",root.transform); ShellUiFactory.Stretch(safe);
                     var anchors=SafeAreaMath.ToAnchors(new Rect(0,notch?60:0,width,height-(notch?160:0)),new Vector2(width,height));
                     safe.anchorMin=anchors.min; safe.anchorMax=anchors.max; safe.gameObject.SetActive(true);
-                    var factory=new ShellUiFactory(demos.Make(bright)); var clock=new ScreenClock(); var session=ScreenTestData.Session(clock,new ScreenFiles());
+                    var factory=new ShellUiFactory(styleName=="chunky"?demos.MakeChunky():demos.Make(styleName=="bright-rounded")); var clock=new ScreenClock(); var session=ScreenTestData.Session(clock,new ScreenFiles());
                     session.LoadAll(); session.Settings.SetLanguage(lang); var text=SampleLocalization.Load(); var game=new PopupGame();
                     var host=safe.gameObject.AddComponent<PopupHost>();
                     switch(name)
@@ -60,6 +60,11 @@ namespace IndieGame.Shell.Tests
                             if(name=="win") popup.ShowWin("screenshot"); else if(name=="lose") popup.ShowLose(); else if(name=="revive") popup.ShowRevive(); else if(name=="pause") popup.ShowPause(); else popup.ShowLeave();
                             break;
                     }
+                    if(styleName=="chunky")
+                    {
+                        DemoStyles.FitChunky(root.transform);
+                        Assert.That(factory.Style.Theme.Primary.Enabled.packed,Is.True,"Chunky UI must render from the atlas");
+                    }
                     yield return new WaitForSecondsRealtime(.3f); Canvas.ForceUpdateCanvases();
                     foreach(var label in root.GetComponentsInChildren<TMP_Text>()) { label.ForceMeshUpdate(); Assert.That(label.text,Does.Not.Contain("["),name+":"+lang); Assert.That(label.isTextOverflowing,Is.False,name+":"+lang+":"+label.text);
                         foreach(var character in label.textInfo.characterInfo.Take(label.textInfo.characterCount)) if(character.isVisible) Assert.That(character.textElement.glyph.index,Is.Not.EqualTo(0),"Missing glyph: "+label.text); }
@@ -73,7 +78,7 @@ namespace IndieGame.Shell.Tests
                     camera.Render(); var previous=RenderTexture.active; RenderTexture.active=target;
                     pixels=new Texture2D(width,height,TextureFormat.RGB24,false); pixels.ReadPixels(new Rect(0,0,width,height),0,0); pixels.Apply(); RenderTexture.active=previous;
                     var colors=pixels.GetPixels32(); Assert.That(colors.Any(c=>!c.Equals(colors[0])),Is.True,"Uniform capture "+name);
-                    var file=Path.Combine(shots,width+"x"+height+(notch?"_notch":"")+"_"+(bright?"bright-rounded":"dark-flat")+"_"+lang+"_"+name+".png");
+                    var file=Path.Combine(shots,width+"x"+height+(notch?"_notch":"")+"_"+styleName+"_"+lang+"_"+name+".png");
                     File.WriteAllBytes(file,CapturePng.Encode(pixels)); Assert.That(File.Exists(file),Is.True); Assert.That(new FileInfo(file).Length,Is.GreaterThan(1000));
                 }
                 finally

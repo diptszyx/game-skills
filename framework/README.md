@@ -28,3 +28,11 @@ Bộ khung dùng chung cho game hybrid-casual. Spec: `../docs/SHELL_SPEC.md`. B�
 
 ## Chưa kiểm
 IL2CPP chạy thật trên điện thoại, cảm giác chạm, nút Back Android, SDK quảng cáo / mua hàng / bảng xếp hạng thật, hình thật (chỉ có hình tạm).
+
+## Booting a game with ShellApp
+
+Create a `ShellApp` component explicitly and call `Boot(new ShellAppConfig { ... })` once. Supply `Style`, `LanguageTables` (language code to JSON `TextAsset`, covering all `Settings.Languages`), `SavePath`, `Lives`, `Economy`, `CheckIn`, `Quests`, `Settings`, `RemoteConfig`, `SessionPopups`, `Actions` (`IGameSessionActions`), and `GameScreenFactory`. Optional fields are `Clock` (defaults to `SystemClock`), `SaveStore` (supports `ISaveFileSystem` injection), `RewardedAds`, `ShopFactory` or `ShopCatalog` + `Purchases`, and `Leaderboard` + `BoardId` + `LeaderboardRows`. Missing optional screens throw a named unavailable error when navigated to.
+
+The game factory receives `ShellGameContext` with Factory, Session, Text, Popups, Flow, Parent, Navigate and ShowMain. Return one game `RectTransform`, built under Parent; ShellApp owns it. Keep gameplay input gated on `app.Ready`, the visible game root and an empty popup stack. The factory runs before Ready; wait for Ready after a successful BootResult before navigating. Main Play calls Actions.Play once and shows the game; Leave calls Actions.Leave and shows Main. NextLevel/Retry/Revive retain game-specific behavior; use context.ShowMain when the final level completes. Use `Flow.ShowPause/ShowLeave/ShowWin/ShowLose` for session popups, `Navigate(ShellScreen)` for service screens, and `Commit()` to retry persistence without replaying gameplay actions. ShellApp owns Back routing and restores the timeScale captured at Boot when destroyed. A failed load retains only a localized error surface, remains unready and refuses writes. Destroy ShellApp to release its roots.
+
+PilotApp's own shell assembly/composition is **migration-only**, with removal checkpoint **T29b**. New games use ShellApp; the Pilot migration is not part of this package slice. Legacy Main layout is unchanged; home chrome remains deferred to T28e.

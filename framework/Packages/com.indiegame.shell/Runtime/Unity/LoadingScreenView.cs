@@ -12,7 +12,13 @@ namespace IndieGame.Shell.Unity
         void Awake()
         {
             group = GetComponent<CanvasGroup>();
-            Controller = new LoadingScreenController(new SystemClock(), minimumSeconds, fadeSeconds);
+            Initialize();
+            Render();
+        }
+        public void Initialize(IClock clock = null)
+        {
+            group = GetComponent<CanvasGroup>();
+            Controller = new LoadingScreenController(clock ?? new SystemClock(), minimumSeconds, fadeSeconds);
             Render();
         }
         public void Show() { Controller.Show(); Render(); }

@@ -17,13 +17,17 @@ namespace IndieGame.Shell.Unity.Screens
             foreach(var item in reward.Boosters) items.Add(Get("shell.booster",Get("shell.booster."+item.Key),item.Value));
             return Get("shell.reward",string.Join(Get("shell.separator"),items));
         }
+        internal string CommitError(SessionResult result)
+        {
+            var codes=new List<string>(); foreach(var item in result.ModuleErrors) codes.Add(Get("shell.error."+item.Value));
+            return Get("shell.error.commit",Get("shell.error."+result.Error),string.Join(Get("shell.separator"),codes));
+        }
         public bool Commit(Action<string> error)
         {
             var result=session.Commit();
             if(!result.Success)
             {
-                var codes=new List<string>(); foreach(var item in result.ModuleErrors) codes.Add(Get("shell.error."+item.Value));
-                error(Get("shell.error.commit",Get("shell.error."+result.Error),string.Join(Get("shell.separator"),codes)));
+                error(CommitError(result));
             }
             return result.Success;
         }

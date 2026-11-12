@@ -8,6 +8,7 @@ namespace IndieGame.Shell.Unity.UI
     // One host owns both display order and Back routing. Closing retains the input barrier.
     public sealed class PopupHost : MonoBehaviour
     {
+        public bool HandlesOwnBackKey = true;
         readonly List<PopupView> stack = new List<PopupView>();
         public IReadOnlyList<PopupView> Stack => stack;
         public PopupView Top => stack.Count == 0 ? null : stack[stack.Count - 1];
@@ -39,7 +40,7 @@ namespace IndieGame.Shell.Unity.UI
         void Update()
         {
             var keyboard = Keyboard.current;
-            if (keyboard != null && (keyboard.escapeKey.wasPressedThisFrame || keyboard.backspaceKey.wasPressedThisFrame)) Back();
+            if (HandlesOwnBackKey && keyboard != null && (keyboard.escapeKey.wasPressedThisFrame || keyboard.backspaceKey.wasPressedThisFrame)) Back();
             for (int i = stack.Count - 1; i >= 0; i--)
             {
                 var view = stack[i]; view.Progress += Time.unscaledDeltaTime;

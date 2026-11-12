@@ -9,12 +9,25 @@ namespace IndieGame.Shell.Unity.UI
     public sealed class ShellAppearance : MonoBehaviour
     {
         public string Role;
+        public string IconKey;
+        public bool Selected;
         public ButtonRole ButtonRole;
         public void Apply(ShellStyle s)
         {
             var image = GetComponent<Image>(); var text = GetComponent<TMP_Text>();
             switch (Role)
             {
+                case "tabBar": image.sprite = s.TabBarPlainBackground; image.color = Color.white; break;
+                case "tabCell": image.sprite = Selected ? s.TabCellSelectedBackground : s.TabCellBackground; image.color = Color.white; break;
+                case "currencyPill": image.sprite = s.PlainPillBackground; image.color = Color.white; break;
+                case "livesPill": image.sprite = s.PlainPillBackground; image.color = Color.white; break;
+                case "currencyIcon": image.sprite = s.CurrencyIcon; image.color = Color.white; break;
+                case "heartIcon": image.sprite = s.HeartIcon; image.color = Color.white; break;
+                case "badge": image.sprite = s.BadgeSprite; image.color = Color.white; break;
+                case "dayCollected": image.sprite = s.DayCellCollected; image.color = Color.white; break;
+                case "dayToday": image.sprite = s.DayCellToday; image.color = Color.white; break;
+                case "dayLocked": image.sprite = s.DayCellLocked; image.color = Color.white; break;
+                case "tabIcon": image.sprite = s.TabIcon(IconKey); image.color = Selected ? s.TabSelectedTint : s.TabUnselectedTint; break;
                 case "screen": image.sprite = s.ScreenBackground; image.color = s.ScreenColor; break;
                 case "row": image.sprite = s.ListRowSprite; image.color = s.ListRowColor; break;
                 case "panel": image.sprite = s.Theme.PanelSprite; image.color = s.SurfaceColor; image.pixelsPerUnitMultiplier = s.Theme.PanelPixelsPerUnitMultiplier; break;
@@ -28,11 +41,12 @@ namespace IndieGame.Shell.Unity.UI
             {
                 text.font = s.Theme.Font;
                 text.color = Role == "title" ? s.TitleColor : Role == "rowText" ? s.ListRowTextColor : s.Theme.BodyColor;
-                if (Role == "buttonText")
+                if (Role == "buttonText" || Role == "chromeText")
                 {
                     var b = ButtonRole == ButtonRole.Secondary ? s.Theme.Secondary : s.Theme.Primary;
-                    text.color = b.LabelColor; if (b.LabelMaterial != null) text.fontSharedMaterial = b.LabelMaterial;
+                    text.color = Role == "chromeText" ? Color.white : b.LabelColor; if (b.LabelMaterial != null) text.fontSharedMaterial = b.LabelMaterial;
                 }
+                else if (Role == "tabLabel") { text.color = s.TabLabelColor; if (s.Theme.BodyMaterial != null) text.fontSharedMaterial = s.Theme.BodyMaterial; }
                 else { var m = Role == "title" ? s.Theme.TitleMaterial : s.Theme.BodyMaterial; if (m != null) text.fontSharedMaterial = m; }
             }
         }
@@ -52,6 +66,14 @@ namespace IndieGame.Shell.Unity.UI
         { var a = c.gameObject.AddComponent<ShellAppearance>(); a.Role = role; a.ButtonRole = button; a.Apply(Style); }
         Image Image(RectTransform r, string role)
         { var i = r.gameObject.AddComponent<Image>(); i.type = UnityEngine.UI.Image.Type.Sliced; Bind(i, role); return i; }
+        public Image AppearanceImage(Transform parent, string name, string role, bool sliced = false, string iconKey = null)
+        {
+            var r = Node(name, parent); var image = r.gameObject.AddComponent<Image>();
+            image.type = sliced ? UnityEngine.UI.Image.Type.Sliced : UnityEngine.UI.Image.Type.Simple;
+            image.preserveAspect = !sliced; image.raycastTarget = false;
+            var binding = r.gameObject.AddComponent<ShellAppearance>(); binding.Role = role; binding.IconKey = iconKey; binding.Apply(Style);
+            r.gameObject.SetActive(true); return image;
+        }
         public RectTransform ScreenRoot(Transform parent, string name = "Screen")
         { var r = Node(name, parent); Stretch(r); Image(r, "screen"); r.gameObject.SetActive(true); return r; }
         public TextMeshProUGUI Label(Transform parent, string value, bool title = false, string role = null)

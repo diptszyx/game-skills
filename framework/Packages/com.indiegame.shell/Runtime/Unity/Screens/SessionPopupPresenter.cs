@@ -118,6 +118,7 @@ namespace IndieGame.Shell.Unity.Screens
                 {
                     if(action=="ad")
                     {
+                        if(ads==null) { Error(p,"Unavailable"); return; }
                         var ad=ads.Show(config.RevivePlacement);
                         if(!ad.Success) { Error(p,ad.Error==ServiceError.None?ad.Outcome.ToString():ad.Error.ToString()); return; }
                     }
@@ -130,6 +131,7 @@ namespace IndieGame.Shell.Unity.Screens
                     if(action=="double")
                     {
                         if(session.Economy.Claims.Contains("session:double:"+round)) return;
+                        if(ads==null) { Error(p,"Unavailable"); return; }
                         var ad=ads.Show(config.DoublePlacement); if(!ad.Success) { Error(p,ad.Outcome.ToString()); return; }
                         var grant=session.Economy.GrantReward("session:double:"+round,config.WinReward);
                         if(!grant.Success) { Error(p,grant.Error.ToString()); return; }
