@@ -38,19 +38,19 @@ namespace IndieGame.Shell.Unity.UI
             var rect = area.rect;
             var normalized = new Vector2((local.x - rect.xMin) / rect.width, (local.y - rect.yMin) / rect.height);
             if (normalized.x < -Tolerance || normalized.x > 1 + Tolerance || normalized.y < -Tolerance || normalized.y > 1 + Tolerance) return false;
-            world = Content.InverseTransformPoint(Camera.ViewportToWorldPoint(new Vector3(normalized.x, normalized.y, -Camera.transform.localPosition.z)));
+            world = Camera.ViewportToWorldPoint(new Vector3(normalized.x, normalized.y, -Camera.transform.localPosition.z));
             return true;
         }
         public Vector2 WorldToScreen(Vector3 worldPoint)
         {
-            var viewport = Camera.WorldToViewportPoint(Content.TransformPoint(worldPoint));
+            var viewport = Camera.WorldToViewportPoint(worldPoint);
             var rect = area.rect;
             var local = new Vector2(rect.xMin + viewport.x * rect.width, rect.yMin + viewport.y * rect.height);
             return RectTransformUtility.WorldToScreenPoint(null, area.TransformPoint(local));
         }
         public void Fit(Bounds worldBounds)
         {
-            Camera.transform.localPosition = new Vector3(worldBounds.center.x, worldBounds.center.y, Camera.transform.localPosition.z);
+            Camera.transform.position = new Vector3(worldBounds.center.x, worldBounds.center.y, Camera.transform.position.z);
             Camera.orthographicSize = Mathf.Max(worldBounds.extents.y, worldBounds.extents.x / Camera.aspect);
         }
         public void Dispose()

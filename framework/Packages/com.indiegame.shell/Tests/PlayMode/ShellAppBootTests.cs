@@ -193,9 +193,9 @@ namespace IndieGame.Shell.Tests
             Assert.That(viewport.Camera.enabled,Is.True);
             var area=(RectTransform)app.GameHud.Frame.Find("Game viewport");
             Vector2 Screen(Vector2 normalized)=>RectTransformUtility.WorldToScreenPoint(null,area.TransformPoint(area.rect.min+Vector2.Scale(area.rect.size,normalized)));
-            Assert.That(viewport.TryScreenToWorld(Screen(new Vector2(.5f,.5f)),out var centre),Is.True); Assert.That(centre.x,Is.EqualTo(0).Within(.05f)); Assert.That(centre.y,Is.EqualTo(0).Within(.05f));
+            Assert.That(viewport.TryScreenToWorld(Screen(new Vector2(.5f,.5f)),out var centre),Is.True); var origin=viewport.Content.position; Assert.That(centre.x,Is.EqualTo(origin.x).Within(.05f)); Assert.That(centre.y,Is.EqualTo(origin.y).Within(.05f));
             Assert.That(viewport.TryScreenToWorld(Screen(new Vector2(1,1)),out var corner),Is.True);
-            Assert.That(corner.y,Is.EqualTo(viewport.Camera.orthographicSize).Within(.05f)); Assert.That(corner.x,Is.EqualTo(viewport.Camera.orthographicSize*viewport.Camera.aspect).Within(.05f));
+            Assert.That(corner.y-origin.y,Is.EqualTo(viewport.Camera.orthographicSize).Within(.05f)); Assert.That(corner.x-origin.x,Is.EqualTo(viewport.Camera.orthographicSize*viewport.Camera.aspect).Within(.05f));
             Assert.That(viewport.TryScreenToWorld(Screen(new Vector2(1.5f,.5f)),out _),Is.False);
             app.ShowMain(); yield return null; Assert.That(viewport.Camera.enabled,Is.False);
         }

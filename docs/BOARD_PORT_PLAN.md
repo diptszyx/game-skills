@@ -13,7 +13,9 @@ Cho camera của bàn vẽ vào một **ảnh trung gian** (render texture), r�
 ## Trạng thái 2026-11-13 (đợt 1 xong)
 - Tool: `GameViewportView` (camera + ảnh trung gian + đổi tọa độ chạm hai chiều), `GameHud.Viewport`. Shell EditMode 71/71, PlayMode 36/36, error CS 0.
 - Game-2-v2: bàn thật hiện trong khung (chim, băng, nước, cơ chế đứng yên), vuốt chạy qua luật. Pilot EditMode 325/325, PlayMode 4/4. Điện thoại A07 720x1600: ảnh `work/ref/p_play.png`, `p_swipe.png` (vuốt chim, 3 lượt thành 2).
-- Chưa làm (đợt 2): hoạt cảnh trượt, bắt cá, băng nứt, tụm đàn, hiệu ứng thắng, âm thanh/rung, gợi ý, hoàn tác.
+- Đợt 2a (2026-11-13): mang sang hoạt cảnh trượt (`SlideRunner`) và 16 file hiệu ứng cơ chế (cá, băng nứt, hố, cổng, tụm đàn, dịch chuyển, v.v.). Biên dịch ngay, pilot 325/325 và 4/4, shell 71/71 và 36/36. Test pilot giờ chờ hoạt cảnh xong trước khi vuốt tiếp. Trên A07: vuốt trượt đúng, số lượt giảm, 3 cú vuốt liên tiếp chạy.
+- Chưa kiểm: khung hình giữa lúc trượt trên điện thoại (quay màn hình làm cú vuốt không nhận, chưa rõ vì sao); các hiệu ứng cơ chế chưa có màn thử (pilot chỉ có 3 màn băng thường).
+- Chưa làm: hiệu ứng thắng (`ResultCelebration`), âm thanh và rung (`FeedbackStubs.cs` đang rỗng), gợi ý, hoàn tác.
 - Bài học kỹ thuật: mã bàn đặt sprite bằng tọa độ thế giới tuyệt đối; muốn đưa vào vùng chơi phải đổi sang `localPosition`. Camera cảnh khác cũng thấy sprite, nên vùng chơi đặt ở gốc cách xa (offset 10000).
 - Test pilot phải đổi một chỗ: bấm vào vị trí chim khi popup Pause mở sẽ đóng popup (bấm nền), nên test chỉ kiểm `InputAllowed()==false`.
 
