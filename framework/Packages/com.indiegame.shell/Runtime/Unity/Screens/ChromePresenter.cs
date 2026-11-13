@@ -16,12 +16,12 @@ namespace IndieGame.Shell.Unity.Screens
         public TabBarView TabBar { get; }
         string language; DateTime day; long second=-1;
         static readonly string[] Keys={"home","checkin","quests","shop","leaderboard"};
-        public ChromePresenter(ShellSession session,LocalizationService localization,IClock clock,ShellUiFactory factory,ScreenHost host,RectTransform main,RectTransform game,Action home,Action<ShellScreen> navigate,Action<string> showError = null)
+        public ChromePresenter(ShellSession session,LocalizationService localization,IClock clock,ShellUiFactory factory,ScreenHost host,RectTransform main,RectTransform game,Action home,Action<ShellScreen> navigate,Action settings,Action<string> showError = null)
         {
             this.showError=showError??(_=>{}); this.session=session; text=new ScreenText(session,localization); this.clock=clock; this.host=host; this.main=main; this.game=game; this.home=home; this.navigate=navigate;
             TopBar=new TopBarView(factory,host.ChromeRoot);
             TabBar=new TabBarView(factory,host.ChromeRoot,Keys.Select(k=>new TabDefinition(k,Label(k),k)).ToArray());
-            host.SetTabBar(TabBar); TabBar.TabSelected+=Selected; host.Shown+=Shown;
+            TopBar.Settings.onClick.AddListener(()=>settings()); host.SetTabBar(TabBar); TabBar.TabSelected+=Selected; host.Shown+=Shown;
             lifetime=host.ChromeRoot.gameObject.AddComponent<ScreenLifetime>(); lifetime.Ticked+=Refresh; lifetime.Resumed+=Refresh;
             Refresh();
         }
@@ -41,7 +41,7 @@ namespace IndieGame.Shell.Unity.Screens
         void Selected(string key) { if(key=="home") home(); else navigate((ShellScreen)(Array.IndexOf(Keys,key)-1)); }
         void Shown(RectTransform screen)
         {
-            bool visible=screen!=game; TopBar.Root.gameObject.SetActive(visible); host.ShowTabBar(visible);
+            bool visible=screen!=game; TopBar.Root.gameObject.SetActive(true); TopBar.SetCompact(!visible); host.ShowTabBar(visible);
             if(visible) TabBar.SetSelected(screen==main?"home":screen.name.ToLowerInvariant());
             Refresh();
         }

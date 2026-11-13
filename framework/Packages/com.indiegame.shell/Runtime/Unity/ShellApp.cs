@@ -22,6 +22,7 @@ namespace IndieGame.Shell.Unity
         public SessionPopupPresenter Flow { get; private set; }
         public MainView Main { get; private set; }
         public RectTransform GameRoot { get; private set; }
+        public GameHudView GameHud { get; private set; }
         public TMP_Text ErrorLabel { get; private set; }
         public MainPresenter MainPresenter { get; private set; }
         readonly List<IDisposable> owned = new List<IDisposable>();
@@ -41,7 +42,8 @@ namespace IndieGame.Shell.Unity
                 foreach(var table in config.LanguageTables)
                 {
                     if(table.Value==null) throw new InvalidOperationException("Missing language table: "+table.Key);
-                    var result=Text.LoadTable(table.Key,table.Value.text);
+                    var shellDefaults=Resources.Load<TextAsset>("ShellLocalization/"+table.Key);
+                    var result=Text.LoadLayeredTable(table.Key,shellDefaults!=null?shellDefaults.text:null,table.Value.text);
                     if(!result.Success) throw new InvalidOperationException("Invalid language table: "+table.Key+": "+result.Error);
                 }
                 factory=new ShellUiFactory(config.Style);
@@ -64,6 +66,7 @@ namespace IndieGame.Shell.Unity
                 loaded=true;
                 if(EventSystem.current==null && FindFirstObjectByType<EventSystem>()==null)
                 { events=new GameObject("Shell Input",typeof(EventSystem),typeof(InputSystemUIInputModule)); events.transform.SetParent(transform,false); }
+                var backdrop=factory.AppearanceImage(canvas.transform,"Backdrop","screen"); ShellUiFactory.Stretch(backdrop.rectTransform); backdrop.preserveAspect=false; backdrop.transform.SetAsFirstSibling();
                 Screens=canvas.AddComponent<ScreenHost>(); Screens.Initialize(factory); Screens.Loading.Initialize(clock);
                 var popupRoot=ShellUiFactory.Node("Safe Popups",canvas.transform); ShellUiFactory.Stretch(popupRoot);
                 popupRoot.gameObject.AddComponent<SafeAreaFitter>(); popupRoot.gameObject.SetActive(true);
@@ -74,9 +77,10 @@ namespace IndieGame.Shell.Unity
                 if(destroyed || this==null) throw new InvalidOperationException("ShellApp destroyed during Boot");
                 if(GameRoot==null) throw new InvalidOperationException("GameScreenFactory returned null");
                 GameRoot.SetParent(Screens.SafeRoot,false); GameRoot.gameObject.SetActive(false);
+                GameHud=new GameHudView(factory,GameRoot,config.Style.EnableHomeChrome); owned.Add(GameHud);
                 Main=new MainView(factory,Screens.SafeRoot);
                 MainPresenter=new MainPresenter(Session,Main,Text,clock,actions,Navigate,config.PlayLabel); owned.Add(MainPresenter);
-                if(config.Style.EnableHomeChrome) owned.Add(new ChromePresenter(Session,Text,clock,factory,Screens,Main.Root,GameRoot,ShowMain,Navigate,error=>ErrorLabel.text=error));
+                if(config.Style.EnableHomeChrome) owned.Add(new ChromePresenter(Session,Text,clock,factory,Screens,Main.Root,GameRoot,ShowMain,Navigate,()=>{ if(Ready && Popups.Top==null) Flow.ShowPause(); },error=>ErrorLabel.text=error));
                 Screens.Show(Main.Root);
                 Screens.Loading.gameObject.AddComponent<LoadingContentView>().Initialize(factory,Screens.Loading,screenText,"shell.loading.tip");
                 Screens.Loading.transform.SetAsLastSibling(); Screens.Loading.Show(); Screens.Loading.SetProgress(1); Screens.Loading.Hide();

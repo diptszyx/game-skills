@@ -29,10 +29,11 @@ public sealed class KitChunkyImporter : AssetPostprocessor
         {"btn_locked", new Vector4(327,130,327,100)},
         {"list_row", new Vector4(173,40,173,40)},
         {"panel_popup", new Vector4(120,120,170,400)},
+        {"board_frame", new Vector4(130,130,130,130)},
 
     };
     public static bool IsUi(string path) => !new[]{"bg_home","bg_play","logo"}.Contains(Path.GetFileNameWithoutExtension(path));
-    static float Ppu(string name) => name.StartsWith("day_cell_") ? 300 : name == "pill_plain" ? 501.25f : name == "tab_bar_plain" ? 323.125f : name == "tab_cell" ? 349f/1.2f : name == "tab_cell_selected" ? 305 : name == "panel_popup" ? 300 : name == "list_row" ? 300 : name == "btn_primary" ? 700 : name == "btn_secondary" ? 500 : name == "btn_locked" ? 740 : 100;
+    static float Ppu(string name) => name.StartsWith("day_cell_") ? 300 : name == "pill_plain" ? 501.25f : name == "tab_bar_plain" ? 323.125f : name == "tab_cell" ? 349f/1.2f : name == "tab_cell_selected" ? 305 : name == "panel_popup" || name == "board_frame" ? 300 : name == "list_row" ? 300 : name == "btn_primary" ? 700 : name == "btn_secondary" ? 500 : name == "btn_locked" ? 740 : 100;
     void OnPreprocessTexture()
     {
         if (!assetPath.StartsWith(Folder + "/", StringComparison.Ordinal) || !assetPath.EndsWith(".png")) return;

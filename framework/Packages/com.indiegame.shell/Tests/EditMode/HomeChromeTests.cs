@@ -20,7 +20,7 @@ namespace IndieGame.Shell.Tests
         ShellStyle Chrome(ShellStyle s)
         {
             s.EnableHomeChrome=true;
-            s.TabBarPlainBackground=s.DayCellCollected=s.DayCellToday=s.DayCellLocked=s.BadgeSprite=s.PlainPillBackground=s.TabCellBackground=s.TabCellSelectedBackground=s.CurrencyIcon;
+            s.TabBarPlainBackground=s.DayCellCollected=s.DayCellToday=s.DayCellLocked=s.BadgeSprite=s.PlainPillBackground=s.TabCellBackground=s.TabCellSelectedBackground=s.GearButton=s.BoardFrame=s.CurrencyIcon;
             foreach(var key in Keys) s.TabIcons.Add(new ShellStyle.TabIconEntry{Key=key,Sprite=s.CurrencyIcon});
             return s;
         }
@@ -29,7 +29,7 @@ namespace IndieGame.Shell.Tests
         [Test] public void HomeChromeStyleValidates() { Assert.DoesNotThrow(()=>style.Validate()); }
         [Test] public void EveryMissingChromeSlotThrowsOnlyWhenEnabled()
         {
-            foreach(var name in new[]{"TabBarPlainBackground","DayCellCollected","DayCellToday","DayCellLocked","BadgeSprite","PlainPillBackground","TabCellBackground","TabCellSelectedBackground"})
+            foreach(var name in new[]{"TabBarPlainBackground","DayCellCollected","DayCellToday","DayCellLocked","BadgeSprite","PlainPillBackground","TabCellBackground","TabCellSelectedBackground","GearButton","BoardFrame"})
             {
                 var field=typeof(ShellStyle).GetField(name); var saved=field.GetValue(style); field.SetValue(style,null);
                 Assert.That(Assert.Throws<InvalidOperationException>(()=>style.Validate()).Message,Does.Contain(name));

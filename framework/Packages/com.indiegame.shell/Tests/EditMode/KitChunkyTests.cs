@@ -90,10 +90,13 @@ namespace IndieGame.Shell.Tests
             var original=Path.GetFullPath(Path.Combine(Application.dataPath,"../../../art/kit_v3_cut"));
             var source=Directory.GetFiles(original,"*.png"); Assert.That(source.Length,Is.EqualTo(34),"T27 supplied folder contains 34, despite brief saying 32");
             var retired=new[]{"pill_currency.png","pill_lives.png","tab_bar.png"};
+            var v5=new[]{"gear_button","board_frame"};
             var v4=new[]{"tab_home","tab_checkin","tab_quests","tab_shop","tab_trophy","pill_plain","tab_cell","tab_cell_selected"};
-            Assert.That(Sources().Length,Is.EqualTo(source.Length-retired.Length+v4.Length+1));
+            Assert.That(Sources().Length,Is.EqualTo(source.Length-retired.Length+v4.Length+v5.Length+1));
             foreach(var name in v4)
                 Assert.That(File.ReadAllBytes(Folder+"/"+name+".png").SequenceEqual(File.ReadAllBytes(Path.Combine(original,"../kit_v4_cut",name+".png"))),Is.True,name);
+            foreach(var name in v5)
+                Assert.That(File.ReadAllBytes(Folder+"/"+name+".png").SequenceEqual(File.ReadAllBytes(Path.Combine(original,"../kit_v5_cut",name+".png"))),Is.True,name);
             foreach(var path in source.Where(p=>!retired.Contains(Path.GetFileName(p))))
                 Assert.That(File.ReadAllBytes(Folder+"/"+Path.GetFileName(path)).SequenceEqual(File.ReadAllBytes(path)),Is.True,path);
         }

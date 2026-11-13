@@ -23,6 +23,8 @@ namespace IndieGame.Shell.Unity.UI
                 case "livesPill": image.sprite = s.PlainPillBackground; image.color = Color.white; break;
                 case "currencyIcon": image.sprite = s.CurrencyIcon; image.color = Color.white; break;
                 case "heartIcon": image.sprite = s.HeartIcon; image.color = Color.white; break;
+                case "gearButton": image.sprite = s.GearButton; image.color = Color.white; break;
+                case "boardFrame": image.sprite = s.BoardFrame; image.color = Color.white; break;
                 case "badge": image.sprite = s.BadgeSprite; image.color = Color.white; break;
                 case "dayCollected": image.sprite = s.DayCellCollected; image.color = Color.white; break;
                 case "dayToday": image.sprite = s.DayCellToday; image.color = Color.white; break;

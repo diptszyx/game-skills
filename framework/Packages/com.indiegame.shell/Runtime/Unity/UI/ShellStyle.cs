@@ -10,7 +10,7 @@ namespace IndieGame.Shell.Unity.UI
     {
         public bool EnableHomeChrome;
         public Sprite Logo, Mascot;
-        public Sprite TabBarPlainBackground, DayCellCollected, DayCellToday, DayCellLocked, BadgeSprite, PlainPillBackground, TabCellBackground, TabCellSelectedBackground;
+        public Sprite GearButton, BoardFrame, TabBarPlainBackground, DayCellCollected, DayCellToday, DayCellLocked, BadgeSprite, PlainPillBackground, TabCellBackground, TabCellSelectedBackground;
         [Serializable] public sealed class TabIconEntry { public string Key; public Sprite Sprite; }
         public List<TabIconEntry> TabIcons = new List<TabIconEntry>();
         public Color TabSelectedTint = Color.white, TabUnselectedTint = new Color(.7f,.7f,.8f); public Color TabLabelColor = Color.white;
@@ -34,7 +34,7 @@ namespace IndieGame.Shell.Unity.UI
             {
                 Require(TabBarPlainBackground, nameof(TabBarPlainBackground)); Require(DayCellCollected, nameof(DayCellCollected));
                 Require(DayCellToday, nameof(DayCellToday)); Require(DayCellLocked, nameof(DayCellLocked));
-                Require(BadgeSprite, nameof(BadgeSprite)); Require(PlainPillBackground, nameof(PlainPillBackground));
+                Require(BadgeSprite, nameof(BadgeSprite)); Require(GearButton, nameof(GearButton)); Require(BoardFrame, nameof(BoardFrame)); Require(PlainPillBackground, nameof(PlainPillBackground));
                 Require(TabCellBackground, nameof(TabCellBackground)); Require(TabCellSelectedBackground, nameof(TabCellSelectedBackground));
                 foreach (var key in new[] { "home", "checkin", "quests", "shop", "leaderboard" }) Require(TabIcon(key), "TabIcons." + key);
             }

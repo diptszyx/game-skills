@@ -123,7 +123,7 @@ namespace IndieGame.Shell.Tests
                     var text=SampleLocalization.Load();
                     var main=new MainView(factory,host.SafeRoot); var game=factory.ScreenRoot(host.SafeRoot,"Game");
                     using(var mainPresenter=new MainPresenter(session,main,text,clock,new ShotGame(),_=>{}))
-                    using(var chrome=new ChromePresenter(session,text,clock,factory,host,main.Root,game,()=>host.Show(main.Root),_=>{}))
+                    using(var chrome=new ChromePresenter(session,text,clock,factory,host,main.Root,game,()=>host.Show(main.Root),_=>{},()=>{}))
                     {
                     var check=new CheckInView(factory,host.SafeRoot);
                     using(var checkPresenter=new CheckInPresenter(session,check,text,clock))

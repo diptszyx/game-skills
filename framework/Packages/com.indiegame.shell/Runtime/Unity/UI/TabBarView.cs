@@ -40,8 +40,8 @@ namespace IndieGame.Shell.Unity.UI
                 var size=r.gameObject.AddComponent<LayoutElement>(); size.minWidth=size.minHeight=44; size.flexibleWidth=1;
                 var icon=factory.AppearanceImage(r,"Icon","tabIcon",iconKey:definition.IconKey);
                 TopBarView.Place(icon.rectTransform,new Vector2(.26f,.43f),new Vector2(.74f,.94f));
-                var label=factory.Label(r,definition.Label,role:"tabLabel"); label.fontSize=18; label.fontSizeMax=18; label.fontSizeMin=16; label.maxVisibleLines=2;
-                TopBarView.Place(label.rectTransform,new Vector2(.06f,.06f),new Vector2(.94f,.43f));
+                var label=factory.Label(r,definition.Label,role:"tabLabel"); label.fontSize=18; label.fontSizeMax=18; label.fontSizeMin=12; label.enableAutoSizing=true; label.maxVisibleLines=2;
+                TopBarView.Place(label.rectTransform,new Vector2(.12f,.06f),new Vector2(.88f,.43f));
                 var badge=factory.AppearanceImage(icon.transform,"Badge","badge");
                 badge.rectTransform.anchorMin=badge.rectTransform.anchorMax=Vector2.one;
                 badge.rectTransform.sizeDelta=new Vector2(28,28); badge.rectTransform.anchoredPosition=new Vector2(-2,-2);

@@ -33,22 +33,40 @@ namespace IndieGame.Shell
         // Replace one complete table atomically; a malformed table never replaces a valid one.
         public SaveResult<bool> LoadTable(string language, string json)
         {
-            if (string.IsNullOrWhiteSpace(language) || string.IsNullOrWhiteSpace(json)) return new SaveResult<bool>(false, SaveError.InvalidArgument);
+            if (string.IsNullOrWhiteSpace(language)) return new SaveResult<bool>(false, SaveError.InvalidArgument);
+            var parsed = Parse(json);
+            if (parsed == null) return new SaveResult<bool>(false, string.IsNullOrWhiteSpace(json) ? SaveError.InvalidArgument : SaveError.InvalidData);
+            tables[language] = parsed;
+            return new SaveResult<bool>(true);
+        }
+        // Package defaults first, then the game's own table on top: the game overrides, never has to repeat shell keys.
+        public SaveResult<bool> LoadLayeredTable(string language, string baseJson, string overlayJson)
+        {
+            if (string.IsNullOrWhiteSpace(language) || string.IsNullOrWhiteSpace(overlayJson)) return new SaveResult<bool>(false, SaveError.InvalidArgument);
+            var overlay = Parse(overlayJson);
+            var merged = string.IsNullOrWhiteSpace(baseJson) ? new Dictionary<string, string>(StringComparer.Ordinal) : Parse(baseJson);
+            if (overlay == null || merged == null) return new SaveResult<bool>(false, SaveError.InvalidData);
+            foreach (var pair in overlay) merged[pair.Key] = pair.Value;
+            tables[language] = merged;
+            return new SaveResult<bool>(true);
+        }
+        static Dictionary<string, string> Parse(string json)
+        {
+            if (string.IsNullOrWhiteSpace(json)) return null;
             try
             {
                 using var reader = new JsonTextReader(new StringReader(json)) { DateParseHandling = DateParseHandling.None };
                 var parsed = JObject.Load(reader, new JsonLoadSettings { DuplicatePropertyNameHandling = DuplicatePropertyNameHandling.Error });
-                if (reader.Read()) return new SaveResult<bool>(false, SaveError.InvalidData);
+                if (reader.Read()) return null;
                 var next = new Dictionary<string, string>(StringComparer.Ordinal);
                 foreach (var p in parsed.Properties())
                 {
-                    if (string.IsNullOrWhiteSpace(p.Name) || p.Value.Type != JTokenType.String) return new SaveResult<bool>(false, SaveError.InvalidData);
+                    if (string.IsNullOrWhiteSpace(p.Name) || p.Value.Type != JTokenType.String) return null;
                     next.Add(p.Name, (string)p.Value!);
                 }
-                tables[language] = next;
-                return new SaveResult<bool>(true);
+                return next;
             }
-            catch (JsonException) { return new SaveResult<bool>(false, SaveError.InvalidData); }
+            catch (JsonException) { return null; }
         }
         public SaveResult<string> Lookup(string language, string key)
         {

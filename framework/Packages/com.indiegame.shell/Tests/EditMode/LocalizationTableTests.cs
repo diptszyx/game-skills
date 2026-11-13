@@ -23,6 +23,22 @@ namespace IndieGame.Shell.Tests
             // Lookup records a miss even when English fallback succeeds.
             Assert.That(text.MissingKeys,Is.Empty);
         }
+        [Test] public void LayeredTableOverlayWinsAndBaseFillsMissingKeys()
+        {
+            var service=new LocalizationService(new LocalizationConfig("en"));
+            Assert.That(service.LoadLayeredTable("en","{\"a\":\"base a\",\"b\":\"base b\"}","{\"a\":\"game a\"}").Success,Is.True);
+            Assert.That(service.Lookup("en","a").Value,Is.EqualTo("game a"));
+            Assert.That(service.Lookup("en","b").Value,Is.EqualTo("base b"));
+        }
+        [Test] public void LayeredTableMalformedInputLeavesPreviousTableUntouched()
+        {
+            var service=new LocalizationService(new LocalizationConfig("en"));
+            service.LoadTable("en","{\"a\":\"kept\"}");
+            Assert.That(service.LoadLayeredTable("en","{\"a\":\"x\"}","{ not json").Success,Is.False);
+            Assert.That(service.LoadLayeredTable("en","{ not json","{\"a\":\"y\"}").Success,Is.False);
+            Assert.That(service.LoadLayeredTable("en","{\"a\":\"x\"}","").Success,Is.False);
+            Assert.That(service.Lookup("en","a").Value,Is.EqualTo("kept"));
+        }
         [Test] public void RegistryCoversPresenterLiteralsAndDynamicFamilies()
         {
             var package=Path.GetFullPath(Path.Combine(Application.dataPath,"../../Packages/com.indiegame.shell"));

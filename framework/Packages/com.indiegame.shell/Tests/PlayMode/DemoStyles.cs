@@ -42,30 +42,7 @@ namespace IndieGame.Shell.Tests
             chunkyAtlas=UnityEditor.AssetDatabase.LoadAssetAtPath<UnityEngine.U2D.SpriteAtlas>("Assets/Art/KitChunky/KitChunkyUi.spriteatlas");
             if(chunkyAtlas==null) throw new System.InvalidOperationException("Missing chunky atlas");
 #endif
-            s.EnableHomeChrome=true; s.Logo=ChunkySprite("logo"); s.Mascot=ChunkySprite("penguin_red_idle");
-            s.TabBarPlainBackground=ChunkySprite("tab_bar_plain"); s.DayCellCollected=ChunkySprite("day_cell_1");
-            s.DayCellToday=ChunkySprite("day_cell_2"); s.DayCellLocked=ChunkySprite("day_cell_3");
-            s.BadgeSprite=ChunkySprite("badge_1"); s.PlainPillBackground=ChunkySprite("pill_plain");
-            s.TabCellBackground=ChunkySprite("tab_cell"); s.TabCellSelectedBackground=ChunkySprite("tab_cell_selected");
-            foreach(var key in new[]{"home","checkin","quests","shop","leaderboard"})
-                s.TabIcons.Add(new ShellStyle.TabIconEntry{Key=key,Sprite=ChunkySprite(key=="leaderboard"?"tab_trophy":"tab_"+key)});
-            s.Theme.PanelSprite=ChunkySprite("panel_popup");
-            s.Theme.Primary.Enabled=ChunkySprite("btn_primary");
-            s.Theme.Secondary.Enabled=ChunkySprite("btn_secondary");
-            s.Theme.Primary.Locked=s.Theme.Secondary.Locked=s.LockedButtonSprite=ChunkySprite("btn_locked");
-            s.ListRowSprite=ChunkySprite("list_row"); s.ScreenBackground=ChunkySprite("bg_home");
-            s.CurrencyIcon=ChunkySprite("icons_1"); s.HeartIcon=ChunkySprite("icons_2"); s.BoosterIcon=ChunkySprite("icons_5");
-            s.Theme.CloseSprite=ChunkySprite("btn_close"); s.Theme.ToggleOn=ChunkySprite("toggle_1"); s.Theme.ToggleOff=ChunkySprite("toggle_2");
-            var plum=new Color32(0x30,0x0c,0x31,255); var cream=new Color32(0xfe,0xe9,0xd1,255);
-            s.TabLabelColor=plum; s.ScreenTitleColorOverride=plum; s.TabUnselectedTint=new Color(.92f,.92f,.95f); s.SurfaceColor=s.ScreenColor=Color.white; s.TitleColor=Color.white; s.Theme.PanelSize=new Vector2(620f,400f);
-            s.ListRowColor=cream; s.ListRowTextColor=plum; s.Theme.BodyColor=cream;
-            s.ProgressTrackColor=new Color32(0xd9,0xd6,0xf0,255); s.ProgressFillColor=new Color32(0xd7,0x44,0x49,255);
-            s.Theme.Primary.LabelColor=s.Theme.Secondary.LabelColor=Color.white;
-            var outlined=Own(new Material(s.Theme.Font.material));
-            outlined.SetColor("_OutlineColor",plum); outlined.SetFloat("_OutlineWidth",.045f); outlined.EnableKeyword("OUTLINE_ON");
-            s.Theme.Primary.LabelMaterial=s.Theme.Secondary.LabelMaterial=outlined;
-            s.Theme.TitleMaterial=Own(new Material(s.Theme.Font.material));
-            s.Theme.TitleMaterial.SetColor("_OutlineColor",plum); s.Theme.TitleMaterial.SetFloat("_OutlineWidth",.06f); s.Theme.TitleMaterial.EnableKeyword("OUTLINE_ON");
+            ShellKit.Apply(s, ChunkySprite, ShellKitPalette.Chunky, o=>Own(o));
             s.Validate(); return s;
         }
         Sprite ChunkySprite(string name)
@@ -82,11 +59,10 @@ namespace IndieGame.Shell.Tests
         }
         public static void FitChunky(Transform root)
         {
-            var plum=new Color32(0x30,0x0c,0x31,255);
             foreach(var binding in root.GetComponentsInChildren<ShellAppearance>(true))
             {
                 var text=binding.GetComponent<TMP_Text>(); if(text==null) continue;
-                if(binding.Role=="body"&&binding.GetComponentInParent<PopupView>()!=null) text.color=plum;
+                if(binding.Role=="body"&&binding.GetComponentInParent<PopupView>()!=null) text.color=ShellKitPalette.Chunky.Outline;
                 if(binding.Role=="buttonText")
                 {
                     // Leave a safe inset inside the source rim, including wrapped stress labels.

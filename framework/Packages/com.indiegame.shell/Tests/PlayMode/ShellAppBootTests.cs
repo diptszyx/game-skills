@@ -73,6 +73,14 @@ namespace IndieGame.Shell.Tests
             InputSystem.QueueStateEvent(mouse,new MouseState {position=position}.WithButton(MouseButton.Left)); yield return null; yield return null;
             InputSystem.QueueStateEvent(mouse,new MouseState {position=position}); yield return null; yield return new WaitForSecondsRealtime(.15f);
         }
+        [UnityTest] public IEnumerator GameTableOverridesAndShellDefaultsFillMissingKeys()
+        {
+            config.LanguageTables=new Dictionary<string,TextAsset>{{"en",new TextAsset("{\"shell.play\":\"Go\"}")},{"vi",new TextAsset("{\"shell.play\":\"Di\"}")}};
+            yield return Boot();
+            Assert.That(app.Text.Lookup("en","shell.play").Value,Is.EqualTo("Go"));
+            Assert.That(app.Text.Lookup("en","shell.tab.home").Value,Is.EqualTo("Home"));
+            Assert.That(app.Text.Lookup("vi","shell.back").Value,Is.Not.Contain("["));
+        }
         [UnityTest] public IEnumerator PlayAndPauseLeaveUseRealPointerInput()
         {
             yield return Boot(); yield return Tap(MainButton("shell.play"));
@@ -173,9 +181,23 @@ namespace IndieGame.Shell.Tests
             Assert.That(app.Session.Economy.Gold,Is.EqualTo(gold+1));
             Assert.That(chrome.Find("TabBar/Tabs/Tab checkin/Icon/Badge").gameObject.activeSelf,Is.False);
             app.Back(); yield return Tap(MainButton("shell.play")); Assert.That(game.Plays,Is.EqualTo(1));
-            Assert.That(chrome.Find("TabBar").gameObject.activeSelf,Is.False); Assert.That(chrome.Find("TopBar").gameObject.activeSelf,Is.False);
-            app.Back(); Assert.That(app.Popups.Top,Is.Not.Null); app.Back(); yield return new WaitForSecondsRealtime(.15f);
+            Assert.That(chrome.Find("TabBar").gameObject.activeSelf,Is.False); Assert.That(chrome.Find("TopBar").gameObject.activeSelf,Is.True);
+            Assert.That(app.GameHud,Is.Not.Null); yield return Tap(chrome.Find("TopBar/Shell Settings").GetComponent<Button>()); Assert.That(app.Popups.Top,Is.Not.Null); app.Back(); yield return new WaitForSecondsRealtime(.15f);
             app.ShowMain(); Assert.That(chrome.Find("TabBar").gameObject.activeSelf,Is.True);
+        }
+        [UnityTest] public IEnumerator GameViewportMapsScreenPointsToWorldAndFollowsGameScreen()
+        {
+            config.Style=demos.MakeChunky(); yield return Boot();
+            var viewport=app.GameHud.Viewport; Assert.That(viewport.Camera.enabled,Is.False);
+            app.ShowGame(); yield return null; Canvas.ForceUpdateCanvases();
+            Assert.That(viewport.Camera.enabled,Is.True);
+            var area=(RectTransform)app.GameHud.Frame.Find("Game viewport");
+            Vector2 Screen(Vector2 normalized)=>RectTransformUtility.WorldToScreenPoint(null,area.TransformPoint(area.rect.min+Vector2.Scale(area.rect.size,normalized)));
+            Assert.That(viewport.TryScreenToWorld(Screen(new Vector2(.5f,.5f)),out var centre),Is.True); Assert.That(centre.x,Is.EqualTo(0).Within(.05f)); Assert.That(centre.y,Is.EqualTo(0).Within(.05f));
+            Assert.That(viewport.TryScreenToWorld(Screen(new Vector2(1,1)),out var corner),Is.True);
+            Assert.That(corner.y,Is.EqualTo(viewport.Camera.orthographicSize).Within(.05f)); Assert.That(corner.x,Is.EqualTo(viewport.Camera.orthographicSize*viewport.Camera.aspect).Within(.05f));
+            Assert.That(viewport.TryScreenToWorld(Screen(new Vector2(1.5f,.5f)),out _),Is.False);
+            app.ShowMain(); yield return null; Assert.That(viewport.Camera.enabled,Is.False);
         }
         void SetPortrait()
         {
