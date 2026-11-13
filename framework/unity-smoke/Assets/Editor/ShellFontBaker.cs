@@ -35,6 +35,8 @@ public static class ShellFontBaker
         var font = TMP_FontAsset.CreateFontAsset(source, 64, 6, GlyphRenderMode.SDFAA, 2048, 2048, AtlasPopulationMode.Dynamic, true);
         if (!font.TryAddCharacters(VietnameseCharacters(), out string missing)) throw new InvalidOperationException("Font missing glyphs: " + missing);
         font.name = "ShellFont";
+        font.material.shader = Shader.Find("TextMeshPro/Mobile/Distance Field");
+        font.material.EnableKeyword("OUTLINE_ON");
         AssetDatabase.CreateAsset(font, Output);
         AssetDatabase.AddObjectToAsset(font.material, font);
         foreach (var atlas in font.atlasTextures) AssetDatabase.AddObjectToAsset(atlas, font);
