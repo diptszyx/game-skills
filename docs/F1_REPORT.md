@@ -19,3 +19,6 @@ Game thử: **Tap Order** (chạm các số 1..N theo thứ tự trên lưới 3
 3. **Chữ trạng thái màn chơi trắng trên nền pastel** khó đọc (cùng lỗi như game-2).
 4. **Không có vai trò ô vuông** (tile): nút `Primary` bị kéo giãn 9-slice thành khối phình khi vuông 190 px.
 5. Không có chỗ khai báo "game nào chạy" khi một project có hai game: tôi dùng file `game-selector.txt` tạm.
+
+## Cập nhật 2026-11-13
+Cổng của tool hiện: shell EditMode 76 + PlayMode 36, pilot EditMode 325 + PlayMode 9 (số báo từ người làm game, chưa chạy lại ở phiên này; bản trên đây ghi 9/9 PlayMode cho Tap Order). Font (Baloo 2 ExtraBold qua `ShellFont`) và cổng tương phản chữ (`MinTextContrast` 4.5) đã nằm trong tool, nên chỗ thiếu số 2 và 3 ở trên (chữ popup và chữ trạng thái khó đọc) đã có cổng tương phản nhằm bắt lỗi loại này; chưa chụp lại để xác nhận hai lỗi đó hết. Các chỗ thiếu số 1 (mẫu game mới), 4 và 5 chưa làm.

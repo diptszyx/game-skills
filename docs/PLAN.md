@@ -1,4 +1,4 @@
-# Kế hoạch: bộ công cụ làm game nhanh (cập nhật 2026-11-11)
+# Kế hoạch: bộ công cụ làm game nhanh (cập nhật 2026-11-13)
 
 Khi có ý tưởng game mới, người làm game chỉ cần nghĩ gameplay. Phần xung quanh và hình ảnh được làm sẵn. Các game làm sau chủ yếu thuộc thể loại hybrid-casual, nên phần khung gần như không đổi giữa các game. Chi tiết kỹ thuật (spec) viết sau.
 
@@ -54,12 +54,12 @@ Chưa viết, cần nghiên cứu thêm: gameplay hybrid-casual; cảm giác ch�
 | Bước | Việc | Xong khi | Trạng thái |
 |---|---|---|---|
 | A, B | So sánh hai game, chốt danh sách khung | Danh sách được duyệt | Xong |
-| D | Code khung (màn hình, popup, tab, top bar, vùng chơi) | Shell test xanh, chạy trên A07 | Gần xong: shell 71/71 + 36/36, A07 chạy; âm thanh + rung đã nối (D1 xong, nghe thử trên máy chờ bạn). Thiếu: thông báo đẩy, mẫu game mới (F1) |
-| C | Xưởng phong cách | Bộ hình đồng nhất, hết lỗi art | Một nửa: có `kit_v5`; còn ô trắng trong icon, nút xanh lá, hình xấu (băng, cá, hải cẩu, bg_play), font. Cần bạn quyết có giao Codex vẽ lại không |
-| E | Thay hình tạm, so ảnh mẫu | Cổng so ảnh chụp với `reference_chunky.png` xanh ở 2 tỉ lệ | Cổng đã viết (`tools/compare_shot`, selftest qua). Chưa có ảnh chuẩn thật: mockup quá khác game nên không dùng làm chuẩn chặt; cần bạn duyệt một ảnh chụp thật làm chuẩn |
+| D | Code khung (màn hình, popup, tab, top bar, vùng chơi) | Shell test xanh, chạy trên A07 | Gần xong: shell EditMode 76 + PlayMode 36, pilot EditMode 325 + PlayMode 9 (số do người làm game báo, chưa chạy lại ở phiên này), A07 chạy; âm thanh + rung đã nối (D1 xong, nghe thử trên máy chờ bạn). Font đã xong: Baloo 2 ExtraBold là mặc định cố định qua `ShellFont`, shader SDF cho mobile, cổng tương phản chữ `MinTextContrast` 4.5. Popup đã sửa: vùng bấm đóng thật, nút 400x76 căn giữa, tiêu đề căn giữa, nhãn ngoài popup mặc định dùng `backdropText` (commit fbb51c5, f101230, 4f1dcc1, 62aeceb, b80c71a). Thiếu: thông báo đẩy, lệnh chụp montage qua ShellApp thật, mẫu game mới + đo thời gian (F1) |
+| C | Xưởng phong cách | Bộ hình đồng nhất, hết lỗi art | Một nửa: có `kit_v5`; còn ô trắng trong icon, nút xanh lá, khung panel đôi trong `panel_popup.png`, hình xấu (băng, cá, hải cẩu, bg_play). Cần bạn quyết có giao Codex vẽ lại không (font đã xong, xem bước D) |
+| E | Thay hình tạm, so ảnh mẫu | Cổng so ảnh chụp với `reference_chunky.png` xanh ở 2 tỉ lệ | Cổng đã viết (`tools/compare_shot`, selftest qua). Chưa có ảnh chuẩn thật: mockup quá khác game nên không dùng làm chuẩn chặt; cần bạn duyệt một ảnh chụp thật làm chuẩn. Chưa có lệnh chụp montage qua ShellApp thật |
 | F | Game mới nhỏ 3 màn dựng từ tool | Chạy trên A07, có số giờ thật | Đã thử một lần: ~3 phút đến chạy trên A07 (`docs/F1_REPORT.md`), nhưng chưa tạo project mới, chưa style mới. 5 chỗ tool thiếu |
-| G1, G2 | 6 skill | Mỗi skill qua 3 tình huống (gồm 1 không nên kích hoạt) + so với không skill | Đã rà tĩnh (`docs/skill_eval/`): using-game-shell và building-3d-objects cần sửa; chưa chạy thử nghiệm với agent thật |
-| H | Cài hook / skill toàn cục | Bạn đồng ý | Chưa |
+| G1, G2 | 6 skill | Mỗi skill qua 3 tình huống (gồm 1 không nên kích hoạt) + so với không skill | Đã rà tĩnh (`docs/skill_eval/`). Đã sửa 2026-11-13: using-game-shell (luật 6 qua `ShellApp.Boot`, số cổng 76/36) và building-3d-objects (viết lại theo blender-mcp). Chưa chạy thử nghiệm với agent thật (chưa kiểm hai bản sửa) |
+| H | Cài hook / skill toàn cục | Bạn đồng ý | Chưa, cần bạn duyệt |
 
 ## Tiêu chí "tool xong" (đề xuất, chờ bạn duyệt)
 1. Game mới 3 màn chạy trên A07 trong ≤ X giờ làm việc (X đo ở F1, chưa có).

@@ -13,7 +13,7 @@ The shell is the shared "everything around the gameplay". A game supplies gamepl
 3. **Rewards only via `IRewardGrantor.Grant(claimId, reward)`.** A claim id is stable per source (`checkin:<date>`, `quest:<date>:<id>`, `iap:<transactionId>`). Same id grants once.
 4. **Time only via `IClock`, UTC.** Tests use a fake clock; test the clock going backward and midnight rollover.
 5. **No literal UI text, color, sprite or reward amount in code.** Text = localization keys in en and vi tables; look = `ShellStyle`; amounts = config. A new key must exist in every table (the EditMode key test fails otherwise).
-6. **The game attaches only through `IGameSessionActions`** (Play, Retry, Revive, NextLevel, Leave, Pause, Resume). Game-specific screens live in the game, not in the shell.
+6. **A game attaches through `ShellApp.Boot(ShellAppConfig)`**: it supplies `Style` (fill it with `ShellKit.Apply` from the game's art kit, never copy slot lines), the string tables, `Actions` (`IGameSessionActions`: Play, Retry, Revive, NextLevel, Leave, Pause, Resume) and a `GameScreenFactory` that builds the game under `ShellGameContext.Parent`. The game draws inside `GameHudView` / `GameViewportView`. Game-specific screens live in the game, not in the shell. Details: `framework/README.md` "Booting a game with ShellApp".
 7. **Core stays pure C#.** `grep -rn UnityEngine Runtime/Core` must print 0 and the Core asmdef keeps `noEngineReferences: true`.
 8. **Do not edit `game-kit` or any other game.** Reference it read-only.
 
