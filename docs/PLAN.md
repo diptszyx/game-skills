@@ -54,11 +54,11 @@ Chưa viết, cần nghiên cứu thêm: gameplay hybrid-casual; cảm giác ch�
 | Bước | Việc | Xong khi | Trạng thái |
 |---|---|---|---|
 | A, B | So sánh hai game, chốt danh sách khung | Danh sách được duyệt | Xong |
-| D | Code khung (màn hình, popup, tab, top bar, vùng chơi) | Shell test xanh, chạy trên A07 | Gần xong: shell 71/71 + 36/36, A07 chạy. Thiếu: âm thanh, rung, thông báo đẩy (D1) |
+| D | Code khung (màn hình, popup, tab, top bar, vùng chơi) | Shell test xanh, chạy trên A07 | Gần xong: shell 71/71 + 36/36, A07 chạy; âm thanh + rung đã nối (D1 xong, nghe thử trên máy chờ bạn). Thiếu: thông báo đẩy, mẫu game mới (F1) |
 | C | Xưởng phong cách | Bộ hình đồng nhất, hết lỗi art | Một nửa: có `kit_v5`; còn ô trắng trong icon, nút xanh lá, hình xấu (băng, cá, hải cẩu, bg_play), font. Cần bạn quyết có giao Codex vẽ lại không |
-| E | Thay hình tạm, so ảnh mẫu | Cổng so ảnh chụp với `reference_chunky.png` xanh ở 2 tỉ lệ | Chưa: chưa có cổng (E1) |
-| F | Game mới nhỏ 3 màn dựng từ tool | Chạy trên A07, có số giờ thật | Chưa: chưa có số giờ nào (F1) |
-| G1, G2 | 6 skill | Mỗi skill qua 3 tình huống (gồm 1 không nên kích hoạt) + so với không skill | Chưa kiểm cái nào (G) |
+| E | Thay hình tạm, so ảnh mẫu | Cổng so ảnh chụp với `reference_chunky.png` xanh ở 2 tỉ lệ | Cổng đã viết (`tools/compare_shot`, selftest qua). Chưa có ảnh chuẩn thật: mockup quá khác game nên không dùng làm chuẩn chặt; cần bạn duyệt một ảnh chụp thật làm chuẩn |
+| F | Game mới nhỏ 3 màn dựng từ tool | Chạy trên A07, có số giờ thật | Đã thử một lần: ~3 phút đến chạy trên A07 (`docs/F1_REPORT.md`), nhưng chưa tạo project mới, chưa style mới. 5 chỗ tool thiếu |
+| G1, G2 | 6 skill | Mỗi skill qua 3 tình huống (gồm 1 không nên kích hoạt) + so với không skill | Đã rà tĩnh (`docs/skill_eval/`): using-game-shell và building-3d-objects cần sửa; chưa chạy thử nghiệm với agent thật |
 | H | Cài hook / skill toàn cục | Bạn đồng ý | Chưa |
 
 ## Tiêu chí "tool xong" (đề xuất, chờ bạn duyệt)
