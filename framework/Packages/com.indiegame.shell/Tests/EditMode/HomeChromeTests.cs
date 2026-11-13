@@ -26,6 +26,23 @@ namespace IndieGame.Shell.Tests
         }
         TabBarView Tabs(Transform parent=null) => new TabBarView(factory,parent??root.transform,Keys.Select(k=>new TabDefinition(k,k,k)).ToArray());
         [TearDown] public void Cleanup() { UnityEngine.Object.DestroyImmediate(root); demos.Dispose(); }
+        [Test] public void ChunkyPaletteTextColoursMeetMinimumContrast()
+        {
+            var palette=ShellKitPalette.Chunky;
+            Assert.That(ShellStyle.Contrast(palette.Outline,palette.Cream),Is.GreaterThanOrEqualTo(ShellStyle.MinTextContrast));
+            Assert.That(ShellStyle.Contrast(palette.Outline,palette.Backdrop),Is.GreaterThanOrEqualTo(ShellStyle.MinTextContrast));
+        }
+        [Test] public void LowContrastPanelTextFailsValidation()
+        {
+            style.PanelColor=ShellKitPalette.Chunky.Cream; style.PanelTextColor=ShellKitPalette.Chunky.Cream;
+            Assert.That(Assert.Throws<InvalidOperationException>(()=>style.Validate()).Message,Does.Contain("PanelTextColor"));
+        }
+        [Test] public void HalfDeclaredContrastPairFailsValidation()
+        {
+            style.BackdropTextColor=ShellKitPalette.Chunky.Outline; style.BackdropColor=Color.clear;
+            Assert.That(Assert.Throws<InvalidOperationException>(()=>style.Validate()).Message,Does.Contain("BackdropTextColor"));
+        }
+        [Test] public void ContrastOfBlackOnWhiteIs21() { Assert.That(ShellStyle.Contrast(Color.black,Color.white),Is.EqualTo(21f).Within(.01f)); }
         [Test] public void HomeChromeStyleValidates() { Assert.DoesNotThrow(()=>style.Validate()); }
         [Test] public void EveryMissingChromeSlotThrowsOnlyWhenEnabled()
         {

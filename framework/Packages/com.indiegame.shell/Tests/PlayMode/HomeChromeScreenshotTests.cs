@@ -43,7 +43,7 @@ namespace IndieGame.Shell.Tests
                     host.Show(factory.ScreenRoot(root.transform,"Chrome demo"));
                     var top=new TopBarView(factory,host.ChromeRoot); top.Render(new TopBarDisplay(12345,5,"04:32"));
                     var keys=new[]{"home","checkin","quests","shop","leaderboard"};
-                    var labels=lang=="vi"?new[]{"Trang chủ","Điểm danh","Nhiệm vụ","Cửa hàng","Bảng xếp hạng"}:new[]{"Home","Check in","Quests","Shop","Leaderboard"};
+                    var labels=lang=="vi"?new[]{"Trang chủ","Điểm danh","Nhiệm vụ","Cửa hàng","Xếp hạng"}:new[]{"Home","Check-in","Quests","Shop","Leaderboard"};
                     var tabs=new TabBarView(factory,host.ChromeRoot,keys.Select((k,i)=>new TabDefinition(k,labels[i],k)).ToArray());
                     host.SetTabBar(tabs); host.ShowTabBar(true); tabs.SetSelected("home"); tabs.SetBadge("quests",true);
                     for(int i=0;i<3;i++)

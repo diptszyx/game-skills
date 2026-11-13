@@ -24,12 +24,30 @@ namespace IndieGame.Shell.Unity.UI
         public Sprite ScreenBackground, CurrencyIcon, HeartIcon, BoosterIcon, ListRowSprite, LockedButtonSprite;
         public Color ScreenColor, TitleColor, ListRowColor, ListRowTextColor, ProgressTrackColor, ProgressFillColor;
         public Color SurfaceColor = Color.white;
+        public const float MinTextContrast = 4.5f;
+        public Color PanelColor = Color.clear, PanelTextColor = Color.clear, BackdropColor = Color.clear, BackdropTextColor = Color.clear;
+        public static float Contrast(Color a, Color b)
+        {
+            var la = Luminance(a); var lb = Luminance(b);
+            return (Mathf.Max(la, lb) + .05f) / (Mathf.Min(la, lb) + .05f);
+        }
+        static float Luminance(Color c) => .2126f * Mathf.GammaToLinearSpace(c.r) + .7152f * Mathf.GammaToLinearSpace(c.g) + .0722f * Mathf.GammaToLinearSpace(c.b);
+        void RequireContrast(Color text, Color surface, string pair)
+        {
+            if (text.a <= 0 && surface.a <= 0) return;
+            if (text.a <= 0 || surface.a <= 0) throw new InvalidOperationException("Style pair needs both colours: " + pair);
+            var ratio = Contrast(text, surface);
+            if (ratio < MinTextContrast) throw new InvalidOperationException("Style text contrast " + ratio.ToString("0.0") + " < " + MinTextContrast + ": " + pair);
+        }
         public Vector2 RowSize = new Vector2(600, 80);
         public float Spacing = 12;
         public T Require<T>(T value, string role) where T : UnityEngine.Object
         { if (value == null) throw new InvalidOperationException("Missing style role: " + role); return value; }
         public void Validate()
         {
+            RequireContrast(PanelTextColor, PanelColor, "PanelTextColor on PanelColor");
+            RequireContrast(BackdropTextColor, BackdropColor, "BackdropTextColor on BackdropColor");
+            RequireContrast(ListRowTextColor, ListRowColor, "ListRowTextColor on ListRowColor");
             if (EnableHomeChrome)
             {
                 Require(TabBarPlainBackground, nameof(TabBarPlainBackground)); Require(DayCellCollected, nameof(DayCellCollected));

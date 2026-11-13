@@ -42,7 +42,7 @@ namespace IndieGame.Shell.Unity.UI
             if (text != null)
             {
                 text.font = s.Theme.Font;
-                text.color = Role == "title" ? s.TitleColor : Role == "rowText" ? s.ListRowTextColor : s.Theme.BodyColor;
+                text.color = Role == "title" ? s.TitleColor : Role == "rowText" ? s.ListRowTextColor : Role == "popupText" && s.PanelTextColor.a > 0 ? s.PanelTextColor : Role == "backdropText" && s.BackdropTextColor.a > 0 ? s.BackdropTextColor : s.Theme.BodyColor;
                 if (Role == "buttonText" || Role == "chromeText")
                 {
                     var b = ButtonRole == ButtonRole.Secondary ? s.Theme.Secondary : s.Theme.Primary;

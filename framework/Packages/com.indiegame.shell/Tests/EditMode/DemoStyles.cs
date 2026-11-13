@@ -28,7 +28,7 @@ namespace IndieGame.Shell.Tests
             s.ScreenColor = bright ? new Color(.95f,.93f,.8f) : new Color(.04f,.04f,.08f);
             s.SurfaceColor = bright ? new Color(.3f,.8f,1) : new Color(.2f,.2f,.25f);
             s.TitleColor=s.ListRowTextColor=s.Theme.BodyColor = bright ? Color.black : Color.white;
-            s.ListRowColor = bright ? Color.white : Color.gray;
+            s.ListRowColor = bright ? Color.white : new Color(.3f,.3f,.35f);
             s.ProgressTrackColor = bright ? Color.gray : Color.black; s.ProgressFillColor = bright ? Color.blue : Color.green;
             s.Theme.Primary.LabelColor=s.Theme.Secondary.LabelColor=s.TitleColor;
             s.Theme.Motion.OpenSeconds=.04f; s.Theme.Motion.CloseSeconds=.04f; s.Theme.Motion.ScrimFadeSeconds=.03f;

@@ -92,5 +92,9 @@
   "shell.booster.hint": "Gợi ý",
   "shell.loading.title": "Đang chuẩn bị mọi thứ cho hành trình phiêu lưu kỳ diệu tiếp theo của bạn",
   "shell.tab.home": "Trang chủ",
+  "shell.tab.checkin": "Điểm danh",
+  "shell.tab.quests": "Nhiệm vụ",
+  "shell.tab.shop": "Cửa hàng",
+  "shell.tab.leaderboard": "Xếp hạng",
   "shell.checkin.day": "Ngày {0}"
 }

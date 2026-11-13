@@ -100,5 +100,14 @@ namespace IndieGame.Shell.Tests
             foreach(var path in source.Where(p=>!retired.Contains(Path.GetFileName(p))))
                 Assert.That(File.ReadAllBytes(Folder+"/"+Path.GetFileName(path)).SequenceEqual(File.ReadAllBytes(path)),Is.True,path);
         }
-    }
+            [Test] public void DefaultFontCoversEveryVietnameseCharacter()
+        {
+            var font=Resources.Load<TMPro.TMP_FontAsset>(ShellKit.DefaultFontResource); Assert.That(font,Is.Not.Null);
+            var vowels="aăâeêioôơuưy"; var tones=new[]{'\u0300','\u0309','\u0303','\u0301','\u0323'}; var missing=new System.Text.StringBuilder();
+            foreach(var vowel in vowels+vowels.ToUpperInvariant()+"đĐ")
+                foreach(var form in new[]{vowel.ToString()}.Concat(tones.Select(t=>(vowel.ToString()+t).Normalize(System.Text.NormalizationForm.FormC))))
+                    if(!font.HasCharacter(form[0])) missing.Append(form);
+            Assert.That(missing.ToString(),Is.Empty);
+        }
+}
 }

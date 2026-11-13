@@ -73,9 +73,9 @@ namespace IndieGame.Shell.Unity.Screens
             p.View.Panel.sizeDelta=new Vector2(p.View.Panel.sizeDelta.x,800);
 
             var layout=p.View.Content.gameObject.AddComponent<VerticalLayoutGroup>(); layout.childControlHeight=false; layout.childForceExpandHeight=false; layout.spacing=factory.Style.Spacing;
-            factory.Label(p.View.Content,text.Get("popup."+kind.ToString().ToLowerInvariant()+".body"));
-            if(kind==SessionPopupKind.Win) factory.Label(p.View.Content,text.Reward(config.WinReward));
-            if(kind==SessionPopupKind.Revive) factory.Label(p.View.Content,text.Get("popup.revive.price",config.ReviveGold));
+            factory.Label(p.View.Content,text.Get("popup."+kind.ToString().ToLowerInvariant()+".body"),role:"popupText");
+            if(kind==SessionPopupKind.Win) factory.Label(p.View.Content,text.Reward(config.WinReward),role:"popupText");
+            if(kind==SessionPopupKind.Revive) factory.Label(p.View.Content,text.Get("popup.revive.price",config.ReviveGold),role:"popupText");
             string[] actions=kind==SessionPopupKind.Win?new[]{"next","double"}:kind==SessionPopupKind.Lose?new[]{"retry","revive"}:kind==SessionPopupKind.Revive?new[]{"ad","gold"}:kind==SessionPopupKind.Pause?new[]{"resume","sound","music","haptics","leave"}:new[]{"confirm","cancel"};
             foreach(var action in actions)
             {

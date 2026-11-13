@@ -25,7 +25,7 @@ namespace IndieGame.Shell.Unity.Screens
             lifetime=host.ChromeRoot.gameObject.AddComponent<ScreenLifetime>(); lifetime.Ticked+=Refresh; lifetime.Resumed+=Refresh;
             Refresh();
         }
-        string Label(string key)=>text.Get(key=="home"?"shell.tab.home":"shell."+key+".title");
+        string Label(string key)=>text.Get("shell.tab."+key);
         public static bool CheckInBadge(ShellSession session)=>session.DailyCheckIn.Preview().CanClaimNow;
         public static bool QuestsBadge(ShellSession session)=>session.DailyQuests.Quests.Any(QuestsPresenter.CanClaim);
         public void Refresh()

@@ -1,4 +1,5 @@
 using System;
+using TMPro;
 using UnityEngine;
 using GameKit.UI;
 
@@ -8,6 +9,7 @@ namespace IndieGame.Shell.Unity.UI
     {
         public Color Outline = new Color32(0x30, 0x0c, 0x31, 255);
         public Color Cream = new Color32(0xfe, 0xe9, 0xd1, 255);
+        public Color Backdrop = new Color32(0xe9, 0xb1, 0xcc, 255);
         public Color TrackColor = new Color32(0xd9, 0xd6, 0xf0, 255);
         public Color FillColor = new Color32(0xd7, 0x44, 0x49, 255);
         public float LabelOutlineWidth = .045f;
@@ -17,9 +19,13 @@ namespace IndieGame.Shell.Unity.UI
 
     public static class ShellKit
     {
+        public const string DefaultFontResource = "ShellFont";
         public static void Apply(ShellStyle style, Func<string, Sprite> sprite, ShellKitPalette palette, Action<UnityEngine.Object> adopt)
         {
             var theme = style.Theme;
+            var font = Resources.Load<TMP_FontAsset>(DefaultFontResource);
+            if (font == null) throw new InvalidOperationException("Missing default font resource: " + DefaultFontResource);
+            theme.Font = font;
             Sprite Get(string name) => sprite(name);
             style.EnableHomeChrome = true;
             style.Logo = Get("logo"); style.Mascot = Get("penguin_red_idle");
@@ -38,6 +44,7 @@ namespace IndieGame.Shell.Unity.UI
             theme.PanelSize = new Vector2(620f, 400f);
             style.TabLabelColor = palette.Outline; style.ScreenTitleColorOverride = palette.Outline; style.TabUnselectedTint = new Color(.92f, .92f, .95f);
             style.SurfaceColor = style.ScreenColor = Color.white; style.TitleColor = Color.white;
+            style.PanelColor = palette.Cream; style.PanelTextColor = palette.Outline; style.BackdropColor = palette.Backdrop; style.BackdropTextColor = palette.Outline;
             style.ListRowColor = palette.Cream; style.ListRowTextColor = palette.Outline; theme.BodyColor = palette.Cream;
             style.ProgressTrackColor = palette.TrackColor; style.ProgressFillColor = palette.FillColor;
             theme.Primary.LabelColor = theme.Secondary.LabelColor = Color.white;

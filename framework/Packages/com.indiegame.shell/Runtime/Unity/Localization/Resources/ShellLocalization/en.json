@@ -92,5 +92,9 @@
   "shell.booster.hint": "Hint",
   "shell.loading.title": "Loading your next extraordinary adventure and preparing everything for you",
   "shell.tab.home": "Home",
+  "shell.tab.checkin": "Check-in",
+  "shell.tab.quests": "Quests",
+  "shell.tab.shop": "Shop",
+  "shell.tab.leaderboard": "Leaderboard",
   "shell.checkin.day": "Day {0}"
 }
