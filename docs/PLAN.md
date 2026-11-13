@@ -49,15 +49,27 @@ Skill là hướng dẫn ngắn cho trợ lý AI, chỉ được mở ra khi vi�
 
 Chưa viết, cần nghiên cứu thêm: gameplay hybrid-casual; cảm giác chơi, âm thanh, kinh tế; phát hành.
 
-## Các bước xây
+## Các bước xây (trạng thái đo được, 2026-11-13)
 
-| Bước | Việc | Làm sau | Xong khi | Trạng thái |
-|---|---|---|---|---|
-| A | So sánh phần xung quanh của hai game đã làm | | Có bảng từng chức năng, kiểm lại ngẫu nhiên | Xong |
-| B | Chốt danh sách đưa vào khung | A | Danh sách được duyệt | Xong |
-| C | Xưởng phong cách | B | Thử với một ý tưởng giả: ra 3-4 phong cách, chọn một, ra đủ bộ hình đồng nhất, dựng thử một đồ vật 3D | Chưa |
-| D | Code khung, các màn hình dùng hình tạm | B (làm song song với C) | Chạy đúng, có kiểm tra tự động, chạy được trên điện thoại | Chưa |
-| E | Thay hình tạm bằng hình của xưởng | C và D | Mỗi màn hình đúng ảnh mẫu đã duyệt, ở 2 kiểu màn hình | Chưa |
-| F | Thử bằng một game mới nhỏ (3 màn) | E | Chạy trên điện thoại, ghi số giờ thật để biết tiết kiệm bao nhiêu | Chưa |
-| G1 | Viết hai skill đầu (làm việc với AI, kiểm tra kết quả) | B (làm được ngay) | Qua thử nghiệm: nên dùng, không nên dùng, so với không có skill | Chưa |
-| G2 | Viết bốn skill còn lại: ba skill hình ảnh và 3D cùng bước C, skill dùng khung sau bước D | C, D | Như G1 | Chưa |
+| Bước | Việc | Xong khi | Trạng thái |
+|---|---|---|---|
+| A, B | So sánh hai game, chốt danh sách khung | Danh sách được duyệt | Xong |
+| D | Code khung (màn hình, popup, tab, top bar, vùng chơi) | Shell test xanh, chạy trên A07 | Gần xong: shell 71/71 + 36/36, A07 chạy. Thiếu: âm thanh, rung, thông báo đẩy (D1) |
+| C | Xưởng phong cách | Bộ hình đồng nhất, hết lỗi art | Một nửa: có `kit_v5`; còn ô trắng trong icon, nút xanh lá, hình xấu (băng, cá, hải cẩu, bg_play), font. Cần bạn quyết có giao Codex vẽ lại không |
+| E | Thay hình tạm, so ảnh mẫu | Cổng so ảnh chụp với `reference_chunky.png` xanh ở 2 tỉ lệ | Chưa: chưa có cổng (E1) |
+| F | Game mới nhỏ 3 màn dựng từ tool | Chạy trên A07, có số giờ thật | Chưa: chưa có số giờ nào (F1) |
+| G1, G2 | 6 skill | Mỗi skill qua 3 tình huống (gồm 1 không nên kích hoạt) + so với không skill | Chưa kiểm cái nào (G) |
+| H | Cài hook / skill toàn cục | Bạn đồng ý | Chưa |
+
+## Tiêu chí "tool xong" (đề xuất, chờ bạn duyệt)
+1. Game mới 3 màn chạy trên A07 trong ≤ X giờ làm việc (X đo ở F1, chưa có).
+2. Mọi màn của game đó qua cổng so ảnh E1 (ngưỡng ghi trong script).
+3. Shell EditMode + PlayMode xanh, `error CS` = 0.
+4. 6 skill qua kiểm G.
+
+## Việc tách song song (2026-11-13)
+Chỉ một tiến trình Unity cùng lúc. Agent chỉ viết mã / đọc dữ liệu, không chạy Unity; Claude chạy Unity một lần mỗi đợt.
+- E1: script so ảnh (Python, không Unity).
+- D1: dịch vụ âm thanh + rung trong shell (C#, file mới).
+- G: rà 6 skill, viết kịch bản kiểm (chỉ đọc + viết docs).
+- Việc phụ của game-2-v2 (hiệu ứng thắng, màn thử cơ chế) không nằm trong tiêu chí xong tool.

@@ -46,6 +46,7 @@ namespace IndieGame.Shell.Unity
         public ILeaderboardService Leaderboard;
         public string BoardId;
         public int LeaderboardRows = 10;
+        public IDictionary<string,AudioClip> Sounds;
         public Func<ShellGameContext,RectTransform> GameScreenFactory;
         internal static void Require(object value,string name)
         { if(value==null) throw new InvalidOperationException("Missing ShellApp config: "+name); }

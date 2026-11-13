@@ -182,7 +182,7 @@ namespace IndieGame.Shell.Tests
             Assert.That(chrome.Find("TabBar/Tabs/Tab checkin/Icon/Badge").gameObject.activeSelf,Is.False);
             app.Back(); yield return Tap(MainButton("shell.play")); Assert.That(game.Plays,Is.EqualTo(1));
             Assert.That(chrome.Find("TabBar").gameObject.activeSelf,Is.False); Assert.That(chrome.Find("TopBar").gameObject.activeSelf,Is.True);
-            Assert.That(app.GameHud,Is.Not.Null); yield return Tap(chrome.Find("TopBar/Shell Settings").GetComponent<Button>()); Assert.That(app.Popups.Top,Is.Not.Null); app.Back(); yield return new WaitForSecondsRealtime(.15f);
+            Assert.That(app.GameHud,Is.Not.Null); Assert.That(app.Audio,Is.Not.Null); Assert.That(app.Haptics,Is.Not.Null); yield return Tap(chrome.Find("TopBar/Shell Settings").GetComponent<Button>()); Assert.That(app.Popups.Top,Is.Not.Null); app.Back(); yield return new WaitForSecondsRealtime(.15f);
             app.ShowMain(); Assert.That(chrome.Find("TabBar").gameObject.activeSelf,Is.True);
         }
         [UnityTest] public IEnumerator GameViewportMapsScreenPointsToWorldAndFollowsGameScreen()

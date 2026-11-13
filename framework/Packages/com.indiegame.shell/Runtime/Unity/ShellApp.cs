@@ -23,6 +23,8 @@ namespace IndieGame.Shell.Unity
         public MainView Main { get; private set; }
         public RectTransform GameRoot { get; private set; }
         public GameHudView GameHud { get; private set; }
+        public IAudioService Audio { get; private set; }
+        public IHapticsPlayer Haptics { get; private set; }
         public TMP_Text ErrorLabel { get; private set; }
         public MainPresenter MainPresenter { get; private set; }
         readonly List<IDisposable> owned = new List<IDisposable>();
@@ -53,6 +55,9 @@ namespace IndieGame.Shell.Unity
                 scaler.referenceResolution=new Vector2(720,1600); scaler.matchWidthOrHeight=0;
                 Session=new ShellSession(config.SaveStore??new SaveStore(),config.SavePath,clock,config.Lives,config.Economy,config.CheckIn,config.Quests,config.Settings,config.RemoteConfig);
                 screenText=new ScreenText(Session,Text); loadResult=Session.LoadAll();
+                if(FindFirstObjectByType<AudioListener>()==null) gameObject.AddComponent<AudioListener>();
+                var audioPool=new UnityAudioSourcePool(transform,config.Sounds??new Dictionary<string,AudioClip>()); owned.Add(audioPool);
+                Audio=new AudioService(Session.Settings,audioPool); Haptics=new HapticsGate(Session.Settings,new UnityHapticsPlayer());
                 ErrorLabel=factory.Label(canvas.transform,""); ErrorLabel.name="Shell Error";
                 ErrorLabel.rectTransform.anchorMin=ErrorLabel.rectTransform.anchorMax=new Vector2(.5f,0);
                 ErrorLabel.rectTransform.anchoredPosition=new Vector2(0,35);
