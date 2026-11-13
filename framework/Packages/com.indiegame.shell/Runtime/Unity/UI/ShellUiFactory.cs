@@ -79,11 +79,16 @@ namespace IndieGame.Shell.Unity.UI
         }
         public RectTransform ScreenRoot(Transform parent, string name = "Screen")
         { var r = Node(name, parent); Stretch(r); Image(r, "screen"); r.gameObject.SetActive(true); return r; }
+        string DefaultLabelRole(Transform parent, bool title)
+        {
+            bool onBackdrop = Style.BackdropTextColor.a > 0 && parent.GetComponentInParent<PopupView>() == null;
+            return onBackdrop ? "backdropText" : title ? "title" : "body";
+        }
         public TextMeshProUGUI Label(Transform parent, string value, bool title = false, string role = null)
         {
             var r = Node(title ? "Title" : "Label", parent); r.sizeDelta = title ? Style.Theme.TitleSize : Style.Theme.BodySize;
             var t = r.gameObject.AddComponent<TextMeshProUGUI>(); t.text = value; t.fontSize = title ? Style.Theme.TitleFontSize : Style.Theme.BodyFontSize;
-            t.alignment = TextAlignmentOptions.Center; t.raycastTarget = false; Bind(t, role ?? (title ? "title" : "body"));
+            t.alignment = TextAlignmentOptions.Center; t.raycastTarget = false; Bind(t, role ?? DefaultLabelRole(parent, title));
             LocalizedLayout.Text(t,t.fontSize);
             if(title) LocalizedLayout.Heading(r);
             if(parent.GetComponent<PopupView>()==null && parent.parent!=null && parent.parent.GetComponentInParent<PopupView>()!=null) LocalizedLayout.PopupChild(r,false);
@@ -127,7 +132,7 @@ namespace IndieGame.Shell.Unity.UI
             var closeHit = Node("CloseHit", panel); closeHit.anchorMin = closeHit.anchorMax = new Vector2(1, 1); closeHit.sizeDelta = new Vector2(96, 96); closeHit.anchoredPosition = new Vector2(-36, -110);
             var closeImage = closeHit.gameObject.AddComponent<Image>(); closeImage.color = Color.clear;
             var closeButton = closeHit.gameObject.AddComponent<Button>(); closeButton.targetGraphic = closeImage; closeButton.transition = Selectable.Transition.None; closeHit.gameObject.SetActive(true);
-            var heading = Label(panel, title, true); heading.rectTransform.anchoredPosition = new Vector2(0, Style.Theme.PanelSize.y/2 + Style.Theme.TitleOffsetY);
+            var heading = Label(panel, title, true, "title"); heading.rectTransform.anchoredPosition = new Vector2(0, Style.Theme.PanelSize.y/2 + Style.Theme.TitleOffsetY);
             RectTransform slot = null;
             if (contentSlot) { slot = Node("Content", panel); slot.sizeDelta = Style.Theme.BodySize; slot.gameObject.SetActive(true); }
             var view = r.gameObject.AddComponent<PopupView>(); view.Initialize(group, panel, slot, Style.Theme.Motion);
