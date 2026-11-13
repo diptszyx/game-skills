@@ -124,12 +124,15 @@ namespace IndieGame.Shell.Unity.UI
             var scrim = r.gameObject.AddComponent<Button>(); scrim.transition = Selectable.Transition.None;
             var panel = Node("Panel", r); panel.sizeDelta = Style.Theme.PanelSize; Image(panel, "panel");
             var panelInput = panel.gameObject.AddComponent<Button>(); panelInput.transition = Selectable.Transition.None;
+            var closeHit = Node("CloseHit", panel); closeHit.anchorMin = closeHit.anchorMax = new Vector2(1, 1); closeHit.sizeDelta = new Vector2(96, 96); closeHit.anchoredPosition = new Vector2(-36, -110);
+            var closeImage = closeHit.gameObject.AddComponent<Image>(); closeImage.color = Color.clear;
+            var closeButton = closeHit.gameObject.AddComponent<Button>(); closeButton.targetGraphic = closeImage; closeButton.transition = Selectable.Transition.None; closeHit.gameObject.SetActive(true);
             var heading = Label(panel, title, true); heading.rectTransform.anchoredPosition = new Vector2(0, Style.Theme.PanelSize.y/2 + Style.Theme.TitleOffsetY);
             RectTransform slot = null;
             if (contentSlot) { slot = Node("Content", panel); slot.sizeDelta = Style.Theme.BodySize; slot.gameObject.SetActive(true); }
             var view = r.gameObject.AddComponent<PopupView>(); view.Initialize(group, panel, slot, Style.Theme.Motion);
             LocalizedLayout.Popup(panel,heading.rectTransform,slot);
-            scrim.onClick.AddListener(() => view.RequestDismiss()); panel.gameObject.SetActive(true);
+            scrim.onClick.AddListener(() => view.RequestDismiss()); closeButton.onClick.AddListener(() => view.RequestDismiss()); panel.gameObject.SetActive(true);
             // Remains inactive until a host owns it.
             return view;
         }

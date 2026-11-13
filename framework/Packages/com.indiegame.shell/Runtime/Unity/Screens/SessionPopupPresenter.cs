@@ -72,7 +72,7 @@ namespace IndieGame.Shell.Unity.Screens
             p.View.Policy=kind==SessionPopupKind.Pause||kind==SessionPopupKind.Leave?DismissalPolicy.Dismissible:DismissalPolicy.Mandatory;
             p.View.Panel.sizeDelta=new Vector2(p.View.Panel.sizeDelta.x,800);
 
-            var layout=p.View.Content.gameObject.AddComponent<VerticalLayoutGroup>(); layout.childControlHeight=false; layout.childForceExpandHeight=false; layout.spacing=factory.Style.Spacing;
+            var layout=p.View.Content.gameObject.AddComponent<VerticalLayoutGroup>(); layout.childControlHeight=false; layout.childForceExpandHeight=false; layout.childControlWidth=false; layout.childForceExpandWidth=false; layout.childAlignment=TextAnchor.MiddleCenter; layout.spacing=factory.Style.Spacing;
             factory.Label(p.View.Content,text.Get("popup."+kind.ToString().ToLowerInvariant()+".body"),role:"popupText");
             if(kind==SessionPopupKind.Win) factory.Label(p.View.Content,text.Reward(config.WinReward),role:"popupText");
             if(kind==SessionPopupKind.Revive) factory.Label(p.View.Content,text.Get("popup.revive.price",config.ReviveGold),role:"popupText");
