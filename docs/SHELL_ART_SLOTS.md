@@ -21,6 +21,7 @@ Nguồn: `framework/Packages/com.indiegame.shell/Runtime/Unity/UI/ShellStyle.cs`
 ## B. Khung có trong tùy chọn nhưng chưa có hình
 | Chỗ cắm | Ghi chú |
 |---|---|
+| Nền popup bắt buộc (`ShellStyle.MandatoryPanelSprite`) | Dùng cho popup `Mandatory`; file `panel_popup_nox.png`, no X badge. Kích thước pixel phải bằng `panel_popup` (1086×1113 cho KitChunky), cùng cấu hình 9-slice. Tùy chọn: nếu null thì dùng `Theme.PanelSprite`, vùng đóng vẫn không nhận input |
 | Nút đóng (`CloseSprite`) | `panel_popup` đang có nút đóng đính liền; cần tách thành mảnh riêng |
 | Công tắc bật tắt (`ToggleOn/Off`) | Cho màn cài đặt. Thiếu |
 | Nút trung tính (`Neutral`), nút khóa của nút chính và phụ | Thiếu |

@@ -28,7 +28,7 @@ Khung dùng được cho cả game 2D lẫn 3D vì giao diện luôn là lớp 2
 | Cài đặt | Bảng xếp hạng (Unity Leaderboards) | Rời ván |
 | Đa ngôn ngữ | Màn hình tải | |
 | Vùng an toàn (tai thỏ) | | |
-| Xem quảng cáo nhận thưởng (giả) | | |
+| Xem quảng cáo nhận thưởng (giao diện bất đồng bộ; bản giả cho test, bản thật LevelPlay trong package `com.indiegame.shell.levelplay`) | | |
 | Mua hàng (giả) | | |
 | Thông báo đẩy | | |
 | Cấu hình từ xa | | |

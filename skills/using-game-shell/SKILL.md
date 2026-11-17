@@ -26,3 +26,8 @@ The shell is the shared "everything around the gameplay". A game supplies gamepl
 
 ## Gates before saying done
 `dotnet build` 0 warnings; `dotnet test` green; `error CS count: 0`; EditMode and PlayMode `passed == expected`; Core isolation checks. Only one Unity at a time. Details and measured times: `references/gates.md`.
+
+## Rewarded ads (LevelPlay)
+- Game code never touches the ad SDK: the shell calls `IRewardedAdService.Show(placementId, onDone)` (async, `onDone` exactly once). Tests use `FakeRewardedAdService`.
+- Real ads: add package `com.indiegame.shell.levelplay` (it pulls `com.unity.services.levelplay`), build `LevelPlayAdsSettings` (AppKey, RewardedAdUnitId), call `new LevelPlayAds().Create(settings)` once at boot and put the returned service in `ShellAppConfig.RewardedAds`. A hidden ticker drives load retries.
+- Placement ids from the shell config (`RevivePlacement`, `DoublePlacement`) must exist on the LevelPlay dashboard. The placeholder key `TEST_KEY_REPLACE_ME` is rejected in release builds. Real key and on-device test come from the dev lead; Editor mock ads only work with an Android or iOS build target.
