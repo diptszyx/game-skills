@@ -10,6 +10,8 @@ namespace IndieGame.Shell.Unity.UI
         public CanvasGroup Group { get; private set; }
         public RectTransform Panel { get; private set; }
         public RectTransform Content { get; private set; }
+        internal bool FitContent;
+        public Button CloseButton { get; internal set; }
         public Selectable InitialFocus;
         [SerializeField, UnityEngine.Serialization.FormerlySerializedAs("Policy")] DismissalPolicy policy;
         public DismissalPolicy Policy { get=>policy; set { policy=value; RefreshCloseTarget(); } }
@@ -21,10 +23,17 @@ namespace IndieGame.Shell.Unity.UI
             if(style!=null)
                 Panel.GetComponent<Image>().sprite=policy==DismissalPolicy.Mandatory && style.MandatoryPanelSprite!=null
                     ? style.MandatoryPanelSprite : style.Theme.PanelSprite;
-            var close=Panel.Find("CloseHit"); if(close==null) return;
+            var close=CloseButton!=null?CloseButton.transform:null; if(close==null) return;
             bool enabled=policy==DismissalPolicy.Dismissible && (style==null||style.ShowCloseHotspot);
             close.GetComponent<Button>().interactable=enabled;
             close.GetComponent<Image>().raycastTarget=enabled;
+            // The style's sliced panel may already contain the close circle and X.
+            // Keep one accessible, expanded hit target aligned with that artwork.
+            bool baked=style!=null&&style.PanelHasBakedCloseIcon;
+            close.GetComponent<Image>().color=baked?Color.clear:style!=null?style.ActionSurfaceColor:Color.white;
+            foreach(var icon in close.GetComponentsInChildren<ShellAppearance>(true))
+                if(icon.Role=="actionIcon") icon.GetComponent<Image>().enabled=!baked;
+            close.gameObject.SetActive(enabled);
         }
         void OnEnable() { RefreshCloseTarget(); Reflow(); }
         int layoutSignature;
@@ -51,7 +60,7 @@ namespace IndieGame.Shell.Unity.UI
         // This also handles text changes and retry/error controls appearing after Open.
         public void Reflow()
         {
-            if(style==null||Content==null||style.PopupLayout.PanelMaxHeight<=0) return;
+            if(style==null||Content==null||style.PopupLayout.PanelMaxHeight<=0&&!FitContent) return;
             const float padding=48, headingBand=132;
             float width=Mathf.Max(1,Panel.rect.width-2*padding);
             var layout=Content.GetComponent<VerticalLayoutGroup>();
@@ -68,15 +77,18 @@ namespace IndieGame.Shell.Unity.UI
                 element.ignoreLayout=label!=null&&string.IsNullOrEmpty(label.text);
                 if(element.ignoreLayout) { rect.sizeDelta=Vector2.zero; continue; }
                 bool button=child.GetComponent<Button>()!=null;
-                rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,button?Mathf.Min(ShellLayout.Standard.PopupAction.x,width):width);
+                var category=child.GetComponent<LayoutCategory>();
+                bool icon=category!=null&&(category.Category==ShellLayoutCategory.IconButton||category.Category==ShellLayoutCategory.IconAction||category.Category==ShellLayoutCategory.IconAmount);
+                var buttonSize=icon?ShellUiFactory.IconSize(category.Category):ShellLayout.Standard.PopupAction;
+                rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,button?Mathf.Min(buttonSize.x,width):width);
                 if(label!=null) element.preferredHeight=Mathf.Max(32,label.GetPreferredValues(label.text,width,float.PositiveInfinity).y);
-                else if(button) element.preferredHeight=ShellLayout.Standard.PopupAction.y;
+                else if(button) element.preferredHeight=buttonSize.y;
             }
             LayoutRebuilder.ForceRebuildLayoutImmediate(Content);
             float preferred=LayoutUtility.GetPreferredHeight(Content);
             var sizing=style.PopupLayout;
-            float min=sizing.PanelMinHeight>0?sizing.PanelMinHeight:style.Theme.PanelSize.y;
-            float max=sizing.PanelMaxHeight>0?sizing.PanelMaxHeight:style.Theme.PanelSize.y;
+            float min=sizing.PanelMinHeight>0?sizing.PanelMinHeight:FitContent?ShellLayout.Standard.SessionPopupMinHeight:style.Theme.PanelSize.y;
+            float max=sizing.PanelMaxHeight>0?sizing.PanelMaxHeight:FitContent?ShellLayout.Standard.SessionPopupMaxHeight:style.Theme.PanelSize.y;
             Panel.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical,Mathf.Clamp(headingBand+preferred+padding,min,Mathf.Max(min,max)));
             LayoutRebuilder.ForceRebuildLayoutImmediate(Content);
         }

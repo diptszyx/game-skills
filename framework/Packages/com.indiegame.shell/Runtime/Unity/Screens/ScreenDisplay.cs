@@ -15,8 +15,10 @@ namespace IndieGame.Shell.Unity.Screens
         public string Action { get; }
         public bool Enabled { get; }
         public float Progress { get; }
-        public RowDisplay(string id, string text, string action = "", bool enabled = false, float progress = -1)
-        { Id=id; Text=text; Action=action; Enabled=enabled; Progress=progress; }
+        public string Icon { get; }
+        public string Amount { get; }
+        public RowDisplay(string id, string text, string action = "", bool enabled = false, float progress = -1,string icon="check",string amount=null)
+        { Id=id; Text=text; Action=action; Enabled=enabled; Progress=progress; Icon=icon; Amount=amount; }
     }
     public sealed class ListDisplay
     {
@@ -60,8 +62,8 @@ namespace IndieGame.Shell.Unity.Screens
                     fill.gameObject.AddComponent<Image>().color=f.Style.ProgressFillColor; fill.gameObject.SetActive(true); track.gameObject.SetActive(true);
                 }
                 if(!string.IsNullOrEmpty(row.Action))
-                { var b=f.Button(r,row.Action,clicked:()=>clicked(row.Id)); b.interactable=row.Enabled;
-                  var rt=(RectTransform)b.transform; rt.anchorMin=new Vector2(.66f,.1f); rt.anchorMax=new Vector2(.98f,.9f); rt.offsetMin=rt.offsetMax=Vector2.zero;
+                { var b=f.IconButton(r,row.Icon,row.Action,()=>clicked(row.Id),row.Amount!=null?ShellLayoutCategory.IconAmount:ShellLayoutCategory.IconAction,row.Amount); b.interactable=row.Enabled;
+                  var rt=(RectTransform)b.transform; rt.anchorMin=rt.anchorMax=new Vector2(1,.5f); rt.pivot=new Vector2(1,.5f); rt.anchoredPosition=new Vector2(-12,0);
  }
             }
         }

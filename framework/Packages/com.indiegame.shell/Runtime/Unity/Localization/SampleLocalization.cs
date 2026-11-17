@@ -8,6 +8,7 @@ namespace IndieGame.Shell.Unity.Localization
     {
         public static readonly IReadOnlyList<string> Keys = Array.AsReadOnly(new[] {
             "en",
+            "shell.pause", "shell.back", "shell.home", "shell.close",
             "popup.action.ad",
             "popup.action.cancel",
             "popup.action.confirm",

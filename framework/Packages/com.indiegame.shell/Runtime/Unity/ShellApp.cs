@@ -83,6 +83,13 @@ namespace IndieGame.Shell.Unity
                 if(GameRoot==null) throw new InvalidOperationException("GameScreenFactory returned null");
                 GameRoot.SetParent(Screens.SafeRoot,false); GameRoot.gameObject.SetActive(false);
                 GameHud=new GameHudView(factory,GameRoot,config.Style.EnableHomeChrome); owned.Add(GameHud);
+                if(!config.Style.EnableHomeChrome) {
+                    var pause=factory.IconButton(GameRoot,"pause",screenText.Get("shell.pause"),()=>Flow.ShowPause(),accessibilityKey:"pause");
+                    var pr=(RectTransform)pause.transform; pr.anchorMin=pr.anchorMax=new Vector2(1,1); pr.pivot=new Vector2(1,1); pr.anchoredPosition=ShellLayout.Standard.HeaderRightPosition;
+                    var lifetime=GameRoot.GetComponent<ScreenLifetime>()??GameRoot.gameObject.AddComponent<ScreenLifetime>();
+                    void RefreshPauseName()=>pause.GetComponent<ActionAccessibility>().Set("pause",screenText.Get("shell.pause"));
+                    lifetime.Entered+=RefreshPauseName; lifetime.Ticked+=RefreshPauseName;
+                }
                 Main=new MainView(factory,Screens.SafeRoot);
                 MainPresenter=new MainPresenter(Session,Main,Text,clock,actions,Navigate,config.PlayLabel); owned.Add(MainPresenter);
                 if(config.Style.EnableHomeChrome) owned.Add(new ChromePresenter(Session,Text,clock,factory,Screens,Main.Root,GameRoot,ShowMain,Navigate,()=>{ if(Ready && Popups.Top==null) Flow.ShowPause(); },error=>ErrorLabel.text=error));
@@ -125,11 +132,11 @@ namespace IndieGame.Shell.Unity
                         var board=new LeaderboardView(factory,Screens.SafeRoot); owned.Add(new LeaderboardPresenter(Session,board,Text,config.Leaderboard,config.BoardId,config.LeaderboardRows)); root=board.Root; break;
                     default: throw new InvalidOperationException("Unavailable ShellScreen: "+screen);
                 }
-                var back=factory.Button(root,screenText.Get("shell.back"),clicked:Back); back.name="Shell Back";
-                var rect=(RectTransform)back.transform; rect.anchorMin=rect.anchorMax=new Vector2(.5f,0); rect.anchoredPosition=new Vector2(0,ShellLayout.Standard.BackBottomOffset(config.Style.EnableHomeChrome));
+                var back=factory.IconButton(root,"back",screenText.Get("shell.back"),Back);
+                var rect=(RectTransform)back.transform; rect.anchorMin=rect.anchorMax=new Vector2(0,1); rect.pivot=new Vector2(0,1); rect.anchoredPosition=ShellLayout.Standard.BackPosition;
                 cached.Add(screen,root);
             }
-            root.Find("Shell Back").GetComponentInChildren<TMP_Text>().text=screenText.Get("shell.back"); Screens.Show(root);
+            foreach(var a in root.GetComponentsInChildren<ActionAccessibility>(true)) if(a.Key=="back") a.Set("back",screenText.Get("shell.back")); Screens.Show(root);
         }
         public SessionResult Commit()
         {

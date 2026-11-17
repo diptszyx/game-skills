@@ -42,6 +42,7 @@ namespace IndieGame.Shell.Tests
             table["shell.loading.tip"]="Tip"; table["shell.refresh"]="Refresh"; table["shell.leaderboard.title"]="Leaderboard";
             table["shell.leaderboard.row"]="{0} {1} {2}"; table["shell.leaderboard.mine"]="My rank {0} {1}";
             table["shell.leaderboard.loading"]="Loading"; table["shell.leaderboard.empty"]="Empty";
+            table["shell.home"]="Home"; table["shell.close"]="Close"; table["shell.pause"]="Pause"; table["shell.back"]="Back";
             var l=new LocalizationService(new LocalizationConfig("en")); l.LoadTable("en","{"+string.Join(",",table.Select(p=>"\""+p.Key+"\":\""+p.Value+"\""))+"}"); return l;
         }
     }

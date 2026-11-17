@@ -53,7 +53,7 @@ namespace IndieGame.Shell.Tests
             Assert.DoesNotThrow(()=>factory.Style.Validate());
             var p=Popup("Mandatory",DismissalPolicy.Mandatory);
             Assert.That(p.Panel.GetComponent<Image>().sprite,Is.SameAs(factory.Style.Theme.PanelSprite));
-            var close=p.Panel.Find("CloseHit");
+            var close=p.CloseButton.transform;
             Assert.That(close.GetComponent<Button>().interactable,Is.False);
             Assert.That(close.GetComponent<Image>().raycastTarget,Is.False);
             p.Policy=DismissalPolicy.Dismissible;
@@ -65,7 +65,7 @@ namespace IndieGame.Shell.Tests
             foreach(var policy in new[]{DismissalPolicy.Mandatory,DismissalPolicy.Dismissible})
             {
                 var p=Popup("Close",policy); host.Open(p); yield return null;
-                var close=p.Panel.Find("CloseHit").GetComponent<Button>();
+                var close=p.CloseButton;
                 Assert.That(close.interactable,Is.EqualTo(policy==DismissalPolicy.Dismissible));
                 Assert.That(close.GetComponent<Image>().raycastTarget,Is.EqualTo(policy==DismissalPolicy.Dismissible));
                 Canvas.ForceUpdateCanvases();
@@ -125,7 +125,7 @@ namespace IndieGame.Shell.Tests
             var last=p.Content.GetComponentsInChildren<Button>().Last(); var corners=new Vector3[4]; ((RectTransform)last.transform).GetWorldCorners(corners);
             float bottom=p.Panel.InverseTransformPoint(corners[0]).y-p.Panel.rect.yMin;
             Assert.That(bottom,Is.InRange(0f,72f),"Empty space below last button (padding=48)");
-            Assert.That(p.Panel.Find("CloseHit").GetComponent<RectTransform>().anchorMax,Is.EqualTo(Vector2.one));
+            Assert.That(((RectTransform)p.CloseButton.transform).anchorMax,Is.EqualTo(Vector2.one));
             Assert.That(p.Panel.GetComponentInChildren<TMP_Text>().rectTransform.anchorMax.y,Is.EqualTo(1));
         }
         static void CheckPanel(PopupView p)

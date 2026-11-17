@@ -83,7 +83,7 @@ namespace IndieGame.Shell.Tests
             Assert.That(app.Ready,Is.True); Assert.That(app.Popups.HandlesOwnBackKey,Is.False);
             yield return null; yield return null;
         }
-        Button MainButton(string key)=>app.Main.Root.GetComponentsInChildren<Button>().Single(b=>b.GetComponentInChildren<TMP_Text>().text==app.Text.Format("en",key).Value);
+        Button MainButton(string key)=>app.Main.Root.GetComponentsInChildren<Button>().Single(b=>(b.GetComponentInChildren<TMP_Text>()?.text??b.GetComponent<ActionAccessibility>()?.Label)==app.Text.Format("en",key).Value);
         static IEnumerator Until(Func<bool> condition,string message)
         {
             float deadline=Time.realtimeSinceStartup+10;
@@ -138,7 +138,7 @@ namespace IndieGame.Shell.Tests
             Assert.That(Assert.Throws<InvalidOperationException>(()=>app.Navigate(ShellScreen.Shop)).Message,Does.Contain("Shop"));
             Assert.That(Assert.Throws<InvalidOperationException>(()=>app.Navigate(ShellScreen.Leaderboard)).Message,Does.Contain("Leaderboard"));
             yield return new RealPointer(mouse).Click(MainButton("shell.checkin.title")); var check=app.Screens.Current;
-            Assert.That(check.name,Is.EqualTo("CheckIn")); yield return new RealPointer(mouse).Click(check.Find("Shell Back").GetComponent<Button>());
+            Assert.That(check.name,Is.EqualTo("CheckIn")); yield return new RealPointer(mouse).Click(check.GetComponentsInChildren<Button>().Single(b=>b.GetComponent<ActionAccessibility>()?.Key=="back"));
             Assert.That(app.Screens.Current,Is.SameAs(app.Main.Root)); app.Navigate(ShellScreen.CheckIn); Assert.That(app.Screens.Current,Is.SameAs(check));
             app.Back(); Assert.That(app.Screens.Current,Is.SameAs(app.Main.Root));
         }
@@ -211,20 +211,20 @@ namespace IndieGame.Shell.Tests
             config.Style=demos.MakeChunky(); yield return Boot();
             Assert.That(app.GetComponentInChildren<GraphicRaycaster>(),Is.Not.Null);
             var chrome=app.Screens.ChromeRoot;
-            Button Tab(string key)=>chrome.Find("TabBar/Tabs/Tab "+key).GetComponent<Button>();
+            Button Tab(string key)=>chrome.GetComponentsInChildren<ActionAccessibility>(true).Single(a=>a.Key==key).GetComponent<Button>();
             yield return new RealPointer(mouse).Click(Tab("quests")); Assert.That(app.Screens.Current.name,Is.EqualTo("Quests")); Assert.That(chrome.gameObject.activeInHierarchy,Is.True);
             app.Navigate(ShellScreen.CheckIn);
-            Assert.That(chrome.Find("TabBar/Tabs/Tab checkin/Cell").GetComponent<ShellAppearance>().Selected,Is.True);
+            Assert.That(Tab("checkin").transform.Find("Cell").GetComponent<ShellAppearance>().Selected,Is.True);
             yield return new RealPointer(mouse).Click(Tab("home")); Assert.That(app.Screens.Current,Is.SameAs(app.Main.Root));
-            yield return new RealPointer(mouse).Click(Tab("checkin")); var claim=app.Screens.Current.GetComponentsInChildren<Button>().Single(b=>b.name!="Shell Back");
+            yield return new RealPointer(mouse).Click(Tab("checkin")); var claim=app.Screens.Current.GetComponentsInChildren<Button>().Single(b=>b.GetComponent<ActionAccessibility>()?.Key!="back");
             var gold=app.Session.Economy.Gold; yield return new RealPointer(mouse).Click(claim);
             Assert.That(claim.IsInteractable(),Is.False,"Claim must disable after collection");
             claim.onClick.Invoke(); // Also exercise the presenter guard against a duplicate callback.
             Assert.That(app.Session.Economy.Gold,Is.EqualTo(gold+1));
-            Assert.That(chrome.Find("TabBar/Tabs/Tab checkin/Icon/Badge").gameObject.activeSelf,Is.False);
+            Assert.That(Tab("checkin").transform.Find("Icon/Badge").gameObject.activeSelf,Is.False);
             app.Back(); yield return new RealPointer(mouse).Click(MainButton("shell.play")); Assert.That(game.Plays,Is.EqualTo(1));
             Assert.That(chrome.Find("TabBar").gameObject.activeSelf,Is.False); Assert.That(chrome.Find("TopBar").gameObject.activeSelf,Is.True);
-            Assert.That(app.GameHud,Is.Not.Null); Assert.That(app.Audio,Is.Not.Null); Assert.That(app.Haptics,Is.Not.Null); yield return new RealPointer(mouse).Click(chrome.Find("TopBar/Shell Settings").GetComponent<Button>()); Assert.That(app.Popups.Top,Is.Not.Null); app.Back(); yield return Settled();
+            Assert.That(app.GameHud,Is.Not.Null); Assert.That(app.Audio,Is.Not.Null); Assert.That(app.Haptics,Is.Not.Null); yield return new RealPointer(mouse).Click(chrome.GetComponentsInChildren<Button>().Single(b=>b.GetComponent<ActionAccessibility>()?.Key=="pause")); Assert.That(app.Popups.Top,Is.Not.Null); app.Back(); yield return Settled();
             app.ShowMain(); Assert.That(chrome.Find("TabBar").gameObject.activeSelf,Is.True);
         }
         [UnityTest] public IEnumerator GameViewportMapsScreenPointsToWorldAndFollowsGameScreen()

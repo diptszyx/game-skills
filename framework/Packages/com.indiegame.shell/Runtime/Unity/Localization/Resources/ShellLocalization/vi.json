@@ -96,5 +96,7 @@
   "shell.tab.quests": "Nhiệm vụ",
   "shell.tab.shop": "Cửa hàng",
   "shell.tab.leaderboard": "Xếp hạng",
-  "shell.checkin.day": "Ngày {0}"
+  "shell.checkin.day": "Ngày {0}",
+  "shell.home": "Trang chu",
+  "shell.close": "Đóng"
 }

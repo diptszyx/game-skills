@@ -96,5 +96,7 @@
   "shell.tab.quests": "Quests",
   "shell.tab.shop": "Shop",
   "shell.tab.leaderboard": "Leaderboard",
-  "shell.checkin.day": "Day {0}"
+  "shell.checkin.day": "Day {0}",
+  "shell.home": "Home",
+  "shell.close": "Close"
 }

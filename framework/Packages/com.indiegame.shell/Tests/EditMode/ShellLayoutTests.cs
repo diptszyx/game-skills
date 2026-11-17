@@ -52,9 +52,9 @@ namespace IndieGame.Shell.Tests
             AbsurdThemeSizes(); var popup=factory.PopupFrame(root.transform,"Popup");
             var button=factory.Button(popup.Content,"Action",ButtonRole.Secondary);
             Size(button,new Vector2(400,76)); Category(button,"PopupAction");
-            var close=(RectTransform)popup.Panel.Find("CloseHit"); Size(close,new Vector2(96,96));
-            Assert.That(close.anchoredPosition,Is.EqualTo(new Vector2(-36,-110)));
-            Category(close,"CloseHit");
+            var close=(RectTransform)popup.CloseButton.transform; Size(close,new Vector2(64,64));
+            Assert.That(close.anchoredPosition,Is.EqualTo(new Vector2(-36,-40)));
+            Category(close,"IconButton");
         }
         [Test] public void PopupReflowCapsActionWidthAtAvailableSpace()
         {
@@ -81,9 +81,11 @@ namespace IndieGame.Shell.Tests
             Field("factory",factory); Field("config",new ShellAppConfig { Style=style });
             Field("screenText",new ScreenText(session,app.Text));
             app.Navigate(ShellScreen.CheckIn);
-            var back=host.Current.Find("Shell Back").GetComponent<Button>();
-            Size(back,new Vector2(280,80)); Category(back,"Standard");
-            Assert.That(((RectTransform)back.transform).anchoredPosition,Is.EqualTo(new Vector2(0,offset)));
+            var back=host.Current.GetComponentsInChildren<Button>().Single(b=>b.GetComponent<ActionAccessibility>()?.Key=="back");
+            Size(back,new Vector2(64,64)); Category(back,"IconButton");
+            Assert.That(back.GetComponentInChildren<TMPro.TMP_Text>(),Is.Null);
+            Assert.That(((RectTransform)back.transform).anchorMax,Is.EqualTo(new Vector2(0,1)));
+            Assert.That(((RectTransform)back.transform).anchoredPosition,Is.EqualTo(new Vector2(16,-16)));
         }
         [TestCase(ButtonRole.Primary)] [TestCase(ButtonRole.Secondary)] [TestCase(ButtonRole.Locked)]
         public void OversizedButtonBordersFailValidation(ButtonRole role)

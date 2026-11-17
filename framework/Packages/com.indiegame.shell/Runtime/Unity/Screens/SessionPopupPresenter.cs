@@ -68,22 +68,36 @@ namespace IndieGame.Shell.Unity.Screens
             if(popups.TryGetValue(kind,out var existing)&&host.Stack.ContainsView(existing.View)) return existing;
             if(existing!=null) DestroyView(existing.View);
             consumed.Remove(kind);
-            var p=new SessionPopupContent { View=factory.PopupFrame(host.transform,text.Get("popup."+kind.ToString().ToLowerInvariant()+".title")) };
+            var p=new SessionPopupContent { View=factory.PopupFrame(host.transform,text.Get("popup."+kind.ToString().ToLowerInvariant()+".title"),closeLabel:text.Get("shell.close")) };
             popups[kind]=p;
             p.View.Policy=kind==SessionPopupKind.Pause||kind==SessionPopupKind.Leave?DismissalPolicy.Dismissible:DismissalPolicy.Mandatory;
-            if(factory.Style.PopupLayout.PanelMaxHeight<=0) p.View.Panel.sizeDelta=new Vector2(p.View.Panel.sizeDelta.x,800);
+            p.View.FitContent=true;
 
             var layout=p.View.Content.gameObject.AddComponent<VerticalLayoutGroup>(); layout.childControlHeight=false; layout.childForceExpandHeight=false; layout.childControlWidth=false; layout.childForceExpandWidth=false; layout.childAlignment=TextAnchor.MiddleCenter; layout.spacing=factory.Style.Spacing;
             factory.Label(p.View.Content,text.Get("popup."+kind.ToString().ToLowerInvariant()+".body"),role:"popupText");
             if(kind==SessionPopupKind.Win) factory.Label(p.View.Content,text.Reward(config.WinReward),role:"popupText");
             if(kind==SessionPopupKind.Revive) factory.Label(p.View.Content,text.Get("popup.revive.price",config.ReviveGold),role:"popupText");
-            string[] actions=kind==SessionPopupKind.Win?new[]{"next","double"}:kind==SessionPopupKind.Lose?new[]{"retry","revive"}:kind==SessionPopupKind.Revive?new[]{"ad","gold"}:kind==SessionPopupKind.Pause?new[]{"resume","sound","music","haptics","leave"}:new[]{"confirm","cancel"};
+            Transform toggleRow=null;
+            if(kind==SessionPopupKind.Pause) {
+                var row=ShellUiFactory.Node("Settings icons",p.View.Content); row.sizeDelta=new Vector2(ShellLayout.Standard.ToggleRowWidth,ShellLayout.Standard.IconHitSize);
+                var element=row.gameObject.AddComponent<LayoutElement>(); element.preferredHeight=ShellLayout.Standard.IconHitSize;
+                row.gameObject.SetActive(true); toggleRow=row;
+            }
+            string[] actions=kind==SessionPopupKind.Win?new[]{"next","double"}:kind==SessionPopupKind.Lose?new[]{"retry","revive"}:kind==SessionPopupKind.Revive?new[]{"ad","gold"}:kind==SessionPopupKind.Pause?new[]{"sound","music","haptics","resume","leave"}:new[]{"confirm","cancel"};
             foreach(var action in actions)
             {
-                var captured=action; var button=factory.Button(p.View.Content,text.Get("popup.action."+action),clicked:()=>Act(kind,captured)); p.Buttons.Add(action,button);
-                if(p.View.InitialFocus==null) p.View.InitialFocus=button;
+                var captured=action;
+                bool toggle=kind==SessionPopupKind.Pause&&(action=="sound"||action=="music"||action=="haptics");
+                string icon=toggle?action+"_on":action=="resume"?"play":action=="leave"?"home":action=="double"||action=="ad"?"video":action=="gold"?"coin":action=="revive"?"heart":action=="confirm"?"check":action=="cancel"?"close":action;
+                string label=text.Get(action=="leave"?"shell.home":"popup.action."+action);
+                string amount=action=="double"?"x2":action=="gold"?config.ReviveGold.ToString(System.Globalization.CultureInfo.InvariantCulture):null;
+                var category=toggle?ShellLayoutCategory.IconButton:amount!=null?ShellLayoutCategory.IconAmount:ShellLayoutCategory.IconAction;
+                var button=factory.IconButton(toggle?toggleRow:p.View.Content,icon,label,()=>Act(kind,captured),category,amount,action=="revive"?"video":null,action);
+                if(toggle) ((RectTransform)button.transform).anchoredPosition=new Vector2((action=="sound"?-1:action=="music"?0:1)*ShellLayout.Standard.IconHitSize,0);
+                p.Buttons.Add(action,button);
+                if(p.View.InitialFocus==null&&!toggle) p.View.InitialFocus=button;
             }
-            var retry=factory.Button(p.View.Content,text.Get("shell.retrySave"),clicked:()=>RetrySave(kind));
+            var retry=factory.IconButton(p.View.Content,"retry",text.Get("shell.retrySave"),()=>RetrySave(kind),ShellLayoutCategory.IconAction);
             p.Buttons.Add("save",retry); retry.gameObject.SetActive(false);
             p.ErrorLabel=factory.Label(p.View.Content,"");
             p.View.gameObject.AddComponent<PopupExit>().Exited=()=>Exited(kind,p);
@@ -191,7 +205,7 @@ namespace IndieGame.Shell.Unity.Screens
             if(!popups.TryGetValue(SessionPopupKind.Pause,out var p)) return;
             foreach(var key in new[]{"sound","music","haptics"})
             { bool value=key=="sound"?session.Settings.Sound:key=="music"?session.Settings.Music:session.Settings.Haptics;
-              p.Buttons[key].GetComponentInChildren<TMP_Text>().text=text.Get("popup.setting."+key,text.Get(value?"shell.on":"shell.off")); }
+              factory.SetIcon(p.Buttons[key],key+(value?"_on":"_off"),text.Get("popup.setting."+key,text.Get(value?"shell.on":"shell.off"))); }
         }
         void Error(SessionPopupContent p,string key) { p.Error=text.Get("shell.error."+key); if(p.ErrorLabel!=null) p.ErrorLabel.text=p.Error; }
         bool Save(SessionPopupContent p)

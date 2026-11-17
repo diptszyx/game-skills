@@ -22,8 +22,8 @@ namespace IndieGame.Shell.Unity.Screens
         public LeaderboardView(ShellUiFactory factory, Transform parent)
         {
             this.factory=factory; surface=new ListSurface(factory,parent,"Leaderboard");
-            refresh=factory.Button(Root,"",clicked:()=>RefreshRequested?.Invoke());
-            ((RectTransform)refresh.transform).anchoredPosition=new Vector2(0,-320);
+            refresh=factory.IconButton(Root,"refresh","Refresh",()=>RefreshRequested?.Invoke());
+            var rect=(RectTransform)refresh.transform; rect.anchorMin=rect.anchorMax=new Vector2(1,1); rect.pivot=new Vector2(1,1); rect.anchoredPosition=ShellLayout.Standard.HeaderRightPosition;
         }
         public void Render(LeaderboardSnapshot snapshot, ScreenText text)
         {
@@ -32,7 +32,7 @@ namespace IndieGame.Shell.Unity.Screens
             if(snapshot.MyRank!=null) rows.Add(new RowDisplay("my-rank",text.Get("shell.leaderboard.mine",snapshot.MyRank.Rank,snapshot.MyRank.Score)));
             surface.Render(new ListDisplay(text.Get("shell.leaderboard.title"),rows,snapshot.MessageKey==null?"":text.Get(snapshot.MessageKey)),_=>{});
             surface.Error(snapshot.State==LeaderboardState.Error?text.Get(snapshot.MessageKey):"");
-            refresh.GetComponentInChildren<TMPro.TMP_Text>().text=text.Get("shell.refresh");
+            refresh.GetComponent<ActionAccessibility>().Set("refresh",text.Get("shell.refresh"));
         }
     }
     // Completes on the Unity main thread; null/blank board or negative score -> InvalidArgument.

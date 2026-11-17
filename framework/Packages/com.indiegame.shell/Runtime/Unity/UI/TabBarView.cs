@@ -36,6 +36,7 @@ namespace IndieGame.Shell.Unity.UI
             {
                 var r=ShellUiFactory.Node("Tab "+definition.Key,content);
                 var target=factory.AppearanceImage(r,"Cell","tabCell",true); ShellUiFactory.Stretch(target.rectTransform); target.raycastTarget=true;
+                r.gameObject.AddComponent<ActionAccessibility>().Set(definition.Key,definition.Label);
                 var button=r.gameObject.AddComponent<Button>(); button.targetGraphic=target; button.transition=Selectable.Transition.None;
                 var size=r.gameObject.AddComponent<LayoutElement>(); size.minWidth=size.minHeight=44; size.flexibleWidth=1;
                 var icon=factory.AppearanceImage(r,"Icon","tabIcon",iconKey:definition.IconKey);
@@ -63,7 +64,8 @@ namespace IndieGame.Shell.Unity.UI
                 pair.Value.Icon.transform.localScale=Vector3.one*(selected?1.15f:1);
             }
         }
-        public void SetLabel(string key,string label) { tabs[key].Button.GetComponentInChildren<TMPro.TMP_Text>().text=label; }
+        public Button ButtonFor(string key)=>tabs[key].Button;
+        public void SetLabel(string key,string label) { tabs[key].Button.GetComponent<ActionAccessibility>().Set(key,label); tabs[key].Button.GetComponentInChildren<TMPro.TMP_Text>().text=label; }
         public void SetBadge(string key,bool visible) { tabs[key].Badge.SetActive(visible); }
     }
 }

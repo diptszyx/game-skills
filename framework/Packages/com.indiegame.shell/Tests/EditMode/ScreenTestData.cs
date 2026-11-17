@@ -42,7 +42,8 @@ namespace IndieGame.Shell.Tests
             table["shell.loading.tip"]="Tip"; table["shell.refresh"]="Refresh"; table["shell.leaderboard.title"]="Leaderboard";
             table["shell.leaderboard.row"]="{0} {1} {2}"; table["shell.leaderboard.mine"]="My rank {0} {1}";
             table["shell.leaderboard.loading"]="Loading"; table["shell.leaderboard.empty"]="Empty";
-            var l=new LocalizationService(new LocalizationConfig("en")); l.LoadTable("en","{"+string.Join(",",table.Select(p=>"\""+p.Key+"\":\""+p.Value+"\""))+"}"); return l;
+            table["shell.home"]="Home"; table["shell.back"]="Back";
+            var l=new LocalizationService(new LocalizationConfig("en")); l.LoadLayeredTable("vi",UnityEngine.Resources.Load<UnityEngine.TextAsset>("ShellLocalization/vi").text,"{}"); l.LoadLayeredTable("en",UnityEngine.Resources.Load<UnityEngine.TextAsset>("ShellLocalization/en").text,"{"+string.Join(",",table.Select(p=>"\""+p.Key+"\":\""+p.Value+"\""))+"}"); return l;
         }
     }
 }

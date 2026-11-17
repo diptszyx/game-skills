@@ -24,6 +24,9 @@ namespace IndieGame.Shell.Unity.UI
         public Sprite Logo, Mascot;
         public Sprite GearButton, BoardFrame, TabBarPlainBackground, DayCellCollected, DayCellToday, DayCellLocked, BadgeSprite, PlainPillBackground, TabCellBackground, TabCellSelectedBackground;
         [Serializable] public sealed class TabIconEntry { public string Key; public Sprite Sprite; }
+        public Color ActionSurfaceColor=new Color(.10f,.28f,.36f,1), ActionIconColor=Color.white;
+        public List<TabIconEntry> Icons = new List<TabIconEntry>();
+        public Sprite Icon(string key) { var entry=Icons.Find(e=>e!=null&&e.Key==key&&e.Sprite!=null); return entry!=null?entry.Sprite:ShellIcons.Get(key); }
         public List<TabIconEntry> TabIcons = new List<TabIconEntry>();
         public Color TabSelectedTint = Color.white, TabUnselectedTint = new Color(.7f,.7f,.8f); public Color TabLabelColor = Color.white;
         public Color ScreenTitleColorOverride = Color.clear;

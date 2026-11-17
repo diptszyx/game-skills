@@ -64,7 +64,7 @@ namespace IndieGame.Shell.Tests
                     {
                         var label=tab.GetComponentInChildren<TMP_Text>(); label.ForceMeshUpdate();
                         Assert.That(label.fontSize,Is.GreaterThanOrEqualTo(16),lang+" "+label.text);
-                        var cellTexture=UnityEditor.AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Art/KitChunky/"+(tab.name=="Tab home"?"tab_cell_selected":"tab_cell")+".png");
+                        var cellTexture=UnityEditor.AssetDatabase.LoadAssetAtPath<Texture2D>("Assets/Art/KitChunky/"+(tab.GetComponent<ActionAccessibility>().Key=="home"?"tab_cell_selected":"tab_cell")+".png");
                         float cellLuminance=Luminance(cellTexture.GetPixel(cellTexture.width/2,cellTexture.height/2)),labelLuminance=Luminance(label.color);
                         Assert.That((Mathf.Max(cellLuminance,labelLuminance)+.05f)/(Mathf.Min(cellLuminance,labelLuminance)+.05f),Is.GreaterThanOrEqualTo(4.5f),lang+" label contrast "+label.text);
                         Assert.That(label.textInfo.lineCount,Is.LessThanOrEqualTo(2),label.text);

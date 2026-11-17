@@ -34,14 +34,14 @@ namespace IndieGame.Shell.Unity.Screens
             if(clock.UtcNow.Ticks/TimeSpan.TicksPerSecond!=second)
             { second=clock.UtcNow.Ticks/TimeSpan.TicksPerSecond; var result=session.Lives.Refresh(); if(result.Success) text.Commit(showError); else showError(text.Get("shell.error."+result.Error)); }
             if(language!=session.Settings.Language)
-            { language=session.Settings.Language; foreach(var key in Keys) TabBar.SetLabel(key,Label(key)); }
+            { language=session.Settings.Language; var accessible=TopBar.Settings.GetComponent<ActionAccessibility>()??TopBar.Settings.gameObject.AddComponent<ActionAccessibility>(); accessible.Set("pause",text.Get("shell.pause")); foreach(var key in Keys) TabBar.SetLabel(key,Label(key)); }
             TopBar.Render(new TopBarDisplay(session.Economy.Gold,session.Lives.Hearts,MainPresenter.FormatCountdown(session,text,clock)));
             TabBar.SetBadge("checkin",CheckInBadge(session)); TabBar.SetBadge("quests",QuestsBadge(session));
         }
         void Selected(string key) { if(key=="home") home(); else navigate((ShellScreen)(Array.IndexOf(Keys,key)-1)); }
         void Shown(RectTransform screen)
         {
-            bool visible=screen!=game; TopBar.Root.gameObject.SetActive(true); TopBar.SetCompact(!visible); host.ShowTabBar(visible);
+            bool visible=screen!=game; TopBar.Root.gameObject.SetActive(screen==main||screen==game); TopBar.SetCompact(!visible); host.ShowTabBar(visible);
             if(visible) TabBar.SetSelected(screen==main?"home":screen.name.ToLowerInvariant());
             Refresh();
         }

@@ -95,19 +95,19 @@ namespace IndieGame.Shell.Tests
         }
         [Test] public void SetBadgeTogglesOnlyRequestedTab()
         {
-            var tabs=Tabs(); var badge=tabs.Root.Find("Tabs/Tab shop/Icon/Badge").gameObject;
+            var tabs=Tabs(); var badge=tabs.ButtonFor("shop").transform.Find("Icon/Badge").gameObject;
             Assert.That(badge.activeSelf,Is.False); tabs.SetBadge("shop",true); Assert.That(badge.activeSelf,Is.True);
-            Assert.That(tabs.Root.Find("Tabs/Tab home/Icon/Badge").gameObject.activeSelf,Is.False);
+            Assert.That(tabs.ButtonFor("home").transform.Find("Icon/Badge").gameObject.activeSelf,Is.False);
             tabs.SetBadge("shop",false); Assert.That(badge.activeSelf,Is.False);
         }
         [Test] public void SelectingTabFiresOneEventWithKey()
         {
             var tabs=Tabs(); int count=0; string received=null; tabs.TabSelected+=key=>{count++; received=key;};
             tabs.SetSelected("home"); Assert.That(count,Is.Zero);
-            Assert.That(tabs.Root.Find("Tabs/Tab shop/Cell").GetComponent<Image>().raycastTarget,Is.True);
-            tabs.Root.Find("Tabs/Tab shop").GetComponent<Button>().onClick.Invoke();
+            Assert.That(tabs.ButtonFor("shop").transform.Find("Cell").GetComponent<Image>().raycastTarget,Is.True);
+            tabs.ButtonFor("shop").onClick.Invoke();
             Assert.That(count,Is.EqualTo(1)); Assert.That(received,Is.EqualTo("shop"));
-            var selected=tabs.Root.Find("Tabs/Tab shop/Icon"); Assert.That(selected.localScale.x,Is.EqualTo(1.15f));
+            var selected=tabs.ButtonFor("shop").transform.Find("Icon"); Assert.That(selected.localScale.x,Is.EqualTo(1.15f));
             Assert.That(selected.GetComponent<Image>().color,Is.EqualTo(style.TabSelectedTint));
         }
         [Test] public void ShowPreservesChromeAndTabVisibility()
@@ -134,9 +134,9 @@ namespace IndieGame.Shell.Tests
                 var expected=binding.Role=="heartIcon"?replacement.HeartIcon:replacement.CurrencyIcon;
                 Assert.That(binding.GetComponent<Image>().sprite,Is.SameAs(expected),binding.Role);
             }
-            Assert.That(tabs.Root.Find("Tabs/Tab shop/Icon/Badge").gameObject.activeSelf,Is.True);
-            Assert.That(tabs.Root.Find("Tabs/Tab quests/Icon").localScale.x,Is.EqualTo(1.15f));
-            Assert.That(tabs.Root.Find("Tabs/Tab quests/Icon").GetComponent<Image>().color,Is.EqualTo(replacement.TabSelectedTint));
+            Assert.That(tabs.ButtonFor("shop").transform.Find("Icon/Badge").gameObject.activeSelf,Is.True);
+            Assert.That(tabs.ButtonFor("quests").transform.Find("Icon").localScale.x,Is.EqualTo(1.15f));
+            Assert.That(tabs.ButtonFor("quests").transform.Find("Icon").GetComponent<Image>().color,Is.EqualTo(replacement.TabSelectedTint));
             day.Render("Day 3","100",DayState.Locked);
             Assert.That(day.Root.Find("State").GetComponent<Image>().sprite,Is.SameAs(replacement.DayCellLocked));
         }
@@ -218,7 +218,7 @@ namespace IndieGame.Shell.Tests
             {
                 tabs.SetSelected(selected);
                 foreach(var key in Keys)
-                    Assert.That(tabs.Root.Find("Tabs/Tab "+key+"/Cell").GetComponent<Image>().sprite,
+                    Assert.That(tabs.ButtonFor(key).transform.Find("Cell").GetComponent<Image>().sprite,
                         Is.SameAs(key==selected?style.TabCellSelectedBackground:style.TabCellBackground));
             }
             foreach(var field in new[]{"CurrencyPillBackground","LivesPillBackground","TabBarBackground"})

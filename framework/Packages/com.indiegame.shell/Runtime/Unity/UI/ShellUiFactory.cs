@@ -29,6 +29,8 @@ namespace IndieGame.Shell.Unity.UI
                 case "dayCollected": image.sprite = s.DayCellCollected; image.color = Color.white; break;
                 case "dayToday": image.sprite = s.DayCellToday; image.color = Color.white; break;
                 case "dayLocked": image.sprite = s.DayCellLocked; image.color = Color.white; break;
+                case "actionIcon": image.sprite=s.Icon(IconKey); image.color=s.ActionIconColor; break;
+                case "iconSurface": image.sprite=ShellIcons.Get(IconKey); image.color=s.ActionSurfaceColor; break;
                 case "tabIcon": image.sprite = s.TabIcon(IconKey); image.color = Selected ? s.TabSelectedTint : s.TabUnselectedTint; break;
                 case "screen": image.sprite = s.ScreenBackground; image.color = s.ScreenColor; break;
                 case "row": image.sprite = s.ListRowSprite; image.color = s.ListRowColor; break;
@@ -109,6 +111,41 @@ namespace IndieGame.Shell.Unity.UI
             if(parent.GetComponentInParent<PopupView>(true)!=null) LocalizedLayout.PopupChild(r,true);
             r.gameObject.SetActive(true); return button;
         }
+        public Button IconButton(Transform parent,string key,string label,Action clicked=null,ShellLayoutCategory category=ShellLayoutCategory.IconButton,string amount=null,string secondIcon=null,string accessibilityKey=null)
+        {
+            var r=Node(label,parent); var size=IconSize(category); r.sizeDelta=size; LayoutCategory.Record(r,category);
+            var image=r.gameObject.AddComponent<Image>(); image.sprite=ShellIcons.Get(category==ShellLayoutCategory.IconButton?"_round":"_pill"); image.color=Style.ActionSurfaceColor;
+            if(category==ShellLayoutCategory.IconButton) {
+                float padding=(ShellLayout.Standard.IconHitSize-size.x)/2;
+                image.raycastPadding=new Vector4(-padding,-padding,-padding,-padding);
+            }
+            var appearance=r.gameObject.AddComponent<ShellAppearance>(); appearance.Role="iconSurface"; appearance.IconKey=category==ShellLayoutCategory.IconButton?"_round":"_pill";
+            var b=r.gameObject.AddComponent<Button>(); b.targetGraphic=image; b.transition=Selectable.Transition.None;
+            if(clicked!=null) b.onClick.AddListener(()=>clicked());
+            r.gameObject.AddComponent<ActionAccessibility>().Set(accessibilityKey??key,label);
+            var icon=AppearanceImage(r,"Icon "+key,"actionIcon",iconKey:key); icon.rectTransform.sizeDelta=new Vector2(44,44);
+            if(amount!=null||secondIcon!=null) icon.rectTransform.anchoredPosition=new Vector2(-30,0);
+            if(secondIcon!=null) { var second=AppearanceImage(r,"Icon "+secondIcon,"actionIcon",iconKey:secondIcon); second.rectTransform.sizeDelta=new Vector2(40,40); second.rectTransform.anchoredPosition=new Vector2(30,0); }
+            if(amount!=null) {
+                var text=Label(r,amount,role:"chromeText"); text.rectTransform.anchorMin=text.rectTransform.anchorMax=new Vector2(.5f,.5f); text.rectTransform.sizeDelta=new Vector2(76,48); text.rectTransform.anchoredPosition=new Vector2(28,0);
+                text.fontSize=text.fontSizeMax=30; text.color=Style.ActionIconColor;
+            }
+            r.gameObject.SetActive(true); return b;
+        }
+        public static Vector2 IconSize(ShellLayoutCategory category)
+        { return category==ShellLayoutCategory.IconButton?ShellLayout.Standard.IconButton:category==ShellLayoutCategory.IconAmount?ShellLayout.Standard.IconAmount:ShellLayout.Standard.IconAction; }
+        public void SetIcon(Button button,string key,string label)
+        {
+            var binding=Array.Find(button.GetComponentsInChildren<ShellAppearance>(true),a=>a.Role=="actionIcon");
+            binding.IconKey=key; binding.Apply(Style);
+            var accessible=button.GetComponent<ActionAccessibility>(); accessible.Set(accessible.Key,label);
+        }
+        public void AddPlayIcon(Button button)
+        {
+            var icon=AppearanceImage(button.transform,"Icon play","actionIcon",iconKey:"play");
+            icon.rectTransform.anchorMin=icon.rectTransform.anchorMax=new Vector2(.18f,.5f); icon.rectTransform.sizeDelta=new Vector2(44,44);
+            var label=button.GetComponentInChildren<TMP_Text>(); label.rectTransform.offsetMin=new Vector2(64,6);
+        }
         public RectTransform ListRow(Transform parent, string text)
         {
             var r = Node("List Row", parent); r.sizeDelta = ShellLayout.Standard.Row; LayoutCategory.Record(r,ShellLayoutCategory.Row); Image(r, "row");
@@ -125,20 +162,20 @@ namespace IndieGame.Shell.Unity.UI
             var scroll = r.gameObject.AddComponent<ScrollRect>(); scroll.viewport = viewport; scroll.content = content; scroll.horizontal = false;
             content.gameObject.SetActive(true); viewport.gameObject.SetActive(true); r.gameObject.SetActive(true); return scroll;
         }
-        public PopupView PopupFrame(Transform parent, string title, bool contentSlot = true)
+        public PopupView PopupFrame(Transform parent, string title, bool contentSlot = true,string closeLabel="Close")
         {
             var r = Node("Popup", parent); Stretch(r); Image(r, "scrim");
             var group = r.gameObject.AddComponent<CanvasGroup>(); group.alpha = 0; group.interactable = group.blocksRaycasts = false;
             var scrim = r.gameObject.AddComponent<Button>(); scrim.transition = Selectable.Transition.None; LayoutCategory.Record(scrim,ShellLayoutCategory.PopupScrim);
             var panel = Node("Panel", r); panel.sizeDelta = Style.Theme.PanelSize; Image(panel, "panel");
             var panelInput = panel.gameObject.AddComponent<Button>(); panelInput.transition = Selectable.Transition.None; LayoutCategory.Record(panelInput,ShellLayoutCategory.PopupPanel);
-            var closeHit = Node("CloseHit", panel); closeHit.anchorMin = closeHit.anchorMax = new Vector2(1, 1); closeHit.sizeDelta = ShellLayout.Standard.CloseHit; closeHit.anchoredPosition = ShellLayout.Standard.CloseHitPosition; LayoutCategory.Record(closeHit,ShellLayoutCategory.CloseHit);
-            var closeImage = closeHit.gameObject.AddComponent<Image>(); closeImage.color = Color.clear;
-            var closeButton = closeHit.gameObject.AddComponent<Button>(); closeButton.targetGraphic = closeImage; closeButton.transition = Selectable.Transition.None; closeHit.gameObject.SetActive(true);
+            var closeButton=IconButton(panel,"close",closeLabel,category:ShellLayoutCategory.IconButton);
+            var closeHit=(RectTransform)closeButton.transform; 
+            closeHit.anchorMin=closeHit.anchorMax=new Vector2(1,1); closeHit.anchoredPosition=ShellLayout.Standard.CloseHitPosition;
             var heading = Label(panel, title, true, "title");
             RectTransform slot = null;
             if (contentSlot) { slot = Node("Content", panel); slot.sizeDelta = Style.Theme.BodySize; slot.gameObject.SetActive(true); }
-            var view = r.gameObject.AddComponent<PopupView>(); view.Initialize(group, panel, slot, Style.Theme.Motion); view.Configure(Style);
+            var view = r.gameObject.AddComponent<PopupView>(); view.Initialize(group, panel, slot, Style.Theme.Motion); view.CloseButton=closeButton; view.Configure(Style);
             LocalizedLayout.Popup(panel,heading.rectTransform,slot);
             scrim.onClick.AddListener(() => view.RequestDismiss()); closeButton.onClick.AddListener(() => view.RequestDismiss()); panel.gameObject.SetActive(true);
             // Remains inactive until a host owns it.
