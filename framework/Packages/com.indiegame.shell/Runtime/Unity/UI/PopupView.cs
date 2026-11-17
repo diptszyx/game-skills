@@ -68,9 +68,9 @@ namespace IndieGame.Shell.Unity.UI
                 element.ignoreLayout=label!=null&&string.IsNullOrEmpty(label.text);
                 if(element.ignoreLayout) { rect.sizeDelta=Vector2.zero; continue; }
                 bool button=child.GetComponent<Button>()!=null;
-                rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,button?Mathf.Min(400,width):width);
+                rect.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,button?Mathf.Min(ShellLayout.Standard.PopupAction.x,width):width);
                 if(label!=null) element.preferredHeight=Mathf.Max(32,label.GetPreferredValues(label.text,width,float.PositiveInfinity).y);
-                else if(button) element.preferredHeight=76;
+                else if(button) element.preferredHeight=ShellLayout.Standard.PopupAction.y;
             }
             LayoutRebuilder.ForceRebuildLayoutImmediate(Content);
             float preferred=LayoutUtility.GetPreferredHeight(Content);

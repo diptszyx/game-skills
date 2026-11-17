@@ -1,4 +1,5 @@
 using TMPro;
+using IndieGame.Shell.Unity.UI;
 using UnityEngine;
 using UnityEngine.UI;
 namespace IndieGame.Shell.Unity.Localization
@@ -28,7 +29,7 @@ namespace IndieGame.Shell.Unity.Localization
         }
         internal static void Row(RectTransform row, TMP_Text label, bool action)
         {
-            row.GetComponent<LayoutElement>().preferredHeight=120;
+            row.GetComponent<LayoutElement>().preferredHeight=ShellLayout.Standard.Row.y;
             var rect=label.rectTransform; rect.anchorMin=Vector2.zero;
             rect.anchorMax=new Vector2(action?.64f:1,1);
             rect.offsetMin=new Vector2(12,8); rect.offsetMax=new Vector2(-8,-8);
@@ -44,8 +45,8 @@ namespace IndieGame.Shell.Unity.Localization
             content.offsetMin=new Vector2(48,48); content.offsetMax=new Vector2(-48,-132);
         }
         internal static void PopupChild(RectTransform rect, bool button)
-        { rect.sizeDelta=button?new Vector2(PopupButtonWidth,PopupButtonHeight):new Vector2(rect.sizeDelta.x,64); }
-        const float PopupHeadingBand=104f, PopupTitleTopMargin=8f, PopupButtonWidth=400f, PopupButtonHeight=76f;
+        { rect.sizeDelta=button?ShellLayout.Standard.PopupAction:new Vector2(rect.sizeDelta.x,64); }
+        const float PopupHeadingBand=104f, PopupTitleTopMargin=8f;
         internal static void LoadingTip(RectTransform rect)
         {
             rect.anchorMin=new Vector2(0,.5f); rect.anchorMax=new Vector2(1,.5f);

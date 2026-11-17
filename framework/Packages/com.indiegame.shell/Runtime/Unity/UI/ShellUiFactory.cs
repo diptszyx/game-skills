@@ -97,7 +97,10 @@ namespace IndieGame.Shell.Unity.UI
         public Button Button(Transform parent, string text, ButtonRole role = ButtonRole.Primary, Action clicked = null)
         {
             var r = Node("Button " + role, parent); var b = role == ButtonRole.Secondary ? Style.Theme.Secondary : Style.Theme.Primary;
-            r.sizeDelta = b.DefaultSize; var image = r.gameObject.AddComponent<Image>(); image.type = UnityEngine.UI.Image.Type.Sliced; Bind(image, "button", role);
+            r.sizeDelta = ShellLayout.Standard.ButtonStandard;
+            var parentCategory=parent.GetComponent<LayoutCategory>();
+            LayoutCategory.Record(r,parent.GetComponentInParent<PopupView>(true)!=null ? ShellLayoutCategory.PopupAction
+                : parentCategory!=null && parentCategory.Category==ShellLayoutCategory.Row ? ShellLayoutCategory.RowAction : ShellLayoutCategory.Standard); var image = r.gameObject.AddComponent<Image>(); image.type = UnityEngine.UI.Image.Type.Sliced; Bind(image, "button", role);
             var button = r.gameObject.AddComponent<Button>(); button.targetGraphic = image; button.transition = Selectable.Transition.None;
             button.interactable = role != ButtonRole.Locked; if (clicked != null) button.onClick.AddListener(() => clicked());
             var label = Label(r, text); var binding = label.GetComponent<ShellAppearance>(); binding.Role = "buttonText"; binding.ButtonRole = role; binding.Apply(Style);
@@ -108,8 +111,8 @@ namespace IndieGame.Shell.Unity.UI
         }
         public RectTransform ListRow(Transform parent, string text)
         {
-            var r = Node("List Row", parent); r.sizeDelta = Style.RowSize; Image(r, "row");
-            var layout = r.gameObject.AddComponent<LayoutElement>(); layout.preferredHeight = Style.RowSize.y;
+            var r = Node("List Row", parent); r.sizeDelta = ShellLayout.Standard.Row; LayoutCategory.Record(r,ShellLayoutCategory.Row); Image(r, "row");
+            var layout = r.gameObject.AddComponent<LayoutElement>(); layout.preferredHeight = ShellLayout.Standard.Row.y;
             LocalizedLayout.Row(r,Label(r, text, role: "rowText"),false); r.gameObject.SetActive(true); return r;
         }
         public ScrollRect ScrollList(Transform parent)
@@ -126,10 +129,10 @@ namespace IndieGame.Shell.Unity.UI
         {
             var r = Node("Popup", parent); Stretch(r); Image(r, "scrim");
             var group = r.gameObject.AddComponent<CanvasGroup>(); group.alpha = 0; group.interactable = group.blocksRaycasts = false;
-            var scrim = r.gameObject.AddComponent<Button>(); scrim.transition = Selectable.Transition.None;
+            var scrim = r.gameObject.AddComponent<Button>(); scrim.transition = Selectable.Transition.None; LayoutCategory.Record(scrim,ShellLayoutCategory.PopupScrim);
             var panel = Node("Panel", r); panel.sizeDelta = Style.Theme.PanelSize; Image(panel, "panel");
-            var panelInput = panel.gameObject.AddComponent<Button>(); panelInput.transition = Selectable.Transition.None;
-            var closeHit = Node("CloseHit", panel); closeHit.anchorMin = closeHit.anchorMax = new Vector2(1, 1); closeHit.sizeDelta = new Vector2(96, 96); closeHit.anchoredPosition = new Vector2(-36, -110);
+            var panelInput = panel.gameObject.AddComponent<Button>(); panelInput.transition = Selectable.Transition.None; LayoutCategory.Record(panelInput,ShellLayoutCategory.PopupPanel);
+            var closeHit = Node("CloseHit", panel); closeHit.anchorMin = closeHit.anchorMax = new Vector2(1, 1); closeHit.sizeDelta = ShellLayout.Standard.CloseHit; closeHit.anchoredPosition = ShellLayout.Standard.CloseHitPosition; LayoutCategory.Record(closeHit,ShellLayoutCategory.CloseHit);
             var closeImage = closeHit.gameObject.AddComponent<Image>(); closeImage.color = Color.clear;
             var closeButton = closeHit.gameObject.AddComponent<Button>(); closeButton.targetGraphic = closeImage; closeButton.transition = Selectable.Transition.None; closeHit.gameObject.SetActive(true);
             var heading = Label(panel, title, true, "title");

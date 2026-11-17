@@ -126,7 +126,7 @@ namespace IndieGame.Shell.Unity
                     default: throw new InvalidOperationException("Unavailable ShellScreen: "+screen);
                 }
                 var back=factory.Button(root,screenText.Get("shell.back"),clicked:Back); back.name="Shell Back";
-                var rect=(RectTransform)back.transform; rect.anchorMin=rect.anchorMax=new Vector2(.5f,0); rect.anchoredPosition=new Vector2(0,config.Style.EnableHomeChrome?200:68); rect.sizeDelta=new Vector2(220,64);
+                var rect=(RectTransform)back.transform; rect.anchorMin=rect.anchorMax=new Vector2(.5f,0); rect.anchoredPosition=new Vector2(0,ShellLayout.Standard.BackBottomOffset(config.Style.EnableHomeChrome));
                 cached.Add(screen,root);
             }
             root.Find("Shell Back").GetComponentInChildren<TMP_Text>().text=screenText.Get("shell.back"); Screens.Show(root);

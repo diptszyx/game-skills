@@ -115,10 +115,21 @@ namespace IndieGame.Shell.Unity.UI
             RequireSpriteContrast(Theme.Primary.LabelColor,Theme.Primary.Enabled,SurfaceColor,ButtonTextRegion,"buttonText primary");
             RequireSpriteContrast(Theme.Secondary.LabelColor,Theme.Secondary.Enabled,SurfaceColor,ButtonTextRegion,"buttonText secondary");
         }
-        public Vector2 RowSize = new Vector2(600, 80);
         public float Spacing = 12;
         public T Require<T>(T value, string role) where T : UnityEngine.Object
         { if (value == null) throw new InvalidOperationException("Missing style role: " + role); return value; }
+        static void RequireButtonBorderFit(Sprite sprite, Vector2 size, string role)
+        {
+            // Sprite borders are source pixels; shell dimensions are UI units.
+            var border=sprite.border / sprite.pixelsPerUnit;
+            if(size.x < border.x+border.z || size.y < border.y+border.w)
+                throw new InvalidOperationException(role+" border does not fit shell layout "+size+" in UI units");
+        }
+        void ValidateButtonBorders(Sprite sprite, string role)
+        {
+            RequireButtonBorderFit(sprite,ShellLayout.Standard.ButtonStandard,role+" Standard");
+            RequireButtonBorderFit(sprite,ShellLayout.Standard.PopupAction,role+" PopupAction");
+        }
         public void Validate()
         {
             RequireContrast(PanelTextColor, PanelColor, "PanelTextColor on PanelColor");
@@ -143,6 +154,9 @@ namespace IndieGame.Shell.Unity.UI
             if (Theme.Secondary == null) throw new InvalidOperationException("Missing style role: Theme.Secondary");
             Require(Theme.Primary.Enabled, "Theme.Primary.Enabled"); Require(Theme.Secondary.Enabled, "Theme.Secondary.Enabled");
             if (Theme.Motion == null) throw new InvalidOperationException("Missing style role: Theme.Motion");
+            ValidateButtonBorders(Theme.Primary.Enabled,"Primary");
+            ValidateButtonBorders(Theme.Secondary.Enabled,"Secondary");
+            ValidateButtonBorders(LockedButtonSprite,"Locked");
             ValidateRenderedContrast();
         }
     }

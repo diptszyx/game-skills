@@ -42,3 +42,6 @@ Write a small `<game>-game.json` (`ShellGameConfig`: only `gameId` is required, 
 
 ## Real-input tests (`com.indiegame.shell.testkit`)
 Use `new RealPointer(mouse).Click(button)` (add the package to the game manifest and to `testables`); never copy a click helper. It waits for state (button raycastable, popup transition settled), not fixed sleeps, and fails with the button path and input state. Known: about 1 run in 10 had an unexplained missed click before the settle fix; the failure message now prints focus and InputSystem state, so capture it before guessing.
+
+## Layout
+`ShellLayout.Standard` owns button (280×80), popup action (up to 400×76), row (600×120), close-hit size/position, and Back bottom offsets. Theme button sizes are ignored; never mutate Theme assets at boot. Factory objects carry `LayoutCategory` for geometry checks independent of sprites. Panel sizes and popup height limits, label/title sizes, gameplay tile overrides, and row-action fractional anchors remain caller/style owned. `ShellStyle.Validate()` checks button borders in UI units (sprite border pixels / pixelsPerUnit).
