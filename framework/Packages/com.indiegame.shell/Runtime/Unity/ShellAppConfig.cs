@@ -48,6 +48,43 @@ namespace IndieGame.Shell.Unity
         public int LeaderboardRows = 10;
         public IDictionary<string,AudioClip> Sounds;
         public Func<ShellGameContext,RectTransform> GameScreenFactory;
+        public static ShellAppConfig Standard(ShellGameConfig game, ShellStyle style,
+            IReadOnlyDictionary<string,TextAsset> languageTables, IGameSessionActions actions,
+            Func<ShellGameContext,RectTransform> gameScreen, string savePath)
+        {
+            Require(game,nameof(game)); game.Validate();
+            // Existing service constructors require these durations/prices to be positive.
+            if(game.heartSeconds == 0 || game.reviveGold == 0 || game.shopPrice == 0)
+                throw new InvalidOperationException("Standard requires positive heartSeconds, reviveGold and shopPrice");
+            Require(languageTables,nameof(languageTables));
+            var rewards = new Reward[5];
+            for(int i=0;i<rewards.Length;i++) rewards[i]=new Reward(game.checkInGold);
+            var ads = new FakeRewardedAdService();
+            for(int i=0;i<20;i++) ads.Enqueue(AdOutcome.Completed);
+            var purchases = new FakePurchaseService();
+            purchases.Enqueue(PurchaseOutcome.Success,Guid.NewGuid().ToString("N"));
+            var tables = new Dictionary<string,TextAsset>();
+            foreach(var table in languageTables) tables.Add(table.Key,table.Value);
+            var config = new ShellAppConfig {
+                Style=style, SavePath=savePath, LanguageTables=tables,
+                Lives=new LivesConfig(game.maxHearts,game.initialHearts,TimeSpan.FromSeconds(game.heartSeconds)),
+                Economy=new EconomyConfig(game.initialGold),
+                CheckIn=new DailyCheckInConfig(new[]{rewards,rewards}),
+                Quests=new DailyQuestsConfig(new[]{new QuestTemplate("q","win",1,new Reward(game.questGold))},1),
+                Settings=new SettingsConfig(true,true,true,game.languages[0],game.languages),
+                RemoteConfig=new RemoteConfigRules(new RemoteConfig(1,60),1000,1,3600),
+                SessionPopups=new SessionPopupConfig(new Reward(game.winGold),game.reviveGold,
+                    ShellDefaults.RevivePlacement,ShellDefaults.DoublePlacement),
+                Actions=actions, RewardedAds=ads, BoardId=game.gameId,
+                ShopCatalog=new ProductCatalog(new[]{new Product("p",PriceKind.Gold,game.shopPrice,new Reward(game.shopGold))}),
+                Purchases=purchases,
+                Leaderboard=new LeaderboardRequests(new FakeLeaderboardService("You",new FakeLeaderboardState())),
+                Sounds=new Dictionary<string,AudioClip>(), GameScreenFactory=gameScreen
+            };
+            config.Validate();
+            return config;
+        }
+
         internal static void Require(object value,string name)
         { if(value==null) throw new InvalidOperationException("Missing ShellApp config: "+name); }
         public void Validate()

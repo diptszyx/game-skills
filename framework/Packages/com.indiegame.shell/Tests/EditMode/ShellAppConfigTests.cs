@@ -20,6 +20,82 @@ namespace IndieGame.Shell.Tests
             GameScreenFactory=c=>c.Factory.ScreenRoot(c.Parent,"Game") };
         [SetUp] public void Setup()=>demos=new DemoStyles();
         [TearDown] public void Cleanup()=>demos.Dispose();
+        ShellAppConfig Standard(ShellGameConfig game=null)
+        {
+            var existing=Config();
+            return ShellAppConfig.Standard(game??ShellGameConfig.Parse("{\"gameId\":\"taporder\"}"),
+                existing.Style,new Dictionary<string,TextAsset>(existing.LanguageTables),
+                existing.Actions,existing.GameScreenFactory,existing.SavePath);
+        }
+        [Test] public void StandardConfigPassesShellAppConfigValidation()
+        {
+            var c=Standard(); Assert.DoesNotThrow(c.Validate);
+            Assert.That(c.RewardedAds,Is.TypeOf<FakeRewardedAdService>());
+            Assert.That(c.Purchases,Is.TypeOf<FakePurchaseService>());
+            Assert.That(c.Leaderboard,Is.TypeOf<LeaderboardRequests>());
+            Assert.That(c.Sounds,Is.Empty);
+            for(int i=0;i<20;i++)
+                c.RewardedAds.Show(ShellDefaults.RevivePlacement,result=>Assert.That(result.Outcome,Is.EqualTo(AdOutcome.Completed)));
+            Assert.That(c.RemoteConfig.Defaults.RewardGold,Is.EqualTo(1));
+            Assert.That(c.RemoteConfig.Defaults.RefreshSeconds,Is.EqualTo(60));
+            Assert.That(c.RemoteConfig.MaxRewardGold,Is.EqualTo(1000));
+            Assert.That(c.RemoteConfig.MinRefreshSeconds,Is.EqualTo(1));
+            Assert.That(c.RemoteConfig.MaxRefreshSeconds,Is.EqualTo(3600));
+            Assert.That(c.SessionPopups.RevivePlacement,Is.EqualTo(ShellDefaults.RevivePlacement));
+            Assert.That(c.SessionPopups.DoublePlacement,Is.EqualTo(ShellDefaults.DoublePlacement));
+            c.RewardedAds=new FakeRewardedAdService(); c.Leaderboard=new AsyncLeaderboard();
+            Assert.DoesNotThrow(c.Validate);
+        }
+        [Test] public void StandardConfigUsesGameConfigValues()
+        {
+            var g=new ShellGameConfig { gameId="custom",initialGold=111,maxHearts=8,initialHearts=3,
+                heartSeconds=42,checkInGold=12,questGold=13,winGold=14,reviveGold=15,
+                shopGold=16,shopPrice=17,languages=new[]{"vi"} };
+            var c=Standard(g); Assert.DoesNotThrow(c.Validate);
+            Assert.That(c.BoardId,Is.EqualTo(g.gameId));
+            Assert.That(c.Lives.MaxHearts,Is.EqualTo(8)); Assert.That(c.Lives.InitialHearts,Is.EqualTo(3));
+            Assert.That(c.Lives.RegenInterval,Is.EqualTo(TimeSpan.FromSeconds(42)));
+            Assert.That(c.Economy.InitialGold,Is.EqualTo(111));
+            Assert.That(c.CheckIn.RewardTables.Count,Is.EqualTo(2));
+            foreach(var row in c.CheckIn.RewardTables) {
+                Assert.That(row.Count,Is.EqualTo(5));
+                foreach(var reward in row) Assert.That(reward.Gold,Is.EqualTo(12));
+            }
+            Assert.That(c.Quests.DailyCount,Is.EqualTo(1)); Assert.That(c.Quests.Daily.Count,Is.EqualTo(1));
+            Assert.That(c.Quests.Daily[0].Id,Is.EqualTo("q"));
+            Assert.That(c.Quests.Daily[0].EventKey,Is.EqualTo("win"));
+            Assert.That(c.Quests.Daily[0].Target,Is.EqualTo(1));
+            Assert.That(c.Quests.Daily[0].Reward.Gold,Is.EqualTo(13));
+            Assert.That(c.SessionPopups.WinReward.Gold,Is.EqualTo(14));
+            Assert.That(c.SessionPopups.ReviveGold,Is.EqualTo(15));
+            Assert.That(c.ShopCatalog.Products.Count,Is.EqualTo(1));
+            var product=c.ShopCatalog.Products[0];
+            Assert.That(product.Id,Is.EqualTo("p")); Assert.That(product.PriceKind,Is.EqualTo(PriceKind.Gold));
+            Assert.That(product.Price,Is.EqualTo(17)); Assert.That(product.Reward.Gold,Is.EqualTo(16));
+            Assert.That(c.Settings.DefaultLanguage,Is.EqualTo("vi"));
+            Assert.That(c.Settings.Languages,Is.EquivalentTo(g.languages));
+            Assert.That(c.Settings.Sound && c.Settings.Music && c.Settings.Haptics,Is.True);
+        }
+        [Test] public void ParseRejectsBlankGameIdAndBadHearts()
+        {
+            foreach(var json in new[]{"{}", "{\"gameId\":\" \"}"})
+                Assert.That(Assert.Throws<InvalidOperationException>(()=>ShellGameConfig.Parse(json)).Message,Does.Contain("gameId"));
+            foreach(var field in new[]{"initialGold","maxHearts","initialHearts","heartSeconds","checkInGold","questGold","winGold","reviveGold","shopGold","shopPrice"})
+                Assert.That(Assert.Throws<InvalidOperationException>(()=>ShellGameConfig.Parse("{\"gameId\":\"test\",\""+field+"\":-1}")).Message,Does.Contain(field));
+            Assert.That(Assert.Throws<InvalidOperationException>(()=>ShellGameConfig.Parse("{\"gameId\":\"test\",\"maxHearts\":0}")).Message,Does.Contain("maxHearts"));
+            Assert.That(Assert.Throws<InvalidOperationException>(()=>ShellGameConfig.Parse("{\"gameId\":\"test\",\"initialHearts\":6}")).Message,Does.Contain("initialHearts"));
+            foreach(var value in new[]{"[]","null","[\"\"]"})
+                Assert.That(Assert.Throws<InvalidOperationException>(()=>ShellGameConfig.Parse("{\"gameId\":\"test\",\"languages\":"+value+"}")).Message,Does.Contain("languages"));
+        }
+        [Test] public void MinimalJsonUsesDefaults()
+        {
+            var g=ShellGameConfig.Parse("{\"gameId\":\"minimal\"}");
+            Assert.That(g.gameId,Is.EqualTo("minimal"));
+            Assert.That(new[]{g.initialGold,g.maxHearts,g.initialHearts,g.heartSeconds,g.checkInGold,
+                g.questGold,g.winGold,g.reviveGold,g.shopGold,g.shopPrice},
+                Is.EqualTo(new[]{100,5,5,1800,25,10,20,50,50,30}));
+            Assert.That(g.languages,Is.EqualTo(new[]{"en","vi"}));
+        }
         [Test] public void MissingRequiredConfigNamesEveryPiece()
         {
             foreach(var name in new[]{"Style","SavePath","Lives","Economy","CheckIn","Quests","Settings","RemoteConfig","SessionPopups","Actions","LanguageTables","GameScreenFactory"})
