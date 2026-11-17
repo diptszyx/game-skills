@@ -9,13 +9,24 @@
     "com.indiegame.ui": "file:../../../../game-kit/Packages/com.indiegame.ui",
     "com.unity.ugui": "2.0.0",
     "com.unity.inputsystem": "1.20.0",
-    "com.unity.services.levelplay": "9.6.0",
-    "com.indiegame.shell.levelplay": "file:../../Packages/com.indiegame.shell.levelplay",
-    "com.indiegame.shell.leaderboards": "file:../../Packages/com.indiegame.shell.leaderboards"
+    "com.indiegame.shell.leaderboards": "file:../../Packages/com.indiegame.shell.leaderboards",
+    "com.google.ads.mobile": "11.6.0",
+    "com.indiegame.shell.admob": "file:../../Packages/com.indiegame.shell.admob",
+    "com.indiegame.shell.testkit": "file:../../Packages/com.indiegame.shell.testkit"
   },
   "testables": [
     "com.indiegame.shell",
-    "com.indiegame.shell.levelplay",
-    "com.indiegame.shell.leaderboards"
+    "com.indiegame.shell.admob",
+    "com.indiegame.shell.leaderboards",
+    "com.indiegame.shell.testkit"
+  ],
+  "scopedRegistries": [
+    {
+      "name": "OpenUPM",
+      "url": "https://package.openupm.com",
+      "scopes": [
+        "com.google"
+      ]
+    }
   ]
 }

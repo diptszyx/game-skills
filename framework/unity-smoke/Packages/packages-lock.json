@@ -1,11 +1,29 @@
 {
   "dependencies": {
+    "com.google.ads.mobile": {
+      "version": "11.6.0",
+      "depth": 0,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.external-dependency-manager": "2.1.0",
+        "com.unity.modules.androidjni": "1.0.0"
+      },
+      "url": "https://package.openupm.com"
+    },
     "com.indiegame.shell": {
       "version": "file:../../Packages/com.indiegame.shell",
       "depth": 0,
       "source": "local",
       "dependencies": {
         "com.unity.nuget.newtonsoft-json": "3.2.1"
+      }
+    },
+    "com.indiegame.shell.admob": {
+      "version": "file:../../Packages/com.indiegame.shell.admob",
+      "depth": 0,
+      "source": "local",
+      "dependencies": {
+        "com.google.ads.mobile": "11.6.0"
       }
     },
     "com.indiegame.shell.leaderboards": {
@@ -18,12 +36,15 @@
         "com.unity.services.core": "1.18.0"
       }
     },
-    "com.indiegame.shell.levelplay": {
-      "version": "file:../../Packages/com.indiegame.shell.levelplay",
+    "com.indiegame.shell.testkit": {
+      "version": "file:../../Packages/com.indiegame.shell.testkit",
       "depth": 0,
       "source": "local",
       "dependencies": {
-        "com.unity.services.levelplay": "9.6.0"
+        "com.indiegame.shell": "0.1.0",
+        "com.unity.inputsystem": "1.20.0",
+        "com.unity.test-framework": "1.6.0",
+        "com.unity.ugui": "2.0.0"
       }
     },
     "com.indiegame.ui": {
@@ -40,6 +61,15 @@
       "depth": 1,
       "source": "builtin",
       "dependencies": {}
+    },
+    "com.unity.external-dependency-manager": {
+      "version": "2.1.0",
+      "depth": 1,
+      "source": "registry",
+      "dependencies": {
+        "com.unity.modules.uielements": "1.0.0"
+      },
+      "url": "https://packages.unity.com"
     },
     "com.unity.inputsystem": {
       "version": "1.20.0",
@@ -87,15 +117,6 @@
       "dependencies": {
         "com.unity.services.core": "1.15.1",
         "com.unity.services.authentication": "3.3.3"
-      },
-      "url": "https://packages.unity.com"
-    },
-    "com.unity.services.levelplay": {
-      "version": "9.6.0",
-      "depth": 0,
-      "source": "registry",
-      "dependencies": {
-        "com.unity.services.core": "1.15.1"
       },
       "url": "https://packages.unity.com"
     },

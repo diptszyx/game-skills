@@ -1,6 +1,6 @@
 using System;
 
-namespace IndieGame.Shell.LevelPlay
+namespace IndieGame.Shell.AdMob
 {
     public interface IRewardedAdBackend
     {

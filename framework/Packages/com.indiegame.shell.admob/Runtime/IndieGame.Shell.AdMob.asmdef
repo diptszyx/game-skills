@@ -1,0 +1,7 @@
+{
+  "name": "IndieGame.Shell.AdMob",
+  "references": [
+    "IndieGame.Shell.Core"
+  ],
+  "overrideReferences": false
+}

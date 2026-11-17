@@ -1,7 +1,7 @@
 {
-  "name": "IndieGame.Shell.LevelPlay.Tests.EditMode",
+  "name": "IndieGame.Shell.AdMob.Tests.EditMode",
   "references": [
-    "IndieGame.Shell.LevelPlay",
+    "IndieGame.Shell.AdMob",
     "IndieGame.Shell.Core"
   ],
   "includePlatforms": [

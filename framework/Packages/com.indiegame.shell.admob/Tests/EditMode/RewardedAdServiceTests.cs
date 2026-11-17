@@ -2,7 +2,7 @@ using System;
 using NUnit.Framework;
 using IndieGame.Shell;
 
-namespace IndieGame.Shell.LevelPlay.Tests
+namespace IndieGame.Shell.AdMob.Tests
 {
     sealed class FakeRewardedAdBackend : IRewardedAdBackend
     {
@@ -23,15 +23,15 @@ namespace IndieGame.Shell.LevelPlay.Tests
         public void FailShow() { ShowFailed?.Invoke("show error"); }
     }
 
-    public sealed class LevelPlayRewardedServiceTests
+    public sealed class RewardedAdServiceTests
     {
         FakeRewardedAdBackend backend;
-        LevelPlayRewardedService service;
+        RewardedAdService service;
         float now;
         [SetUp] public void SetUp()
         {
             now = 0; backend = new FakeRewardedAdBackend();
-            service = new LevelPlayRewardedService(backend, () => now);
+            service = new RewardedAdService(backend, () => now);
         }
         [TearDown] public void TearDown() { service.Dispose(); }
         [Test] public void ShowWhenReadyCompletesAfterRewardedThenClosed()
@@ -104,19 +104,23 @@ namespace IndieGame.Shell.LevelPlay.Tests
             backend.RaiseLoaded(); backend.FailLoad(); now += 5f; service.Tick();
             Assert.That(backend.Loads, Is.EqualTo(++loads));
         }
-        [Test] public void SettingsRejectEmptyKeyAndAdUnit()
+        [Test] public void SettingsRejectEmptyAdUnit()
         {
-            Assert.Throws<InvalidOperationException>(() => new LevelPlayAdsSettings { RewardedAdUnitId = "unit" }.Validate(false));
-            Assert.Throws<InvalidOperationException>(() => new LevelPlayAdsSettings { AppKey = "key", RewardedAdUnitId = " " }.Validate(false));
-            Assert.DoesNotThrow(() => new LevelPlayAdsSettings { AppKey = "key", RewardedAdUnitId = "unit" }.Validate(true));
+            foreach (var id in new[] { null, "", "  " })
+                Assert.Throws<InvalidOperationException>(() => new AdMobAdsSettings { RewardedAdUnitId = id }.Validate(false));
+            Assert.DoesNotThrow(() => new AdMobAdsSettings { RewardedAdUnitId = "unit" }.Validate(true));
         }
-        [Test] public void PlaceholderKeyRejectedInReleaseBuildButAllowedInDev()
+        [Test] public void TestAdUnitRejectedInReleaseBuildButAllowedInDev()
         {
-            var settings = new LevelPlayAdsSettings { AppKey = "TEST_KEY_REPLACE_ME", RewardedAdUnitId = "unit", AllowTestKey = true };
-            Assert.Throws<InvalidOperationException>(() => settings.Validate(true));
-            Assert.DoesNotThrow(() => settings.Validate(false));
-            settings.AllowTestKey = false;
-            Assert.Throws<InvalidOperationException>(() => settings.Validate(false));
+            foreach (var id in new[] { AdMobAdsSettings.TestRewardedAndroid, AdMobAdsSettings.TestRewardedIos, AdMobAdsSettings.TestRewarded })
+            {
+                var settings = new AdMobAdsSettings { RewardedAdUnitId = id, AllowTestAdUnit = true };
+                Assert.Throws<InvalidOperationException>(() => settings.Validate(true));
+                Assert.DoesNotThrow(() => settings.Validate(false));
+                settings.AllowTestAdUnit = false;
+                Assert.Throws<InvalidOperationException>(() => settings.Validate(false));
+                Assert.Throws<InvalidOperationException>(() => settings.Validate(true));
+            }
         }
     }
 }

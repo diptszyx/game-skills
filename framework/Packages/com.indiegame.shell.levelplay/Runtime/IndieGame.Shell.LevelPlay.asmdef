@@ -1,7 +1,0 @@
-{
-  "name": "IndieGame.Shell.LevelPlay",
-  "references": [
-    "IndieGame.Shell.Core",
-    "Unity.LevelPlay"
-  ]
-}

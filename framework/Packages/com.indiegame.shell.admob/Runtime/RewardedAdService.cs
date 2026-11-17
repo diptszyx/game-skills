@@ -1,9 +1,9 @@
 using System;
 
-namespace IndieGame.Shell.LevelPlay
+namespace IndieGame.Shell.AdMob
 {
     /// <summary>Main-thread service. Tick must run every frame, including while ads are unavailable.</summary>
-    public sealed class LevelPlayRewardedService : IRewardedAdService, IDisposable
+    public sealed class RewardedAdService : IRewardedAdService, IDisposable
     {
         IRewardedAdBackend backend;
         readonly Func<float> clock;
@@ -12,15 +12,15 @@ namespace IndieGame.Shell.LevelPlay
         float retryAt = float.PositiveInfinity;
         float retryDelay = 5f;
 
-        internal LevelPlayRewardedService(Func<float> clock)
+        internal RewardedAdService(Func<float> clock)
         { this.clock = clock ?? throw new ArgumentNullException(nameof(clock)); }
 
-        public LevelPlayRewardedService(IRewardedAdBackend backend, Func<float> clock) : this(clock)
+        public RewardedAdService(IRewardedAdBackend backend, Func<float> clock) : this(clock)
         { Attach(backend ?? throw new ArgumentNullException(nameof(backend))); }
 
         internal void Attach(IRewardedAdBackend value)
         {
-            if (disposed) throw new ObjectDisposedException(nameof(LevelPlayRewardedService));
+            if (disposed) throw new ObjectDisposedException(nameof(RewardedAdService));
             if (backend != null) throw new InvalidOperationException("Backend already attached.");
             backend = value;
             backend.Loaded += OnLoaded;
@@ -35,7 +35,7 @@ namespace IndieGame.Shell.LevelPlay
             if (onDone == null) throw new ArgumentNullException(nameof(onDone));
             if (string.IsNullOrWhiteSpace(placementId))
             { onDone(new AdResult(AdOutcome.Failed, ServiceError.InvalidArgument)); return; }
-            if (disposed) throw new ObjectDisposedException(nameof(LevelPlayRewardedService));
+            if (disposed) throw new ObjectDisposedException(nameof(RewardedAdService));
             if (pending != null)
             { onDone(new AdResult(AdOutcome.Failed, ServiceError.Conflict)); return; }
             if (backend == null || !backend.IsReady)
