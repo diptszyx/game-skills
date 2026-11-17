@@ -1,0 +1,9 @@
+{
+  "name": "com.indiegame.shell.levelplay",
+  "version": "0.1.0",
+  "displayName": "IndieGame Shell LevelPlay",
+  "unity": "6000.3",
+  "dependencies": {
+    "com.unity.services.levelplay": "9.6.0"
+  }
+}

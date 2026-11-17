@@ -1,0 +1,13 @@
+{
+  "name": "IndieGame.Shell.LevelPlay.Tests.EditMode",
+  "references": [
+    "IndieGame.Shell.LevelPlay",
+    "IndieGame.Shell.Core"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
+}

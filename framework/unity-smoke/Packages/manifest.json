@@ -8,9 +8,12 @@
     "com.unity.modules.androidjni": "1.0.0",
     "com.indiegame.ui": "file:../../../../game-kit/Packages/com.indiegame.ui",
     "com.unity.ugui": "2.0.0",
-    "com.unity.inputsystem": "1.20.0"
+    "com.unity.inputsystem": "1.20.0",
+    "com.unity.services.levelplay": "9.6.0",
+    "com.indiegame.shell.levelplay": "file:../../Packages/com.indiegame.shell.levelplay"
   },
   "testables": [
-    "com.indiegame.shell"
+    "com.indiegame.shell",
+    "com.indiegame.shell.levelplay"
   ]
 }
