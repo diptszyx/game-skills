@@ -43,7 +43,7 @@ namespace IndieGame.Shell.Unity
         public Func<ShellSession,ShopService> ShopFactory;
         public ProductCatalog ShopCatalog;
         public IPurchaseService Purchases;
-        public ILeaderboardService Leaderboard;
+        public ILeaderboardRequests Leaderboard;
         public string BoardId;
         public int LeaderboardRows = 10;
         public IDictionary<string,AudioClip> Sounds;

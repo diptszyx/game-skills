@@ -35,9 +35,10 @@ namespace IndieGame.Shell.Unity.Screens
             refresh.GetComponentInChildren<TMPro.TMP_Text>().text=text.Get("shell.refresh");
         }
     }
-    // Async adapters must complete on the owning Unity context. No Task.Run around SDK calls.
+    // Completes on the Unity main thread; null/blank board or negative score -> InvalidArgument.
     public interface ILeaderboardRequests
     {
+        Task<ServiceResult<bool>> SubmitScore(string board,long score);
         Task<ServiceResult<IReadOnlyList<LeaderboardEntry>>> GetTop(string board,int count);
         Task<ServiceResult<LeaderboardEntry>> GetMyRank(string board);
     }
@@ -45,6 +46,7 @@ namespace IndieGame.Shell.Unity.Screens
     {
         readonly ILeaderboardService service;
         public LeaderboardRequests(ILeaderboardService service) { this.service=service; }
+        public Task<ServiceResult<bool>> SubmitScore(string board,long score)=>Task.FromResult(service.SubmitScore(board,score));
         public Task<ServiceResult<IReadOnlyList<LeaderboardEntry>>> GetTop(string board,int count)=>Task.FromResult(service.GetTop(board,count));
         public Task<ServiceResult<LeaderboardEntry>> GetMyRank(string board)=>Task.FromResult(service.GetMyRank(board));
     }
@@ -53,8 +55,6 @@ namespace IndieGame.Shell.Unity.Screens
         readonly LeaderboardView view; readonly ScreenText text; readonly ILeaderboardRequests requests; readonly string board; readonly int count;
         int requestId; bool disposed;
         public Task Pending { get; private set; }
-        public LeaderboardPresenter(ShellSession session,LeaderboardView view,LocalizationService localization,ILeaderboardService service,string board,int count)
-            :this(session,view,localization,new LeaderboardRequests(service),board,count) {}
         public LeaderboardPresenter(ShellSession session,LeaderboardView view,LocalizationService localization,ILeaderboardRequests requests,string board,int count)
         {
             if(string.IsNullOrWhiteSpace(board)||count<1) throw new ArgumentException("Invalid leaderboard configuration");

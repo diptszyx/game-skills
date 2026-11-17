@@ -1,0 +1,10 @@
+{
+  "name": "IndieGame.Shell.Leaderboards",
+  "references": [
+    "IndieGame.Shell.Core",
+    "IndieGame.Shell.Unity",
+    "Unity.Services.Core",
+    "Unity.Services.Authentication",
+    "Unity.Services.Leaderboards"
+  ]
+}

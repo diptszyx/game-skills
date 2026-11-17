@@ -56,10 +56,22 @@ namespace IndieGame.Shell.Tests
             }
             finally { UnityEngine.Object.DestroyImmediate(root); }
         }
+        sealed class AsyncLeaderboard : ILeaderboardRequests
+        {
+            public System.Threading.Tasks.Task<ServiceResult<bool>> SubmitScore(string board,long score)=>System.Threading.Tasks.Task.FromResult(new ServiceResult<bool>(true));
+            public System.Threading.Tasks.Task<ServiceResult<IReadOnlyList<LeaderboardEntry>>> GetTop(string board,int count)=>System.Threading.Tasks.Task.FromResult(new ServiceResult<IReadOnlyList<LeaderboardEntry>>(Array.Empty<LeaderboardEntry>()));
+            public System.Threading.Tasks.Task<ServiceResult<LeaderboardEntry>> GetMyRank(string board)=>System.Threading.Tasks.Task.FromResult(new ServiceResult<LeaderboardEntry>(null,ServiceError.NotFound));
+        }
+        [Test] public void ShellAppConfigAcceptsAsyncLeaderboardRequests()
+        {
+            var c=Config(); var requests=new AsyncLeaderboard(); c.Leaderboard=requests; c.BoardId="board";
+            Assert.DoesNotThrow(c.Validate);
+            Assert.That(c.Leaderboard,Is.SameAs(requests));
+        }
         [Test] public void PartialOptionalConfigIsNamed()
         {
             var c=Config(); c.ShopCatalog=ScreenTestData.Catalog(); Assert.That(Assert.Throws<InvalidOperationException>(c.Validate).Message,Does.Contain("Purchases"));
-            c=Config(); c.Leaderboard=new FakeLeaderboardService("me",new FakeLeaderboardState()); Assert.That(Assert.Throws<InvalidOperationException>(c.Validate).Message,Does.Contain("BoardId"));
+            c=Config(); c.Leaderboard=new LeaderboardRequests(new FakeLeaderboardService("me",new FakeLeaderboardState())); Assert.That(Assert.Throws<InvalidOperationException>(c.Validate).Message,Does.Contain("BoardId"));
             c=Config(); c.Clock=null; Assert.DoesNotThrow(c.Validate);
         }
     }

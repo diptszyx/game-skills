@@ -31,3 +31,8 @@ The shell is the shared "everything around the gameplay". A game supplies gamepl
 - Game code never touches the ad SDK: the shell calls `IRewardedAdService.Show(placementId, onDone)` (async, `onDone` exactly once). Tests use `FakeRewardedAdService`.
 - Real ads: add package `com.indiegame.shell.levelplay` (it pulls `com.unity.services.levelplay`), build `LevelPlayAdsSettings` (AppKey, RewardedAdUnitId), call `new LevelPlayAds().Create(settings)` once at boot and put the returned service in `ShellAppConfig.RewardedAds`. A hidden ticker drives load retries.
 - Placement ids from the shell config (`RevivePlacement`, `DoublePlacement`) must exist on the LevelPlay dashboard. The placeholder key `TEST_KEY_REPLACE_ME` is rejected in release builds. Real key and on-device test come from the dev lead; Editor mock ads only work with an Android or iOS build target.
+
+## Leaderboard (Unity Leaderboards)
+- `ShellAppConfig.Leaderboard` is an `ILeaderboardRequests` (async). Tests wrap the sync fake: `new LeaderboardRequests(new FakeLeaderboardService(id, state))`.
+- Real: add package `com.indiegame.shell.leaderboards` and set `Leaderboard = UnityLeaderboards.Create()`. It signs in anonymously by itself. The Unity project must be linked to a Unity Cloud project and the board created on the Unity Dashboard (the `BoardId` must match).
+- The shell does not submit scores by itself: the game calls `Leaderboard.SubmitScore(boardId, score)` when a run ends.

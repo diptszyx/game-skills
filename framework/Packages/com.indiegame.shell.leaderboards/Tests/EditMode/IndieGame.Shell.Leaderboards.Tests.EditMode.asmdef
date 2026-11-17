@@ -1,0 +1,14 @@
+{
+  "name": "IndieGame.Shell.Leaderboards.Tests.EditMode",
+  "references": [
+    "IndieGame.Shell.Leaderboards",
+    "IndieGame.Shell.Core",
+    "IndieGame.Shell.Unity"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
+}

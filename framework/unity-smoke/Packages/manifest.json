@@ -10,10 +10,12 @@
     "com.unity.ugui": "2.0.0",
     "com.unity.inputsystem": "1.20.0",
     "com.unity.services.levelplay": "9.6.0",
-    "com.indiegame.shell.levelplay": "file:../../Packages/com.indiegame.shell.levelplay"
+    "com.indiegame.shell.levelplay": "file:../../Packages/com.indiegame.shell.levelplay",
+    "com.indiegame.shell.leaderboards": "file:../../Packages/com.indiegame.shell.leaderboards"
   },
   "testables": [
     "com.indiegame.shell",
-    "com.indiegame.shell.levelplay"
+    "com.indiegame.shell.levelplay",
+    "com.indiegame.shell.leaderboards"
   ]
 }

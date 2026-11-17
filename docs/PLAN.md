@@ -25,7 +25,7 @@ Khung dùng được cho cả game 2D lẫn 3D vì giao diện luôn là lớp 2
 | Vàng, tim, booster | Cửa hàng | Thua |
 | Âm thanh | Điểm danh ngày | Hồi sinh |
 | Rung | Nhiệm vụ ngày | Tạm dừng |
-| Cài đặt | Bảng xếp hạng (Unity Leaderboards) | Rời ván |
+| Cài đặt | Bảng xếp hạng (Unity Leaderboards; adapter thật trong `com.indiegame.shell.leaderboards`) | Rời ván |
 | Đa ngôn ngữ | Màn hình tải | |
 | Vùng an toàn (tai thỏ) | | |
 | Xem quảng cáo nhận thưởng (giao diện bất đồng bộ; bản giả cho test, bản thật LevelPlay trong package `com.indiegame.shell.levelplay`) | | |

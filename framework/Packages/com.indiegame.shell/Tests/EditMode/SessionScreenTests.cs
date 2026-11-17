@@ -105,7 +105,7 @@ namespace IndieGame.Shell.Tests
             {
                 var service=new FakeLeaderboardService("me",new FakeLeaderboardState());
                 var view=new LeaderboardView(f.Factory,f.Root.transform);
-                using(var p=new LeaderboardPresenter(f.Session,view,ScreenTestData.Text(),service,"board",3))
+                using(var p=new LeaderboardPresenter(f.Session,view,ScreenTestData.Text(),new LeaderboardRequests(service),"board",3))
                 {
                     Assert.That(view.Snapshot.State,Is.EqualTo(LeaderboardState.Empty));
                     service.Enqueue(ServiceError.Unavailable); p.Refresh(); Assert.That(view.Snapshot.State,Is.EqualTo(LeaderboardState.Error));
@@ -115,8 +115,19 @@ namespace IndieGame.Shell.Tests
                 }
             }
         }
+        [Test] public async Task LeaderboardRequestsSubmitScoreForwardsToService()
+        {
+            var service=new FakeLeaderboardService("me",new FakeLeaderboardState());
+            var requests=new LeaderboardRequests(service);
+            Assert.That((await requests.SubmitScore("board",42)).Success,Is.True);
+            Assert.That(service.GetMyRank("board").Value.Score,Is.EqualTo(42));
+            service.Enqueue(ServiceError.Unavailable);
+            Assert.That((await requests.SubmitScore("board",43)).Error,Is.EqualTo(ServiceError.Unavailable));
+            Assert.That((await requests.SubmitScore(" ",-1)).Error,Is.EqualTo(ServiceError.InvalidArgument));
+        }
         sealed class Delayed : ILeaderboardRequests
         {
+            public Task<ServiceResult<bool>> SubmitScore(string board,long score)=>Task.FromResult(new ServiceResult<bool>(true));
             public readonly Queue<TaskCompletionSource<ServiceResult<IReadOnlyList<LeaderboardEntry>>>> Top=new Queue<TaskCompletionSource<ServiceResult<IReadOnlyList<LeaderboardEntry>>>>();
             public Task<ServiceResult<IReadOnlyList<LeaderboardEntry>>> GetTop(string board,int count) { var t=new TaskCompletionSource<ServiceResult<IReadOnlyList<LeaderboardEntry>>>(); Top.Enqueue(t); return t.Task; }
             public Task<ServiceResult<LeaderboardEntry>> GetMyRank(string board)=>Task.FromResult(new ServiceResult<LeaderboardEntry>(null,ServiceError.NotFound));

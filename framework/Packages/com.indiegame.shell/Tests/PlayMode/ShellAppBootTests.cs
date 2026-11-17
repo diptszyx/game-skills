@@ -177,7 +177,7 @@ namespace IndieGame.Shell.Tests
         [UnityTest] public IEnumerator OptionalScreensAndCommitRetryDoNotReplayPlay()
         {
             var files=new ScreenFiles(); config.SaveStore=new SaveStore(fileSystem:files);
-            config.ShopCatalog=ScreenTestData.Catalog(); config.Purchases=new FakePurchaseService(); config.Leaderboard=new FakeLeaderboardService("me",new FakeLeaderboardState()); config.BoardId="board";
+            config.ShopCatalog=ScreenTestData.Catalog(); config.Purchases=new FakePurchaseService(); config.Leaderboard=new LeaderboardRequests(new FakeLeaderboardService("me",new FakeLeaderboardState())); config.BoardId="board";
             yield return Boot(); foreach(var screen in new[]{ShellScreen.Quests,ShellScreen.Shop,ShellScreen.Leaderboard}) { app.Navigate(screen); Assert.That(app.Screens.Current.name,Is.EqualTo(screen.ToString())); app.Back(); }
             files.Fail=true; yield return Tap(MainButton("shell.play")); Assert.That(game.Plays,Is.EqualTo(1)); Assert.That(app.Commit().Success,Is.False); Assert.That(app.ErrorLabel.text,Is.Not.Empty);
             files.Fail=false; Assert.That(app.Commit().Success,Is.True); Assert.That(game.Plays,Is.EqualTo(1));
