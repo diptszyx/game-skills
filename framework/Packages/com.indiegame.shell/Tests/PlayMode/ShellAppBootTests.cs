@@ -27,6 +27,9 @@ namespace IndieGame.Shell.Tests
         }
         DemoStyles demos; ShellApp app; Game game; ShellAppConfig config; Mouse mouse; Keyboard keyboard; string path; float priorScale; GameObject external;
         int canvases,systems,objects;
+        readonly List<InputDevice> isolatedDevices=new List<InputDevice>();
+        InputSettings.BackgroundBehavior priorBackground;
+        InputSettings.UpdateMode priorUpdateMode;
 #if UNITY_EDITOR
         UnityEditor.EditorWindow gameView; int previousSize;
 #endif
@@ -34,6 +37,10 @@ namespace IndieGame.Shell.Tests
         {
             SetPortrait(); demos=new DemoStyles(); game=new Game(); priorScale=Time.timeScale; Time.timeScale=.4f;
             canvases=Count<Canvas>(); systems=Count<EventSystem>(); objects=Count<RectTransform>();
+            priorBackground=InputSystem.settings.backgroundBehavior; priorUpdateMode=InputSystem.settings.updateMode;
+            InputSystem.settings.backgroundBehavior=InputSettings.BackgroundBehavior.IgnoreFocus;
+            InputSystem.settings.updateMode=InputSettings.UpdateMode.ProcessEventsInDynamicUpdate;
+            foreach(var device in InputSystem.devices.ToArray()) if(device.enabled) { isolatedDevices.Add(device); InputSystem.DisableDevice(device); }
             mouse=InputSystem.AddDevice<Mouse>(); keyboard=InputSystem.AddDevice<Keyboard>(); path=Path.Combine(Application.temporaryCachePath,"T29a-"+Guid.NewGuid().ToString("N")+".json");
             app=new GameObject("Shell Test").AddComponent<ShellApp>();
             config=new ShellAppConfig { Style=demos.Make(false),SavePath=path,
@@ -50,6 +57,8 @@ namespace IndieGame.Shell.Tests
             if(app!=null) UnityEngine.Object.DestroyImmediate(app.gameObject);
             if(external!=null) UnityEngine.Object.DestroyImmediate(external);
             InputSystem.RemoveDevice(mouse); InputSystem.RemoveDevice(keyboard);
+            foreach(var device in isolatedDevices) if(device.added) InputSystem.EnableDevice(device);
+            isolatedDevices.Clear(); InputSystem.settings.backgroundBehavior=priorBackground; InputSystem.settings.updateMode=priorUpdateMode;
 #if UNITY_EDITOR
             if(gameView!=null) gameView.GetType().GetProperty("selectedSizeIndex").SetValue(gameView,previousSize);
 #endif
@@ -61,6 +70,7 @@ namespace IndieGame.Shell.Tests
             var result=app.Boot(config); Assert.That(result.Success,Is.True,result.Error); Assert.That(app.Ready,Is.False);
             float until=Time.realtimeSinceStartup+5; while(!app.Ready && Time.realtimeSinceStartup<until) yield return null;
             Assert.That(app.Ready,Is.True); Assert.That(app.Popups.HandlesOwnBackKey,Is.False);
+            yield return null; yield return null;
         }
         Button MainButton(string key)=>app.Main.Root.GetComponentsInChildren<Button>().Single(b=>b.GetComponentInChildren<TMP_Text>().text==app.Text.Format("en",key).Value);
         IEnumerator Tap(Button button)
@@ -69,9 +79,25 @@ namespace IndieGame.Shell.Tests
             var position=RectTransformUtility.WorldToScreenPoint(null,button.transform.TransformPoint(((RectTransform)button.transform).rect.center));
             var hits=new List<RaycastResult>(); EventSystem.current.RaycastAll(new PointerEventData(EventSystem.current){position=position},hits);
             Assert.That(hits.Count,Is.GreaterThan(0),button.name); Assert.That(hits[0].gameObject.GetComponentInParent<Button>(),Is.SameAs(button),button.name);
-            InputSystem.QueueStateEvent(mouse,new MouseState {position=position}); yield return null;
-            InputSystem.QueueStateEvent(mouse,new MouseState {position=position}.WithButton(MouseButton.Left)); yield return null; yield return null;
-            InputSystem.QueueStateEvent(mouse,new MouseState {position=position}); yield return null; yield return new WaitForSecondsRealtime(.15f);
+            InputSystem.QueueStateEvent(mouse,new MouseState {position=position});
+            yield return Until(()=>Vector2.Distance(mouse.position.ReadValue(),position)<.1f,"pointer position consumed");
+            InputSystem.QueueStateEvent(mouse,new MouseState {position=position}.WithButton(MouseButton.Left));
+            yield return Until(()=>mouse.leftButton.isPressed,"pointer press consumed");
+            yield return null; // EventSystem has processed the down edge before releasing.
+            InputSystem.QueueStateEvent(mouse,new MouseState {position=position});
+            yield return Until(()=>!mouse.leftButton.isPressed,"pointer release consumed");
+            yield return Settled();
+        }
+        static IEnumerator Until(Func<bool> condition,string message)
+        {
+            float deadline=Time.realtimeSinceStartup+10;
+            while(!condition()&&Time.realtimeSinceStartup<deadline) yield return null;
+            Assert.That(condition(),Is.True,message);
+        }
+        IEnumerator Settled()
+        {
+            yield return null; yield return null;
+            yield return Until(()=>app.Popups.Stack.All(p=>p.Group.alpha>=.999f&&Vector3.Distance(p.Panel.localScale,Vector3.one)<.001f),"popup transitions completed");
         }
         [UnityTest] public IEnumerator GameTableOverridesAndShellDefaultsFillMissingKeys()
         {
@@ -159,10 +185,16 @@ namespace IndieGame.Shell.Tests
         [UnityTest] public IEnumerator KeyboardBackClosesOnlyOnePopupLayer()
         {
             yield return Boot(); yield return Tap(MainButton("shell.play")); app.Back();
-            yield return new WaitForSecondsRealtime(.1f);
+            yield return Settled();
             yield return Tap(app.Flow.Popups[SessionPopupKind.Pause].Buttons["leave"]);
-            InputSystem.QueueStateEvent(keyboard,new KeyboardState(Key.Escape)); yield return null;
-            InputSystem.QueueStateEvent(keyboard,new KeyboardState()); yield return new WaitForSecondsRealtime(.15f);
+            var leave=app.Flow.Popups[SessionPopupKind.Leave].View;
+            InputSystem.QueueStateEvent(keyboard,new KeyboardState(Key.Escape));
+            yield return Until(()=>keyboard.escapeKey.isPressed,"Escape consumed");
+            yield return null;
+            InputSystem.QueueStateEvent(keyboard,new KeyboardState());
+            yield return Until(()=>!keyboard.escapeKey.isPressed,"Escape released");
+            yield return Until(()=>!leave.gameObject.activeSelf,"Leave popup closed");
+            yield return Settled();
             Assert.That(app.Popups.Top,Is.SameAs(app.Flow.Popups[SessionPopupKind.Pause].View));
             Assert.That(Time.timeScale,Is.Zero); Assert.That(game.Resumes,Is.Zero);
         }
@@ -182,7 +214,7 @@ namespace IndieGame.Shell.Tests
             Assert.That(chrome.Find("TabBar/Tabs/Tab checkin/Icon/Badge").gameObject.activeSelf,Is.False);
             app.Back(); yield return Tap(MainButton("shell.play")); Assert.That(game.Plays,Is.EqualTo(1));
             Assert.That(chrome.Find("TabBar").gameObject.activeSelf,Is.False); Assert.That(chrome.Find("TopBar").gameObject.activeSelf,Is.True);
-            Assert.That(app.GameHud,Is.Not.Null); Assert.That(app.Audio,Is.Not.Null); Assert.That(app.Haptics,Is.Not.Null); yield return Tap(chrome.Find("TopBar/Shell Settings").GetComponent<Button>()); Assert.That(app.Popups.Top,Is.Not.Null); app.Back(); yield return new WaitForSecondsRealtime(.15f);
+            Assert.That(app.GameHud,Is.Not.Null); Assert.That(app.Audio,Is.Not.Null); Assert.That(app.Haptics,Is.Not.Null); yield return Tap(chrome.Find("TopBar/Shell Settings").GetComponent<Button>()); Assert.That(app.Popups.Top,Is.Not.Null); app.Back(); yield return Settled();
             app.ShowMain(); Assert.That(chrome.Find("TabBar").gameObject.activeSelf,Is.True);
         }
         [UnityTest] public IEnumerator GameViewportMapsScreenPointsToWorldAndFollowsGameScreen()
@@ -208,7 +240,7 @@ namespace IndieGame.Shell.Tests
             int count=(int)group.GetType().GetMethod("GetTotalCount").Invoke(group,null),index=-1;
             for(int i=0;i<count;i++) { var size=group.GetType().GetMethod("GetGameViewSize").Invoke(group,new object[]{i}); if((int)sizeType.GetProperty("width").GetValue(size)==720 && (int)sizeType.GetProperty("height").GetValue(size)==1600) { index=i; break; } }
             if(index<0) { var size=Activator.CreateInstance(sizeType,new object[]{kind,720,1600,"Shell tests portrait"}); group.GetType().GetMethod("AddCustomSize").Invoke(group,new[]{size}); index=count; }
-            gameView=UnityEditor.EditorWindow.GetWindow(assembly.GetType("UnityEditor.GameView")); previousSize=(int)gameView.GetType().GetProperty("selectedSizeIndex").GetValue(gameView); gameView.GetType().GetProperty("selectedSizeIndex").SetValue(gameView,index); gameView.Repaint();
+            gameView=UnityEditor.EditorWindow.GetWindow(assembly.GetType("UnityEditor.GameView")); previousSize=(int)gameView.GetType().GetProperty("selectedSizeIndex").GetValue(gameView); gameView.GetType().GetProperty("selectedSizeIndex").SetValue(gameView,index); gameView.Focus(); gameView.Repaint();
 #endif
         }
     }

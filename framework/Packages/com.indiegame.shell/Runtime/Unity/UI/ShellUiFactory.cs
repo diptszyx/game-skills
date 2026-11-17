@@ -81,8 +81,8 @@ namespace IndieGame.Shell.Unity.UI
         { var r = Node(name, parent); Stretch(r); Image(r, "screen"); r.gameObject.SetActive(true); return r; }
         string DefaultLabelRole(Transform parent, bool title)
         {
-            bool onBackdrop = Style.BackdropTextColor.a > 0 && parent.GetComponentInParent<PopupView>() == null;
-            return onBackdrop ? "backdropText" : title ? "title" : "body";
+            bool onBackdrop = Style.BackdropTextColor.a > 0 && parent.GetComponentInParent<PopupView>(true) == null;
+            return onBackdrop ? "backdropText" : title ? "title" : parent.GetComponentInParent<PopupView>(true)!=null ? "popupText" : "body";
         }
         public TextMeshProUGUI Label(Transform parent, string value, bool title = false, string role = null)
         {
@@ -91,7 +91,7 @@ namespace IndieGame.Shell.Unity.UI
             t.alignment = TextAlignmentOptions.Center; t.raycastTarget = false; Bind(t, role ?? DefaultLabelRole(parent, title));
             LocalizedLayout.Text(t,t.fontSize);
             if(title) LocalizedLayout.Heading(r);
-            if(parent.GetComponent<PopupView>()==null && parent.parent!=null && parent.parent.GetComponentInParent<PopupView>()!=null) LocalizedLayout.PopupChild(r,false);
+            if(parent.GetComponent<PopupView>()==null && parent.parent!=null && parent.parent.GetComponentInParent<PopupView>(true)!=null) LocalizedLayout.PopupChild(r,false);
             r.gameObject.SetActive(true); return t;
         }
         public Button Button(Transform parent, string text, ButtonRole role = ButtonRole.Primary, Action clicked = null)
@@ -103,7 +103,7 @@ namespace IndieGame.Shell.Unity.UI
             var label = Label(r, text); var binding = label.GetComponent<ShellAppearance>(); binding.Role = "buttonText"; binding.ButtonRole = role; binding.Apply(Style);
             label.fontSize = b.FontSize; LocalizedLayout.Text(label,b.FontSize);
             LocalizedLayout.ButtonLabel(label.rectTransform);
-            if(parent.GetComponentInParent<PopupView>()!=null) LocalizedLayout.PopupChild(r,true);
+            if(parent.GetComponentInParent<PopupView>(true)!=null) LocalizedLayout.PopupChild(r,true);
             r.gameObject.SetActive(true); return button;
         }
         public RectTransform ListRow(Transform parent, string text)
@@ -132,10 +132,10 @@ namespace IndieGame.Shell.Unity.UI
             var closeHit = Node("CloseHit", panel); closeHit.anchorMin = closeHit.anchorMax = new Vector2(1, 1); closeHit.sizeDelta = new Vector2(96, 96); closeHit.anchoredPosition = new Vector2(-36, -110);
             var closeImage = closeHit.gameObject.AddComponent<Image>(); closeImage.color = Color.clear;
             var closeButton = closeHit.gameObject.AddComponent<Button>(); closeButton.targetGraphic = closeImage; closeButton.transition = Selectable.Transition.None; closeHit.gameObject.SetActive(true);
-            var heading = Label(panel, title, true, "title"); heading.rectTransform.anchoredPosition = new Vector2(0, Style.Theme.PanelSize.y/2 + Style.Theme.TitleOffsetY);
+            var heading = Label(panel, title, true, "title");
             RectTransform slot = null;
             if (contentSlot) { slot = Node("Content", panel); slot.sizeDelta = Style.Theme.BodySize; slot.gameObject.SetActive(true); }
-            var view = r.gameObject.AddComponent<PopupView>(); view.Initialize(group, panel, slot, Style.Theme.Motion);
+            var view = r.gameObject.AddComponent<PopupView>(); view.Initialize(group, panel, slot, Style.Theme.Motion); view.Configure(Style);
             LocalizedLayout.Popup(panel,heading.rectTransform,slot);
             scrim.onClick.AddListener(() => view.RequestDismiss()); closeButton.onClick.AddListener(() => view.RequestDismiss()); panel.gameObject.SetActive(true);
             // Remains inactive until a host owns it.
@@ -145,7 +145,7 @@ namespace IndieGame.Shell.Unity.UI
         {
             if (style == null) throw new InvalidOperationException("Missing style role: ShellStyle"); style.Validate(); Style = style;
             foreach (var binding in root.GetComponentsInChildren<ShellAppearance>(true)) binding.Apply(style);
-            foreach (var view in root.GetComponentsInChildren<PopupView>(true)) view.Motion = style.Theme.Motion;
+            foreach (var view in root.GetComponentsInChildren<PopupView>(true)) { view.Motion = style.Theme.Motion; view.Configure(style); }
         }
     }
 }

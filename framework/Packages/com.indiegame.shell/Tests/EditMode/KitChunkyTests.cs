@@ -92,7 +92,8 @@ namespace IndieGame.Shell.Tests
             var retired=new[]{"pill_currency.png","pill_lives.png","tab_bar.png"};
             var v5=new[]{"gear_button","board_frame"};
             var v4=new[]{"tab_home","tab_checkin","tab_quests","tab_shop","tab_trophy","pill_plain","tab_cell","tab_cell_selected"};
-            Assert.That(Sources().Length,Is.EqualTo(source.Length-retired.Length+v4.Length+v5.Length+1));
+            var derived=new[]{"panel_popup_nox"};
+            Assert.That(Sources().Length,Is.EqualTo(source.Length-retired.Length+v4.Length+v5.Length+derived.Length+1));
             foreach(var name in v4)
                 Assert.That(File.ReadAllBytes(Folder+"/"+name+".png").SequenceEqual(File.ReadAllBytes(Path.Combine(original,"../kit_v4_cut",name+".png"))),Is.True,name);
             foreach(var name in v5)

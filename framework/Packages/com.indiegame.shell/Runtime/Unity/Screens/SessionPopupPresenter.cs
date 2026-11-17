@@ -32,6 +32,7 @@ namespace IndieGame.Shell.Unity.Screens
         public readonly Dictionary<string,Button> Buttons=new Dictionary<string,Button>();
         public TMP_Text ErrorLabel { get; internal set; }
         public string Error { get; internal set; }
+        internal bool AdPending, Exited;
     }
     public sealed class SessionPopupPresenter : IDisposable
     {
@@ -70,7 +71,7 @@ namespace IndieGame.Shell.Unity.Screens
             var p=new SessionPopupContent { View=factory.PopupFrame(host.transform,text.Get("popup."+kind.ToString().ToLowerInvariant()+".title")) };
             popups[kind]=p;
             p.View.Policy=kind==SessionPopupKind.Pause||kind==SessionPopupKind.Leave?DismissalPolicy.Dismissible:DismissalPolicy.Mandatory;
-            p.View.Panel.sizeDelta=new Vector2(p.View.Panel.sizeDelta.x,800);
+            if(factory.Style.PopupLayout.PanelMaxHeight<=0) p.View.Panel.sizeDelta=new Vector2(p.View.Panel.sizeDelta.x,800);
 
             var layout=p.View.Content.gameObject.AddComponent<VerticalLayoutGroup>(); layout.childControlHeight=false; layout.childForceExpandHeight=false; layout.childControlWidth=false; layout.childForceExpandWidth=false; layout.childAlignment=TextAnchor.MiddleCenter; layout.spacing=factory.Style.Spacing;
             factory.Label(p.View.Content,text.Get("popup."+kind.ToString().ToLowerInvariant()+".body"),role:"popupText");
@@ -90,7 +91,7 @@ namespace IndieGame.Shell.Unity.Screens
         }
         public void Act(SessionPopupKind kind,string action)
         {
-            if(disposed||busy||consumed.Contains(kind)||!popups.TryGetValue(kind,out var p)||host.Top!=p.View||!p.View.Group.interactable) return;
+            if(disposed||busy||consumed.Contains(kind)||!popups.TryGetValue(kind,out var p)||p.AdPending||p.Exited||p.View==null||host.Top!=p.View||!p.View.Group.interactable) return;
             busy=true;
             try
             {
@@ -119,8 +120,9 @@ namespace IndieGame.Shell.Unity.Screens
                     if(action=="ad")
                     {
                         if(ads==null) { Error(p,"Unavailable"); return; }
-                        var ad=ads.Show(config.RevivePlacement);
-                        if(!ad.Success) { Error(p,ad.Error==ServiceError.None?ad.Outcome.ToString():ad.Error.ToString()); return; }
+                        ShowAd(kind,p,config.RevivePlacement,()=>
+                        { consumed.Add(kind); game.Revive(); if(Save(p)) host.Close(p.View); });
+                        return;
                     }
                     else if(action=="gold") { var spend=session.Economy.SpendGold(config.ReviveGold); if(!spend.Success) { Error(p,spend.Error.ToString()); return; } }
                     else return;
@@ -132,10 +134,14 @@ namespace IndieGame.Shell.Unity.Screens
                     {
                         if(session.Economy.Claims.Contains("session:double:"+round)) return;
                         if(ads==null) { Error(p,"Unavailable"); return; }
-                        var ad=ads.Show(config.DoublePlacement); if(!ad.Success) { Error(p,ad.Outcome.ToString()); return; }
-                        var grant=session.Economy.GrantReward("session:double:"+round,config.WinReward);
-                        if(!grant.Success) { Error(p,grant.Error.ToString()); return; }
-                        Save(p); p.Buttons["double"].interactable=false; return;
+                        var claim="session:double:"+round;
+                        ShowAd(kind,p,config.DoublePlacement,()=>
+                        {
+                            var grant=session.Economy.GrantReward(claim,config.WinReward);
+                            if(!grant.Success) { Error(p,grant.Error.ToString()); return; }
+                            Save(p); p.Buttons["double"].interactable=false;
+                        });
+                        return;
                     }
                     if(action=="next") { consumed.Add(kind); game.NextLevel(); if(Save(p)) host.Close(p.View); }
                 }
@@ -143,11 +149,35 @@ namespace IndieGame.Shell.Unity.Screens
             catch(Exception) { Error(p,"Failed"); }
             finally { busy=false; }
         }
+        void ShowAd(SessionPopupKind kind,SessionPopupContent p,string placement,Action success)
+        {
+            p.AdPending=true; SetButtons(p,false);
+            bool completed=false;
+            Action<AdResult> done=result=>
+            {
+                if(completed) return; completed=true;
+                p.AdPending=false;
+                if(disposed||p.Exited||consumed.Contains(kind)||host==null||p.View==null||p.View.Closing||!p.View.gameObject.activeInHierarchy||
+                    !popups.TryGetValue(kind,out var current)||!ReferenceEquals(current,p)||!host.Stack.ContainsView(p.View)) return;
+                SetButtons(p,true);
+                try
+                {
+                    if(!result.Success) { Error(p,result.Error==ServiceError.None?result.Outcome.ToString():result.Error.ToString()); return; }
+                    success();
+                }
+                catch(Exception) { Error(p,"Failed"); }
+            };
+            try { ads.Show(placement,done); }
+            catch(Exception) { done(new AdResult(AdOutcome.Failed,ServiceError.Failed)); }
+        }
+        static void SetButtons(SessionPopupContent p,bool interactable)
+        { foreach(var button in p.Buttons.Values) if(button!=null) button.interactable=interactable; }
         static void DestroyView(PopupView view) { if(Application.isPlaying) UnityEngine.Object.Destroy(view.gameObject); else UnityEngine.Object.DestroyImmediate(view.gameObject); }
         void Complete(SessionPopupKind kind) { consumed.Add(kind); host.Close(popups[kind].View); }
         void ClosePause() { if(popups.TryGetValue(SessionPopupKind.Pause,out var p)) { consumed.Add(SessionPopupKind.Pause); p.View.gameObject.SetActive(false); } }
         void Exited(SessionPopupKind kind,SessionPopupContent p)
         {
+            p.Exited=true;
             if(kind==SessionPopupKind.Pause) RestorePause(p);
             if(kind==SessionPopupKind.Leave&&paused&&popups.TryGetValue(SessionPopupKind.Pause,out var pause)&&pause.View!=null&&!pause.View.gameObject.activeSelf) RestorePause(p);
         }

@@ -20,6 +20,7 @@ namespace IndieGame.Shell.Unity.UI
     public static class ShellKit
     {
         public const string DefaultFontResource = "ShellFont";
+
         public static void Apply(ShellStyle style, Func<string, Sprite> sprite, ShellKitPalette palette, Action<UnityEngine.Object> adopt)
         {
             var theme = style.Theme;
@@ -36,18 +37,22 @@ namespace IndieGame.Shell.Unity.UI
             style.TabIcons.Clear();
             foreach (var key in new[] { "home", "checkin", "quests", "shop", "leaderboard" })
                 style.TabIcons.Add(new ShellStyle.TabIconEntry { Key = key, Sprite = Get(key == "leaderboard" ? "tab_trophy" : "tab_" + key) });
+            style.MandatoryPanelSprite = Get("panel_popup_nox");
             theme.PanelSprite = Get("panel_popup"); theme.Primary.Enabled = Get("btn_primary"); theme.Secondary.Enabled = Get("btn_secondary");
             theme.Primary.Locked = theme.Secondary.Locked = style.LockedButtonSprite = Get("btn_locked");
             theme.CloseSprite = Get("btn_close"); theme.ToggleOn = Get("toggle_1"); theme.ToggleOff = Get("toggle_2");
             style.ListRowSprite = Get("list_row"); style.ScreenBackground = Get("bg_home");
             style.CurrencyIcon = Get("icons_1"); style.HeartIcon = Get("icons_2"); style.BoosterIcon = Get("icons_5");
             theme.PanelSize = new Vector2(620f, 400f);
+            style.PanelHasBakedCloseIcon=true;
+            style.PopupLayout.PanelMinHeight=240; style.PopupLayout.PanelMaxHeight=1200;
+            style.TitleTextRegion=new Rect(.3f,.84f,.4f,.08f);
             style.TabLabelColor = palette.Outline; style.ScreenTitleColorOverride = palette.Outline; style.TabUnselectedTint = new Color(.92f, .92f, .95f);
-            style.SurfaceColor = style.ScreenColor = Color.white; style.TitleColor = Color.white;
+            style.SurfaceColor = style.ScreenColor = Color.white; style.TitleColor = style.BestTextColor(palette.Outline, Color.white, theme.PanelSprite, style.SurfaceColor, style.TitleTextRegion);
             style.PanelColor = palette.Cream; style.PanelTextColor = palette.Outline; style.BackdropColor = palette.Backdrop; style.BackdropTextColor = palette.Outline;
-            style.ListRowColor = palette.Cream; style.ListRowTextColor = palette.Outline; theme.BodyColor = palette.Cream;
+            style.ListRowColor = palette.Cream; style.ListRowTextColor = palette.Outline; theme.BodyColor = palette.Outline;
             style.ProgressTrackColor = palette.TrackColor; style.ProgressFillColor = palette.FillColor;
-            theme.Primary.LabelColor = theme.Secondary.LabelColor = Color.white;
+            theme.Primary.LabelColor = theme.Secondary.LabelColor = palette.Outline;
             var label = Outlined(theme.Font.material, palette, palette.LabelOutlineWidth);
             theme.Primary.LabelMaterial = theme.Secondary.LabelMaterial = label; adopt(label);
             var title = Outlined(theme.Font.material, palette, palette.TitleOutlineWidth);

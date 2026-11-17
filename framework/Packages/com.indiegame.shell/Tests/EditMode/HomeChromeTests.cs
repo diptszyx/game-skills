@@ -32,6 +32,41 @@ namespace IndieGame.Shell.Tests
             Assert.That(ShellStyle.Contrast(palette.Outline,palette.Cream),Is.GreaterThanOrEqualTo(ShellStyle.MinTextContrast));
             Assert.That(ShellStyle.Contrast(palette.Outline,palette.Backdrop),Is.GreaterThanOrEqualTo(ShellStyle.MinTextContrast));
         }
+        [Test] public void RealChunkySpriteColoursMeetMinimumContrast()
+        { using(var fixture=new ChunkyFixture()) Assert.DoesNotThrow(()=>fixture.Style.Validate()); }
+        // Reuse DemoStyles' owned assets so this exercises the same imported atlas as production.
+        sealed class ChunkyFixture : IDisposable
+        {
+            readonly object demos; readonly Type type; public ShellStyle Style;
+            public ChunkyFixture()
+            {
+                type=Type.GetType("IndieGame.Shell.Tests.DemoStyles, IndieGame.Shell.Tests.PlayMode",true);
+                demos=Activator.CreateInstance(type,true); Style=(ShellStyle)type.GetMethod("MakeChunky").Invoke(demos,null);
+            }
+            public void Dispose()=>type.GetMethod("Dispose").Invoke(demos,null);
+        }
+        [Test] public void SpriteContrastRejectsGoodDeclaredButBadRenderedColours()
+        {
+            style.PanelColor=Color.black; style.PanelTextColor=Color.white;
+            style.SurfaceColor=Color.white; // The actual white sprite contradicts declared black.
+            Assert.That(Assert.Throws<InvalidOperationException>(()=>style.Validate()).Message,Does.Contain("popupText"));
+        }
+        [Test] public void EveryRenderedTextRoleRejectsLowContrast()
+        {
+            foreach(var role in new[]{"popupText","backdropText","title","body","buttonText"})
+            {
+                using(var fixture=new ChunkyFixture())
+                {
+                    var s=fixture.Style;
+                    if(role=="popupText") s.PanelTextColor=s.PanelColor;
+                    else if(role=="backdropText") s.BackdropTextColor=s.BackdropColor;
+                    else if(role=="title") s.TitleColor=Color.red;
+                    else if(role=="body") s.Theme.BodyColor=s.PanelColor;
+                    else s.Theme.Primary.LabelColor=new Color(1,.4f,.3f);
+                    Assert.Throws<InvalidOperationException>(()=>s.Validate(),role);
+                }
+            }
+        }
         [Test] public void LowContrastPanelTextFailsValidation()
         {
             style.PanelColor=ShellKitPalette.Chunky.Cream; style.PanelTextColor=ShellKitPalette.Chunky.Cream;

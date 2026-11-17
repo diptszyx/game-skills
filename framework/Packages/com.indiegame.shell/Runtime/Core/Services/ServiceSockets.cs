@@ -20,19 +20,33 @@ namespace IndieGame.Shell
         public bool Success => Error == ServiceError.None && Outcome == AdOutcome.Completed;
         public AdResult(AdOutcome outcome, ServiceError error = ServiceError.None) { Outcome = outcome; Error = error; }
     }
-    public interface IRewardedAdService { AdResult Show(string placementId); }
+    // Implementations invoke onDone exactly once on the main thread, possibly in a later frame.
+    // Null/whitespace placements complete with Failed / InvalidArgument.
+    public interface IRewardedAdService { void Show(string placementId, Action<AdResult> onDone); }
     public sealed class FakeRewardedAdService : IRewardedAdService
     {
         readonly Queue<AdOutcome> script = new Queue<AdOutcome>();
+        readonly Queue<Action> pending = new Queue<Action>();
+        public bool DeferCompletion { get; set; }
+        // Call Show and CompletePending on the main thread.
+        public void CompletePending()
+        {
+            int count = pending.Count;
+            for (int i = 0; i < count; i++) pending.Dequeue()();
+        }
         public ServiceResult<bool> Enqueue(AdOutcome outcome)
         {
             if (!Enum.IsDefined(typeof(AdOutcome), outcome)) return new ServiceResult<bool>(false, ServiceError.InvalidArgument);
             script.Enqueue(outcome); return new ServiceResult<bool>(true);
         }
-        public AdResult Show(string placementId)
+        public void Show(string placementId, Action<AdResult> onDone)
         {
-            if (string.IsNullOrWhiteSpace(placementId)) return new AdResult(AdOutcome.Failed, ServiceError.InvalidArgument);
-            return new AdResult(script.Count == 0 ? AdOutcome.NotReady : script.Dequeue());
+            if (onDone == null) throw new ArgumentNullException(nameof(onDone));
+            if (string.IsNullOrWhiteSpace(placementId))
+            { onDone(new AdResult(AdOutcome.Failed, ServiceError.InvalidArgument)); return; }
+            var result = new AdResult(script.Count == 0 ? AdOutcome.NotReady : script.Dequeue());
+            if (DeferCompletion) pending.Enqueue(() => onDone(result));
+            else onDone(result);
         }
     }
     public enum PurchaseOutcome { Success, Cancelled, Failed }

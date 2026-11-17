@@ -8,13 +8,14 @@ namespace IndieGame.Shell.Tests;
 
 public sealed class ServicesTests
 {
+    static AdResult ShowNow(IRewardedAdService ads, string placement) { AdResult result = null!; ads.Show(placement, r => result = r); return result; }
     [Fact] public void RewardedAdFakeReturnsScriptedOutcomesInOrderThenNotReady()
     {
         var f = new FakeRewardedAdService(); IRewardedAdService socket = f;
         var expected = new[] { AdOutcome.Completed, AdOutcome.Skipped, AdOutcome.Failed, AdOutcome.NotReady };
         foreach (var outcome in expected) Assert.True(f.Enqueue(outcome).Success);
-        foreach (var outcome in expected) Assert.Equal(outcome, socket.Show("reward").Outcome);
-        Assert.Equal(AdOutcome.NotReady, socket.Show("reward").Outcome);
+        foreach (var outcome in expected) Assert.Equal(outcome, ShowNow(socket, "reward").Outcome);
+        Assert.Equal(AdOutcome.NotReady, ShowNow(socket, "reward").Outcome);
     }
     [Fact] public void PurchaseFakeReturnsScriptedOutcomesInOrderAndRestoreReturnsScriptedOutcomesInOrder()
     {
@@ -100,7 +101,7 @@ public sealed class ServicesTests
     [Fact] public void InvalidServiceArgumentsAndInvalidScriptsDoNotConsumeQueuedOutcomes()
     {
         var ads = new FakeRewardedAdService(); Assert.False(ads.Enqueue((AdOutcome)999).Success); ads.Enqueue(AdOutcome.Completed);
-        Assert.False(ads.Show(null!).Success); Assert.True(ads.Show("ok").Success);
+        Assert.False(ShowNow(ads, null!).Success); Assert.True(ShowNow(ads, "ok").Success);
         var purchases = new FakePurchaseService(); Assert.False(purchases.Enqueue(PurchaseOutcome.Success, " ").Success);
         Assert.False(purchases.Enqueue((PurchaseOutcome)999).Success); Assert.False(purchases.EnqueueRestore((PurchaseOutcome)999).Success);
         purchases.Enqueue(PurchaseOutcome.Success, "t"); Assert.False(purchases.Purchase("").Success); Assert.True(purchases.Purchase("pack").Success);
@@ -123,7 +124,7 @@ public sealed class ServicesTests
     {
         readonly IRewardGrantor grantor; readonly Reward reward;
         public RewardCaller(IRewardGrantor grantor, Reward reward) { this.grantor = grantor; this.reward = reward; }
-        public void Watch(IRewardedAdService ads) { if (ads.Show("reward").Success) grantor.Grant("ad-claim", reward); }
+        public void Watch(IRewardedAdService ads) { ads.Show("reward", result => { if (result.Success) grantor.Grant("ad-claim", reward); }); }
         public void Buy(IPurchaseService purchases)
         { var r = purchases.Purchase("pack"); if (r.Success && !r.AlreadyProcessed) grantor.Grant(r.TransactionId, reward); }
     }

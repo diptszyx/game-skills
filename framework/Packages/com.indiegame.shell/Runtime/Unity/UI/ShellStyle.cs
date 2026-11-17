@@ -9,6 +9,18 @@ namespace IndieGame.Shell.Unity.UI
     public sealed class ShellStyle : ScriptableObject
     {
         public bool EnableHomeChrome;
+        // Mandatory popups disable close input even when the optional no-badge art is absent.
+        public bool PanelHasBakedCloseIcon, ShowCloseHotspot=true;
+        [Serializable] public sealed class PopupLayoutTheme
+        {
+            // Zero retains the original Theme.PanelSize height for existing themes.
+            public float PanelMinHeight, PanelMaxHeight;
+        }
+        public PopupLayoutTheme PopupLayout=new PopupLayoutTheme();
+        public Rect PanelTextRegion=new Rect(.25f,.25f,.5f,.3f);
+        public Rect TitleTextRegion=new Rect(.25f,.25f,.5f,.5f);
+        public Rect ButtonTextRegion=new Rect(.25f,.35f,.5f,.3f);
+        public Rect BackdropTextRegion=new Rect(.1f,.1f,.8f,.8f);
         public Sprite Logo, Mascot;
         public Sprite GearButton, BoardFrame, TabBarPlainBackground, DayCellCollected, DayCellToday, DayCellLocked, BadgeSprite, PlainPillBackground, TabCellBackground, TabCellSelectedBackground;
         [Serializable] public sealed class TabIconEntry { public string Key; public Sprite Sprite; }
@@ -20,11 +32,14 @@ namespace IndieGame.Shell.Unity.UI
             var entry = TabIcons.Find(e => e != null && e.Key == key);
             return entry == null ? null : entry.Sprite;
         }
+        // Optional override; PanelSprite belongs to the shared GameKit theme.
+        public Sprite MandatoryPanelSprite;
         public UiTheme Theme;
         public Sprite ScreenBackground, CurrencyIcon, HeartIcon, BoosterIcon, ListRowSprite, LockedButtonSprite;
         public Color ScreenColor, TitleColor, ListRowColor, ListRowTextColor, ProgressTrackColor, ProgressFillColor;
         public Color SurfaceColor = Color.white;
         public const float MinTextContrast = 4.5f;
+        public const float LargeTextContrast=3f;
         public Color PanelColor = Color.clear, PanelTextColor = Color.clear, BackdropColor = Color.clear, BackdropTextColor = Color.clear;
         public static float Contrast(Color a, Color b)
         {
@@ -38,6 +53,67 @@ namespace IndieGame.Shell.Unity.UI
             if (text.a <= 0 || surface.a <= 0) throw new InvalidOperationException("Style pair needs both colours: " + pair);
             var ratio = Contrast(text, surface);
             if (ratio < MinTextContrast) throw new InvalidOperationException("Style text contrast " + ratio.ToString("0.0") + " < " + MinTextContrast + ": " + pair);
+        }
+        static Color Over(Color foreground,Color background)
+        { return new Color(foreground.r*foreground.a+background.r*(1-foreground.a),foreground.g*foreground.a+background.g*(1-foreground.a),foreground.b*foreground.a+background.b*(1-foreground.a),1); }
+        void RequireSpriteContrast(Color text,Sprite sprite,Color tint,Rect region,string role)
+        {
+            float minimum=MinimumSpriteContrast(text,sprite,tint,region);
+            float required=role=="title"?LargeTextContrast:MinTextContrast;
+            if(minimum<required) throw new InvalidOperationException("Style rendered text contrast "+minimum.ToString("0.00")+" < "+required+": "+role);
+        }
+        public Color BestTextColor(Color preferred,Color alternative,Sprite sprite,Color tint,Rect region) =>
+            MinimumSpriteContrast(alternative,sprite,tint,region)>MinimumSpriteContrast(preferred,sprite,tint,region)?alternative:preferred;
+        float MinimumSpriteContrast(Color text,Sprite sprite,Color tint,Rect region)
+        {
+            if(sprite==null) return float.PositiveInfinity;
+            // UV bounds belong to this sprite, including atlas packing (not the whole atlas).
+            var vertices=sprite.vertices; var uv=sprite.uv;
+            var bounds=sprite.bounds;
+            Vector2 Map(Vector2 point)
+            {
+                for(int i=0;i<vertices.Length-2;i++) for(int j=i+1;j<vertices.Length-1;j++) for(int k=j+1;k<vertices.Length;k++)
+                {
+                    Vector2 a=vertices[j]-vertices[i],b=vertices[k]-vertices[i]; float det=a.x*b.y-a.y*b.x;
+                    if(Mathf.Abs(det)<.000001f) continue;
+                    Vector2 local=new Vector2(bounds.min.x+point.x*bounds.size.x,bounds.min.y+point.y*bounds.size.y)-vertices[i];
+                    float u=(local.x*b.y-local.y*b.x)/det,v=(a.x*local.y-a.y*local.x)/det;
+                    return uv[i]+u*(uv[j]-uv[i])+v*(uv[k]-uv[i]);
+                }
+                throw new InvalidOperationException("Cannot sample sprite: "+sprite.name);
+            }
+            // GPU copy works for non-readable imported textures and packed sprites too.
+            var previous=RenderTexture.active;
+            var target=RenderTexture.GetTemporary(9,5,0,RenderTextureFormat.ARGB32,RenderTextureReadWrite.sRGB);
+            var pixels=new Texture2D(9,5,TextureFormat.RGBA32,false);
+            float minimum=float.PositiveInfinity;
+            try
+            {
+                var a=Map(region.min); var b=Map(region.max);
+                var min=Vector2.Min(a,b); var max=Vector2.Max(a,b);
+                Graphics.Blit(sprite.texture,target,max-min,min); RenderTexture.active=target;
+                pixels.ReadPixels(new Rect(0,0,9,5),0,0,false);
+                foreach(var pixel in pixels.GetPixels())
+                {
+                    var surface=Over(pixel*tint,ScreenColor);
+                    minimum=Mathf.Min(minimum,Contrast(Over(text,surface),surface));
+                }
+            }
+            finally
+            {
+                RenderTexture.active=previous; RenderTexture.ReleaseTemporary(target);
+                if(Application.isPlaying) Destroy(pixels); else DestroyImmediate(pixels);
+            }
+            return minimum;
+        }
+        void ValidateRenderedContrast()
+        {
+            RequireSpriteContrast(PanelTextColor.a>0?PanelTextColor:Theme.BodyColor,Theme.PanelSprite,SurfaceColor,PanelTextRegion,"popupText");
+            RequireSpriteContrast(BackdropTextColor.a>0?BackdropTextColor:Theme.BodyColor,ScreenBackground,ScreenColor,BackdropTextRegion,"backdropText");
+            RequireSpriteContrast(TitleColor,Theme.PanelSprite,SurfaceColor,TitleTextRegion,"title");
+            RequireSpriteContrast(Theme.BodyColor,Theme.PanelSprite,SurfaceColor,PanelTextRegion,"body");
+            RequireSpriteContrast(Theme.Primary.LabelColor,Theme.Primary.Enabled,SurfaceColor,ButtonTextRegion,"buttonText primary");
+            RequireSpriteContrast(Theme.Secondary.LabelColor,Theme.Secondary.Enabled,SurfaceColor,ButtonTextRegion,"buttonText secondary");
         }
         public Vector2 RowSize = new Vector2(600, 80);
         public float Spacing = 12;
@@ -61,10 +137,13 @@ namespace IndieGame.Shell.Unity.UI
             Require(HeartIcon, "HeartIcon"); Require(BoosterIcon, "BoosterIcon");
             Require(ListRowSprite, "ListRowSprite"); Require(LockedButtonSprite, "LockedButtonSprite");
             Require(Theme.PanelSprite, "Theme.PanelSprite");
+            if (MandatoryPanelSprite != null && MandatoryPanelSprite.rect.size != Theme.PanelSprite.rect.size)
+                throw new InvalidOperationException("MandatoryPanelSprite pixel size must equal Theme.PanelSprite pixel size");
             if (Theme.Primary == null) throw new InvalidOperationException("Missing style role: Theme.Primary");
             if (Theme.Secondary == null) throw new InvalidOperationException("Missing style role: Theme.Secondary");
             Require(Theme.Primary.Enabled, "Theme.Primary.Enabled"); Require(Theme.Secondary.Enabled, "Theme.Secondary.Enabled");
             if (Theme.Motion == null) throw new InvalidOperationException("Missing style role: Theme.Motion");
+            ValidateRenderedContrast();
         }
     }
 }

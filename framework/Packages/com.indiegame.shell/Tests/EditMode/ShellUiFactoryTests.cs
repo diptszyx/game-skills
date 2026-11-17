@@ -28,6 +28,12 @@ namespace IndieGame.Shell.Tests
             Assert.That(host.SafeRoot.GetComponent<SafeAreaFitter>(),Is.Not.Null);
             Assert.That(host.Loading.gameObject.activeSelf,Is.True); Assert.That(host.Loading.transform.GetSiblingIndex(),Is.EqualTo(root.transform.childCount-1));
         }
+        [Test] public void MandatoryPanelWithDifferentSizeFailsValidation()
+        {
+            a.MandatoryPanelSprite=a.LockedButtonSprite;
+            var error=Assert.Throws<InvalidOperationException>(()=>a.Validate());
+            Assert.That(error.Message,Does.Contain("MandatoryPanelSprite").And.Contain("Theme.PanelSprite").And.Contain("pixel size"));
+        }
         [Test] public void MissingRoleFailsByName()
         {
             a.CurrencyIcon=null; Assert.That(Assert.Throws<InvalidOperationException>(()=>new ShellUiFactory(a)).Message,Does.Contain("CurrencyIcon"));

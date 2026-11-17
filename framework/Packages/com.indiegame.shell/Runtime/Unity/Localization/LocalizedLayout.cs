@@ -36,14 +36,16 @@ namespace IndieGame.Shell.Unity.Localization
         internal static void Popup(RectTransform panel, RectTransform heading, RectTransform content)
         {
             heading.anchorMin=heading.anchorMax=new Vector2(.5f,1);
-            heading.anchoredPosition=new Vector2(0,-PopupHeadingDrop); heading.sizeDelta=new Vector2(panel.sizeDelta.x-48,104);
+            heading.pivot=new Vector2(.5f,1); heading.anchoredPosition=Vector2.zero; heading.sizeDelta=new Vector2(panel.sizeDelta.x-48,PopupHeadingBand);
+            var title=heading.GetComponent<TMP_Text>();
+            if(title!=null) { title.alignment=TextAlignmentOptions.Top; title.margin=new Vector4(0,PopupTitleTopMargin,0,0); }
             if(content==null) return;
             content.anchorMin=Vector2.zero; content.anchorMax=Vector2.one; content.pivot=new Vector2(.5f,1);
             content.offsetMin=new Vector2(48,48); content.offsetMax=new Vector2(-48,-132);
         }
         internal static void PopupChild(RectTransform rect, bool button)
         { rect.sizeDelta=button?new Vector2(PopupButtonWidth,PopupButtonHeight):new Vector2(rect.sizeDelta.x,64); }
-        const float PopupHeadingDrop=46f, PopupButtonWidth=400f, PopupButtonHeight=76f;
+        const float PopupHeadingBand=104f, PopupTitleTopMargin=8f, PopupButtonWidth=400f, PopupButtonHeight=76f;
         internal static void LoadingTip(RectTransform rect)
         {
             rect.anchorMin=new Vector2(0,.5f); rect.anchorMax=new Vector2(1,.5f);

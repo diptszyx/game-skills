@@ -13,7 +13,7 @@ RESULT="$PROJECT/Logs/$MODE.xml"
 STALL=${UNITY_STALL_SECONDS:-180}
 HARD=${UNITY_HARD_SECONDS:-2400}
 [ "$HARD" -le 2400 ] || HARD=2400
-if pgrep -fl 'Unity.app/Contents/MacOS/Unity'; then
+if pgrep -fl '^/Applications/Unity/Hub/Editor/[^ ]+/Unity\.app/Contents/MacOS/Unity( |$)'; then
   echo 'Refusing to run: Unity Editor already running.'; exit 1
 fi
 mkdir -p "$PROJECT/Logs"
