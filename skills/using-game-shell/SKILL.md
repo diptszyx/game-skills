@@ -27,12 +27,18 @@ The shell is the shared "everything around the gameplay". A game supplies gamepl
 ## Gates before saying done
 `dotnet build` 0 warnings; `dotnet test` green; `error CS count: 0`; EditMode and PlayMode `passed == expected`; Core isolation checks. Only one Unity at a time. Details and measured times: `references/gates.md`.
 
-## Rewarded ads (LevelPlay)
-- Game code never touches the ad SDK: the shell calls `IRewardedAdService.Show(placementId, onDone)` (async, `onDone` exactly once). Tests use `FakeRewardedAdService`.
-- Real ads: add package `com.indiegame.shell.levelplay` (it pulls `com.unity.services.levelplay`), build `LevelPlayAdsSettings` (AppKey, RewardedAdUnitId), call `new LevelPlayAds().Create(settings)` once at boot and put the returned service in `ShellAppConfig.RewardedAds`. A hidden ticker drives load retries.
-- Placement ids from the shell config (`RevivePlacement`, `DoublePlacement`) must exist on the LevelPlay dashboard. The placeholder key `TEST_KEY_REPLACE_ME` is rejected in release builds. Real key and on-device test come from the dev lead; Editor mock ads only work with an Android or iOS build target.
+## Rewarded ads (AdMob)
+- Game code never touches the ad SDK: the shell calls `IRewardedAdService.Show(placementId, onDone)` (async, `onDone` exactly once). Tests use `FakeRewardedAdService`. AdMob has one ad unit per format, so the placement id is ignored by the adapter.
+- Real ads: add package `com.indiegame.shell.admob` (needs `com.google.ads.mobile` from the OpenUPM scoped registry `scopes: ["com.google"]` in the game's manifest), then `cfg.RewardedAds = new AdMobAds().Create(new AdMobAdsSettings { RewardedAdUnitId = ..., AllowTestAdUnit = true })` at boot; a hidden ticker drives load retries. Dispose the `AdMobAds` owner on shutdown.
+- Dev: use `AdMobAdsSettings.TestRewarded` (Google's public sample unit) with `AllowTestAdUnit`; release builds reject it. Real unit id and the AdMob App ID come from the dev lead. The App ID must be set in Unity (Assets > Google Mobile Ads > Settings) before an Android/iOS build, or the app crashes at start; code does not set it.
 
 ## Leaderboard (Unity Leaderboards)
 - `ShellAppConfig.Leaderboard` is an `ILeaderboardRequests` (async). Tests wrap the sync fake: `new LeaderboardRequests(new FakeLeaderboardService(id, state))`.
 - Real: add package `com.indiegame.shell.leaderboards` and set `Leaderboard = UnityLeaderboards.Create()`. It signs in anonymously by itself. The Unity project must be linked to a Unity Cloud project and the board created on the Unity Dashboard (the `BoardId` must match).
 - The shell does not submit scores by itself: the game calls `Leaderboard.SubmitScore(boardId, score)` when a run ends.
+
+## Boot a new game with `Standard`
+Write a small `<game>-game.json` (`ShellGameConfig`: only `gameId` is required, other fields default), then `shell.Boot(ShellAppConfig.Standard(ShellGameConfig.Parse(json), style, languageTables, actions, gameScreenFactory, savePath))`. Override real services after: `cfg.RewardedAds = ...`, `cfg.Leaderboard = ...`. Do not copy the long manual config from another game. Example: `game-2-v2/Assets/SumTen/SumTenApp.cs`.
+
+## Real-input tests (`com.indiegame.shell.testkit`)
+Use `new RealPointer(mouse).Click(button)` (add the package to the game manifest and to `testables`); never copy a click helper. It waits for state (button raycastable, popup transition settled), not fixed sleeps, and fails with the button path and input state. Known: about 1 run in 10 had an unexplained missed click before the settle fix; the failure message now prints focus and InputSystem state, so capture it before guessing.

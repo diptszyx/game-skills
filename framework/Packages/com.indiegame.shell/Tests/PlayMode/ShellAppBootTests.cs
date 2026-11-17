@@ -1,3 +1,4 @@
+using IndieGame.Shell.TestKit;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -51,6 +52,16 @@ namespace IndieGame.Shell.Tests
                 LanguageTables=new Dictionary<string,TextAsset>{{"en",Resources.Load<TextAsset>("ShellLocalization/en")},{"vi",Resources.Load<TextAsset>("ShellLocalization/vi")}},
                 GameScreenFactory=c=> { Assert.That(app.Ready,Is.False); Assert.That(c.Flow,Is.Not.Null); Assert.That(c.Session,Is.SameAs(app.Session)); return c.Factory.ScreenRoot(c.Parent,"Fake Game"); } };
         }
+        [UnityTest] public IEnumerator StandardConfigBootsShellApp()
+        {
+            config=ShellAppConfig.Standard(ShellGameConfig.Parse("{\"gameId\":\"standard-smoke\"}"),
+                config.Style,new Dictionary<string,TextAsset>(config.LanguageTables),game,
+                c=>c.Factory.ScreenRoot(c.Parent,"Empty Game"),path);
+            yield return Boot();
+            Assert.That(app.Screens.Current,Is.SameAs(app.Main.Root));
+            app.ShowGame(); Assert.That(app.Screens.Current,Is.SameAs(app.GameRoot));
+            app.ShowMain(); Assert.That(app.Screens.Current,Is.SameAs(app.Main.Root));
+        }
         static int Count<T>() where T:UnityEngine.Object =>UnityEngine.Object.FindObjectsByType<T>(FindObjectsInactive.Include,FindObjectsSortMode.None).Length;
         [TearDown] public void Cleanup()
         {
@@ -73,21 +84,6 @@ namespace IndieGame.Shell.Tests
             yield return null; yield return null;
         }
         Button MainButton(string key)=>app.Main.Root.GetComponentsInChildren<Button>().Single(b=>b.GetComponentInChildren<TMP_Text>().text==app.Text.Format("en",key).Value);
-        IEnumerator Tap(Button button)
-        {
-            yield return null; Canvas.ForceUpdateCanvases();
-            var position=RectTransformUtility.WorldToScreenPoint(null,button.transform.TransformPoint(((RectTransform)button.transform).rect.center));
-            var hits=new List<RaycastResult>(); EventSystem.current.RaycastAll(new PointerEventData(EventSystem.current){position=position},hits);
-            Assert.That(hits.Count,Is.GreaterThan(0),button.name); Assert.That(hits[0].gameObject.GetComponentInParent<Button>(),Is.SameAs(button),button.name);
-            InputSystem.QueueStateEvent(mouse,new MouseState {position=position});
-            yield return Until(()=>Vector2.Distance(mouse.position.ReadValue(),position)<.1f,"pointer position consumed");
-            InputSystem.QueueStateEvent(mouse,new MouseState {position=position}.WithButton(MouseButton.Left));
-            yield return Until(()=>mouse.leftButton.isPressed,"pointer press consumed");
-            yield return null; // EventSystem has processed the down edge before releasing.
-            InputSystem.QueueStateEvent(mouse,new MouseState {position=position});
-            yield return Until(()=>!mouse.leftButton.isPressed,"pointer release consumed");
-            yield return Settled();
-        }
         static IEnumerator Until(Func<bool> condition,string message)
         {
             float deadline=Time.realtimeSinceStartup+10;
@@ -99,6 +95,18 @@ namespace IndieGame.Shell.Tests
             yield return null; yield return null;
             yield return Until(()=>app.Popups.Stack.All(p=>p.Group.alpha>=.999f&&Vector3.Distance(p.Panel.localScale,Vector3.one)<.001f),"popup transitions completed");
         }
+        [UnityTest] public IEnumerator RealPointerConsumesConsecutiveClicksWhilePaused()
+        {
+            yield return Boot(); Time.timeScale=0;
+            var play=MainButton("shell.play"); int clicks=0;
+            play.onClick.AddListener(()=>clicks++);
+            yield return new RealPointer(mouse).Click(play);
+            Assert.That(clicks,Is.EqualTo(1)); Assert.That(game.Plays,Is.EqualTo(1));
+            app.ShowMain();
+            yield return new RealPointer(mouse).Click(play);
+            Assert.That(clicks,Is.EqualTo(2)); Assert.That(game.Plays,Is.EqualTo(2));
+            Assert.That(mouse.leftButton.isPressed,Is.False);
+        }
         [UnityTest] public IEnumerator GameTableOverridesAndShellDefaultsFillMissingKeys()
         {
             config.LanguageTables=new Dictionary<string,TextAsset>{{"en",new TextAsset("{\"shell.play\":\"Go\"}")},{"vi",new TextAsset("{\"shell.play\":\"Di\"}")}};
@@ -109,19 +117,19 @@ namespace IndieGame.Shell.Tests
         }
         [UnityTest] public IEnumerator PlayAndPauseLeaveUseRealPointerInput()
         {
-            yield return Boot(); yield return Tap(MainButton("shell.play"));
+            yield return Boot(); yield return new RealPointer(mouse).Click(MainButton("shell.play"));
             Assert.That(game.Plays,Is.EqualTo(1)); Assert.That(app.Screens.Current,Is.SameAs(app.GameRoot));
             app.Back(); Assert.That(Time.timeScale,Is.Zero); Assert.That(game.Pauses,Is.EqualTo(1)); yield return new WaitForSecondsRealtime(.1f);
-            yield return Tap(app.Flow.Popups[SessionPopupKind.Pause].Buttons["leave"]);
-            yield return Tap(app.Flow.Popups[SessionPopupKind.Leave].Buttons["cancel"]);
+            yield return new RealPointer(mouse).Click(app.Flow.Popups[SessionPopupKind.Pause].Buttons["leave"]);
+            yield return new RealPointer(mouse).Click(app.Flow.Popups[SessionPopupKind.Leave].Buttons["cancel"]);
             Assert.That(app.Popups.Top,Is.SameAs(app.Flow.Popups[SessionPopupKind.Pause].View)); Assert.That(Time.timeScale,Is.Zero); Assert.That(game.Resumes,Is.Zero);
-            yield return Tap(app.Flow.Popups[SessionPopupKind.Pause].Buttons["leave"]);
-            yield return Tap(app.Flow.Popups[SessionPopupKind.Leave].Buttons["confirm"]);
+            yield return new RealPointer(mouse).Click(app.Flow.Popups[SessionPopupKind.Pause].Buttons["leave"]);
+            yield return new RealPointer(mouse).Click(app.Flow.Popups[SessionPopupKind.Leave].Buttons["confirm"]);
             Assert.That(app.Screens.Current,Is.SameAs(app.Main.Root)); Assert.That(game.Leaves,Is.EqualTo(1)); Assert.That(Time.timeScale,Is.EqualTo(.4f));
         }
         [UnityTest] public IEnumerator BackAgainRestoresCapturedPauseScale()
         {
-            yield return Boot(); yield return Tap(MainButton("shell.play")); app.Back(); app.Back(); app.Back();
+            yield return Boot(); yield return new RealPointer(mouse).Click(MainButton("shell.play")); app.Back(); app.Back(); app.Back();
             yield return new WaitForSecondsRealtime(.15f); Assert.That(Time.timeScale,Is.EqualTo(.4f)); Assert.That(game.Resumes,Is.EqualTo(1)); Assert.That(app.Screens.Current,Is.SameAs(app.GameRoot));
         }
         [UnityTest] public IEnumerator CheckInTapBackAndCachedNavigation()
@@ -129,8 +137,8 @@ namespace IndieGame.Shell.Tests
             yield return Boot();
             Assert.That(Assert.Throws<InvalidOperationException>(()=>app.Navigate(ShellScreen.Shop)).Message,Does.Contain("Shop"));
             Assert.That(Assert.Throws<InvalidOperationException>(()=>app.Navigate(ShellScreen.Leaderboard)).Message,Does.Contain("Leaderboard"));
-            yield return Tap(MainButton("shell.checkin.title")); var check=app.Screens.Current;
-            Assert.That(check.name,Is.EqualTo("CheckIn")); yield return Tap(check.Find("Shell Back").GetComponent<Button>());
+            yield return new RealPointer(mouse).Click(MainButton("shell.checkin.title")); var check=app.Screens.Current;
+            Assert.That(check.name,Is.EqualTo("CheckIn")); yield return new RealPointer(mouse).Click(check.Find("Shell Back").GetComponent<Button>());
             Assert.That(app.Screens.Current,Is.SameAs(app.Main.Root)); app.Navigate(ShellScreen.CheckIn); Assert.That(app.Screens.Current,Is.SameAs(check));
             app.Back(); Assert.That(app.Screens.Current,Is.SameAs(app.Main.Root));
         }
@@ -155,7 +163,7 @@ namespace IndieGame.Shell.Tests
         }
         [UnityTest] public IEnumerator DestroyMidPauseRestoresScaleAndObjectBaseline()
         {
-            yield return Boot(); yield return Tap(MainButton("shell.play")); app.Back(); Assert.That(Time.timeScale,Is.Zero);
+            yield return Boot(); yield return new RealPointer(mouse).Click(MainButton("shell.play")); app.Back(); Assert.That(Time.timeScale,Is.Zero);
             UnityEngine.Object.Destroy(app.gameObject); yield return null; yield return null;
             Assert.That(Time.timeScale,Is.EqualTo(.4f)); Assert.That(Count<Canvas>(),Is.EqualTo(canvases)); Assert.That(Count<EventSystem>(),Is.EqualTo(systems)); Assert.That(Count<RectTransform>(),Is.EqualTo(objects));
         }
@@ -179,14 +187,14 @@ namespace IndieGame.Shell.Tests
             var files=new ScreenFiles(); config.SaveStore=new SaveStore(fileSystem:files);
             config.ShopCatalog=ScreenTestData.Catalog(); config.Purchases=new FakePurchaseService(); config.Leaderboard=new LeaderboardRequests(new FakeLeaderboardService("me",new FakeLeaderboardState())); config.BoardId="board";
             yield return Boot(); foreach(var screen in new[]{ShellScreen.Quests,ShellScreen.Shop,ShellScreen.Leaderboard}) { app.Navigate(screen); Assert.That(app.Screens.Current.name,Is.EqualTo(screen.ToString())); app.Back(); }
-            files.Fail=true; yield return Tap(MainButton("shell.play")); Assert.That(game.Plays,Is.EqualTo(1)); Assert.That(app.Commit().Success,Is.False); Assert.That(app.ErrorLabel.text,Is.Not.Empty);
+            files.Fail=true; yield return new RealPointer(mouse).Click(MainButton("shell.play")); Assert.That(game.Plays,Is.EqualTo(1)); Assert.That(app.Commit().Success,Is.False); Assert.That(app.ErrorLabel.text,Is.Not.Empty);
             files.Fail=false; Assert.That(app.Commit().Success,Is.True); Assert.That(game.Plays,Is.EqualTo(1));
         }
         [UnityTest] public IEnumerator KeyboardBackClosesOnlyOnePopupLayer()
         {
-            yield return Boot(); yield return Tap(MainButton("shell.play")); app.Back();
+            yield return Boot(); yield return new RealPointer(mouse).Click(MainButton("shell.play")); app.Back();
             yield return Settled();
-            yield return Tap(app.Flow.Popups[SessionPopupKind.Pause].Buttons["leave"]);
+            yield return new RealPointer(mouse).Click(app.Flow.Popups[SessionPopupKind.Pause].Buttons["leave"]);
             var leave=app.Flow.Popups[SessionPopupKind.Leave].View;
             InputSystem.QueueStateEvent(keyboard,new KeyboardState(Key.Escape));
             yield return Until(()=>keyboard.escapeKey.isPressed,"Escape consumed");
@@ -204,17 +212,19 @@ namespace IndieGame.Shell.Tests
             Assert.That(app.GetComponentInChildren<GraphicRaycaster>(),Is.Not.Null);
             var chrome=app.Screens.ChromeRoot;
             Button Tab(string key)=>chrome.Find("TabBar/Tabs/Tab "+key).GetComponent<Button>();
-            yield return Tap(Tab("quests")); Assert.That(app.Screens.Current.name,Is.EqualTo("Quests")); Assert.That(chrome.gameObject.activeInHierarchy,Is.True);
+            yield return new RealPointer(mouse).Click(Tab("quests")); Assert.That(app.Screens.Current.name,Is.EqualTo("Quests")); Assert.That(chrome.gameObject.activeInHierarchy,Is.True);
             app.Navigate(ShellScreen.CheckIn);
             Assert.That(chrome.Find("TabBar/Tabs/Tab checkin/Cell").GetComponent<ShellAppearance>().Selected,Is.True);
-            yield return Tap(Tab("home")); Assert.That(app.Screens.Current,Is.SameAs(app.Main.Root));
-            yield return Tap(Tab("checkin")); var claim=app.Screens.Current.GetComponentsInChildren<Button>().Single(b=>b.name!="Shell Back");
-            var gold=app.Session.Economy.Gold; yield return Tap(claim); yield return Tap(claim);
+            yield return new RealPointer(mouse).Click(Tab("home")); Assert.That(app.Screens.Current,Is.SameAs(app.Main.Root));
+            yield return new RealPointer(mouse).Click(Tab("checkin")); var claim=app.Screens.Current.GetComponentsInChildren<Button>().Single(b=>b.name!="Shell Back");
+            var gold=app.Session.Economy.Gold; yield return new RealPointer(mouse).Click(claim);
+            Assert.That(claim.IsInteractable(),Is.False,"Claim must disable after collection");
+            claim.onClick.Invoke(); // Also exercise the presenter guard against a duplicate callback.
             Assert.That(app.Session.Economy.Gold,Is.EqualTo(gold+1));
             Assert.That(chrome.Find("TabBar/Tabs/Tab checkin/Icon/Badge").gameObject.activeSelf,Is.False);
-            app.Back(); yield return Tap(MainButton("shell.play")); Assert.That(game.Plays,Is.EqualTo(1));
+            app.Back(); yield return new RealPointer(mouse).Click(MainButton("shell.play")); Assert.That(game.Plays,Is.EqualTo(1));
             Assert.That(chrome.Find("TabBar").gameObject.activeSelf,Is.False); Assert.That(chrome.Find("TopBar").gameObject.activeSelf,Is.True);
-            Assert.That(app.GameHud,Is.Not.Null); Assert.That(app.Audio,Is.Not.Null); Assert.That(app.Haptics,Is.Not.Null); yield return Tap(chrome.Find("TopBar/Shell Settings").GetComponent<Button>()); Assert.That(app.Popups.Top,Is.Not.Null); app.Back(); yield return Settled();
+            Assert.That(app.GameHud,Is.Not.Null); Assert.That(app.Audio,Is.Not.Null); Assert.That(app.Haptics,Is.Not.Null); yield return new RealPointer(mouse).Click(chrome.Find("TopBar/Shell Settings").GetComponent<Button>()); Assert.That(app.Popups.Top,Is.Not.Null); app.Back(); yield return Settled();
             app.ShowMain(); Assert.That(chrome.Find("TabBar").gameObject.activeSelf,Is.True);
         }
         [UnityTest] public IEnumerator GameViewportMapsScreenPointsToWorldAndFollowsGameScreen()

@@ -1,0 +1,12 @@
+{
+  "name": "IndieGame.Shell.TestKit",
+  "references": [
+    "IndieGame.Shell.Unity",
+    "UnityEngine.UI",
+    "Unity.InputSystem",
+    "Unity.InputSystem.TestFramework"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
+}

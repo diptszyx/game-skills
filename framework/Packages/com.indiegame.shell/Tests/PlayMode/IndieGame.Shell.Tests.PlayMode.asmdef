@@ -6,7 +6,8 @@
     "UnityEngine.UI",
     "Unity.TextMeshPro",
     "Unity.InputSystem",
-    "IndieGame.Shell.Core"
+    "IndieGame.Shell.Core",
+    "IndieGame.Shell.TestKit"
   ],
   "optionalUnityReferences": [
     "TestAssemblies"

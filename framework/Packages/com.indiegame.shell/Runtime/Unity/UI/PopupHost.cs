@@ -11,6 +11,15 @@ namespace IndieGame.Shell.Unity.UI
         public bool HandlesOwnBackKey = true;
         readonly List<PopupView> stack = new List<PopupView>();
         public IReadOnlyList<PopupView> Stack => stack;
+        public bool IsTransitioning
+        {
+            get
+            {
+                foreach (var view in stack)
+                    if (view.Closing ? view.Progress < view.Motion.CloseSeconds : view.Progress < view.Motion.OpenSeconds) return true;
+                return false;
+            }
+        }
         public PopupView Top => stack.Count == 0 ? null : stack[stack.Count - 1];
         public void Open(PopupView view)
         {

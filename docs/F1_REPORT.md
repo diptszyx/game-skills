@@ -22,3 +22,19 @@ Game thử: **Tap Order** (chạm các số 1..N theo thứ tự trên lưới 3
 
 ## Cập nhật 2026-11-13
 Cổng của tool hiện: shell EditMode 76 + PlayMode 36, pilot EditMode 325 + PlayMode 9 (số báo từ người làm game, chưa chạy lại ở phiên này; bản trên đây ghi 9/9 PlayMode cho Tap Order). Font (Baloo 2 ExtraBold qua `ShellFont`) và cổng tương phản chữ (`MinTextContrast` 4.5) đã nằm trong tool, nên chỗ thiếu số 2 và 3 ở trên (chữ popup và chữ trạng thái khó đọc) đã có cổng tương phản nhằm bắt lỗi loại này; chưa chụp lại để xác nhận hai lỗi đó hết. Các chỗ thiếu số 1 (mẫu game mới), 4 và 5 chưa làm.
+
+## F2: game thử thứ hai, "Sum Ten" (2026-11-17)
+Game thử: chọn các ô cho tổng bằng mục tiêu (10, 14, 17), tối đa 3 lần sai, 3 màn. Nằm trong `game-2-v2/Assets/SumTen/`. Dựng sau khi thêm `ShellGameConfig` + `ShellAppConfig.Standard` (việc Codex, 11:29 đến ~11:31, gate shell xanh: EditMode 110, PlayMode 45).
+
+### Số đo (đồng hồ máy)
+- Từ lúc bắt đầu viết game (11:35:05) đến gate PlayMode có chơi 3 màn bằng chạm thật qua UI xanh: **11:37:23, ~2,3 phút**, gồm 5 lần chạy gate (2 lần hỏng biên dịch hoặc test do lỗi của tôi: thiếu `using`, tính nhầm tổng trong test).
+- Không tính: thời gian nghĩ luật, tạo project mới (ổ đĩa còn 5,8 GB, một `Library/` mới ~4,6 GB), chạy trên A07 (bạn cấm dùng điện thoại), style mới (dùng `PilotChunkyStyle`).
+- Mã game: 81 dòng app + 32 dòng luật + 4 file JSON; `Initialize` còn 8 dòng (TapOrder cũ 21 dòng, chưa chuyển sang `Standard`).
+
+### Chỗ tool còn thiếu thấy khi làm
+1. Hàm `Click` chạm thật cho test (~30 dòng) phải chép từ game này sang game khác (đã 3 bản: pilot, TapOrder, SumTen). Nên có sẵn trong shell.
+2. Phải nhớ hai `using` (`IndieGame.Shell`, `IndieGame.Shell.Unity.Screens`) cho `IGameSessionActions`.
+3. Test chạm thật chập chờn: trong 7 lần chạy PlayMode sau khi thêm SumTen, 3 lần có 1 đến 2 test hỏng (Pilot, TapOrder; lỗi "Button never became raycastable", "Expected 2 but was 1", NullReference), 4 lần 17/17. Trước khi thêm SumTen thấy 11/11 hai lần. Chưa tìm ra nguyên nhân gốc.
+
+### Cập nhật 2026-11-17 (sau hàm chạm thật chung)
+Package `com.indiegame.shell.testkit` (`RealPointer.Click`) thay 4 bản chép tay. Đo 10 lần PlayMode liên tiếp của game-2-v2 (17 test): trước khi chờ popup yên trước lúc nhấn 8/10 xanh (2 lần hỏng "timeout waiting for onClick"), sau khi sửa 10/10 xanh. Nguyên nhân gốc của 2 lần hỏng còn lại: chưa chứng minh được; giả thuyết có bằng chứng từ mã: popup đang mở phóng to quanh tâm nên nút dịch chỗ. Thông báo lỗi của `RealPointer` giờ in thêm tiêu điểm cửa sổ và trạng thái InputSystem để bắt lần hỏng kế.
