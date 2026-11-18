@@ -89,6 +89,7 @@ namespace IndieGame.Shell.Unity.Screens
             label.enableAutoSizing=true; label.fontSizeMax=34; label.fontSizeMin=RowTitleMinFont; label.fontSize=34;
             card.gameObject.SetActive(false); return card;
         }
+        const float ProgressInset=14,ProgressHeight=8;
         static void OpaqueCard(Image card)
         { var c=card.color; c.a=Mathf.Max(c.a,MinRowOpacity); card.color=c; }
         internal static void Rows(ShellUiFactory f, RectTransform content, IReadOnlyList<RowDisplay> rows, Action<string> clicked)
@@ -100,7 +101,7 @@ namespace IndieGame.Shell.Unity.Screens
                 OpaqueCard(r.GetComponent<Image>()); LayoutRowText(r,text,f,row);
                 if(row.Progress>=0)
                 {
-                    var track=ShellUiFactory.Node("Progress",r); track.anchorMin=new Vector2(0,0); track.anchorMax=new Vector2(.64f,0); track.sizeDelta=new Vector2(0,8);
+                    var track=ShellUiFactory.Node("Progress",r); track.anchorMin=Vector2.zero; track.anchorMax=new Vector2(.64f,0); track.pivot=Vector2.zero; track.offsetMin=new Vector2(ProgressInset,ProgressInset); track.offsetMax=new Vector2(0,ProgressInset+ProgressHeight);
                     track.gameObject.AddComponent<Image>().color=f.Style.ProgressTrackColor;
                     var fill=ShellUiFactory.Node("Fill",track); fill.anchorMin=Vector2.zero; fill.anchorMax=new Vector2(Mathf.Clamp01(row.Progress),1); fill.offsetMin=fill.offsetMax=Vector2.zero;
                     fill.gameObject.AddComponent<Image>().color=f.Style.ProgressFillColor; fill.gameObject.SetActive(true); track.gameObject.SetActive(true);
