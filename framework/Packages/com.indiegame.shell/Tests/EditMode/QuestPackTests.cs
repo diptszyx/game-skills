@@ -33,5 +33,18 @@ namespace IndieGame.Shell.Tests
             var pack = QuestPack.Standard(10);
             Assert.That(pack.Daily.Single(q => q.Id == "win5").Reward.Gold, Is.GreaterThan(pack.Daily.Single(q => q.Id == "win1").Reward.Gold));
         }
+
+        [Test] public void SaveFromAnOlderQuestSetResetsInsteadOfFailingBoot()
+        {
+            var oldConfig = new DailyQuestsConfig(new[] { new QuestTemplate("q", "win", 1, new Reward(5)) }, 1);
+            var document = new SaveDocument();
+            var oldService = new DailyQuestsService(oldConfig, new ScreenClock(), new NullGrantor());
+            Assert.That(oldService.Refresh().Success, Is.True);
+            Assert.That(oldService.Save(document).Success, Is.True);
+            var current = new DailyQuestsService(QuestPack.Standard(10), new ScreenClock(), new NullGrantor());
+            Assert.That(current.Load(document).Success, Is.True);
+            Assert.That(current.Refresh().Success, Is.True);
+            Assert.That(current.Quests.Count, Is.EqualTo(QuestPack.DailyPicked));
+        }
     }
 }

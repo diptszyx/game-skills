@@ -160,12 +160,16 @@ namespace IndieGame.Shell
             bool ok = read.Success && s != null && s.Version == 1 && (s.Day == -1 || DailyRules.ValidDay(s.Day)) && s.Entries != null;
             var next = ok && s!.Day >= 0 ? Select(s.Day) : new Dictionary<string, Entry>(StringComparer.Ordinal);
             var seen = new HashSet<string>(StringComparer.Ordinal);
+            bool staleConfig = false;
             if (ok)
             {
-                if (s!.Entries!.Count != next.Count) ok = false;
+                foreach (var e in s!.Entries!)
+                    if (e != null && e.Id != null && !next.ContainsKey(e.Id)) { staleConfig = true; break; }
+                if (!staleConfig && s.Entries.Count != next.Count) staleConfig = true;
+                if (staleConfig) { s = new State { Version = 1, Day = -1, Entries = new List<Entry>() }; next = new Dictionary<string, Entry>(StringComparer.Ordinal); }
                 else foreach (var e in s.Entries)
                 {
-                    if (e == null || e.Id == null || !next.ContainsKey(e.Id) || !seen.Add(e.Id) || e.Progress < 0 ||
+                    if (e == null || e.Id == null || !seen.Add(e.Id) || e.Progress < 0 ||
                         e.Progress > Template(e.Id).Target || (e.Claimed && e.Progress != Template(e.Id).Target)) { ok = false; break; }
                     next[e.Id] = new Entry { Id = e.Id, Progress = e.Progress, Claimed = e.Claimed };
                 }
