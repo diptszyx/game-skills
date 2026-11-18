@@ -61,8 +61,8 @@ namespace IndieGame.Shell.Tests
                 Assert.That(row.Count,Is.EqualTo(5));
                 foreach(var reward in row) Assert.That(reward.Gold,Is.EqualTo(12));
             }
-            Assert.That(c.Quests.DailyCount,Is.EqualTo(3)); Assert.That(c.Quests.Daily.Count,Is.EqualTo(3));
-            Assert.That(c.Quests.Daily[0].Id,Is.EqualTo("q"));
+            Assert.That(c.Quests.DailyCount,Is.EqualTo(3)); Assert.That(c.Quests.Daily.Count,Is.EqualTo(5));
+            Assert.That(c.Quests.Daily[0].Id,Is.EqualTo("win1"));
             Assert.That(c.Quests.Daily[0].EventKey,Is.EqualTo("win"));
             Assert.That(c.Quests.Daily[0].Target,Is.EqualTo(1));
             Assert.That(c.Quests.Daily[0].Reward.Gold,Is.EqualTo(13));

@@ -90,7 +90,7 @@ namespace IndieGame.Shell.Unity.Localization
             "shell.play",
             "shell.price.iap",
             "shell.product.p",
-            "shell.quest.q",
+            "shell.quest.win1","shell.quest.win3","shell.quest.win5","shell.quest.play3","shell.quest.play5",
             "shell.quest.row",
             "shell.quests.empty",
             "shell.quests.title",

@@ -23,7 +23,7 @@ namespace IndieGame.Shell.Unity.UI
             rewardCard=ShellUiFactory.Node("Reward card",Root); TopBarView.Place(rewardCard,Vector2.zero,new Vector2(1,RewardBandHeight-.03f));
             var card=factory.AppearanceImage(rewardCard,"Surface","row",true); ShellUiFactory.Stretch(card.rectTransform);
             reward=factory.Label(rewardCard,"",role:"rowText"); ShellUiFactory.Stretch(reward.rectTransform);
-            day.fontSize=day.fontSizeMax=22; day.fontSizeMin=18; day.fontStyle=FontStyles.Bold;
+            day.fontSize=day.fontSizeMax=22; day.fontSizeMin=14; day.fontStyle=FontStyles.Bold;
             reward.fontSize=reward.fontSizeMax=22; reward.fontSizeMin=14; rewardCard.gameObject.SetActive(false); Root.gameObject.SetActive(true);
         }
         public void Render(string dayLabel,string rewardText,DayState state)

@@ -1,3 +1,4 @@
+using System.Linq;
 using System;
 using System.Collections.Generic;
 namespace IndieGame.Shell.Unity.Screens
@@ -19,7 +20,7 @@ namespace IndieGame.Shell.Unity.Screens
             day=clock.UtcNow.Date; language=session.Settings.Language; var result=session.DailyQuests.Refresh();
             if(result.Success) RetrySave(); else view.ShowError(text.Get("shell.error."+result.Error));
             var rows=new List<RowDisplay>();
-            foreach(var q in session.DailyQuests.Quests)
+            foreach(var q in session.DailyQuests.Quests.OrderBy(x=>x.Template.Target))
                 rows.Add(new RowDisplay(q.Template.Id,text.Get("shell.quest."+q.Template.Id),
                     text.Get("shell.claim"),CanClaim(q),(float)q.Progress/q.Template.Target,detail:q.Progress+"/"+q.Template.Target+" · "+text.RewardShort(q.Template.Reward)));
             view.Render(new ListDisplay(text.Get("shell.quests.title"),rows,text.Get("shell.quests.empty")));

@@ -41,6 +41,7 @@ namespace IndieGame.Shell.Unity.Screens
         readonly IGameSessionActions game; readonly IRewardedAdService ads; readonly SessionPopupConfig config;
         readonly Dictionary<SessionPopupKind,SessionPopupContent> popups=new Dictionary<SessionPopupKind,SessionPopupContent>();
         readonly HashSet<SessionPopupKind> consumed=new HashSet<SessionPopupKind>();
+        readonly HashSet<string> recordedRounds=new HashSet<string>();
         readonly TMP_Text errorBanner;
         string round; bool busy,paused,disposed; float priorScale;
         public IReadOnlyDictionary<SessionPopupKind,SessionPopupContent> Popups=>popups;
@@ -52,10 +53,13 @@ namespace IndieGame.Shell.Unity.Screens
             if(string.IsNullOrWhiteSpace(roundId)) throw new ArgumentException("Stable round ID required");
             round=roundId;
             var p=Open(SessionPopupKind.Win);
+            if(recordedRounds.Add(roundId)) { RecordQuest(p,QuestEvents.Win); RecordQuest(p,QuestEvents.Play); }
             var grant=session.Economy.GrantReward("session:win:"+round,config.WinReward);
             if(grant.Success||grant.Error==ModuleError.AlreadyClaimed) Save(p); else Error(p,grant.Error.ToString());
         }
-        public void ShowLose()=>Open(SessionPopupKind.Lose);
+        public void ShowLose() { var p=Open(SessionPopupKind.Lose); RecordQuest(p,QuestEvents.Play); Save(p); }
+        void RecordQuest(SessionPopupContent p,string key)
+        { var r=session.DailyQuests.RecordEvent(key,1); if(!r.Success) Error(p,r.Error.ToString()); }
         public void ShowRevive()=>Open(SessionPopupKind.Revive);
         public void ShowPause()
         {

@@ -50,7 +50,7 @@ namespace IndieGame.Shell.Unity
         public Func<ShellGameContext,RectTransform> GameScreenFactory;
         public static ShellAppConfig Standard(ShellGameConfig game, ShellStyle style,
             IReadOnlyDictionary<string,TextAsset> languageTables, IGameSessionActions actions,
-            Func<ShellGameContext,RectTransform> gameScreen, string savePath)
+            Func<ShellGameContext,RectTransform> gameScreen, string savePath, DailyQuestsConfig quests = null)
         {
             Require(game,nameof(game)); game.Validate();
             // Existing service constructors require these durations/prices to be positive.
@@ -70,7 +70,7 @@ namespace IndieGame.Shell.Unity
                 Lives=new LivesConfig(game.maxHearts,game.initialHearts,TimeSpan.FromSeconds(game.heartSeconds)),
                 Economy=new EconomyConfig(game.initialGold),
                 CheckIn=new DailyCheckInConfig(new[]{rewards,rewards}),
-                Quests=new DailyQuestsConfig(new[]{new QuestTemplate("q","win",1,new Reward(game.questGold)),new QuestTemplate("q3","win",3,new Reward(game.questGold*2)),new QuestTemplate("q5","win",5,new Reward(game.questGold*3))},3),
+                Quests=quests??QuestPack.Standard(game.questGold),
                 Settings=new SettingsConfig(true,true,true,game.languages[0],game.languages),
                 RemoteConfig=new RemoteConfigRules(new RemoteConfig(1,60),1000,1,3600),
                 SessionPopups=new SessionPopupConfig(new Reward(game.winGold),game.reviveGold,

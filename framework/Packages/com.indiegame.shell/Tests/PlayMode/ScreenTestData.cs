@@ -20,7 +20,7 @@ namespace IndieGame.Shell.Tests
         {
             var row=Enumerable.Repeat(new Reward(25,1),5).ToArray();
             return new ShellSession(new SaveStore(fileSystem:files),"screen.json",clock,new LivesConfig(5,1,TimeSpan.FromSeconds(30)),new EconomyConfig(100),
-                new DailyCheckInConfig(new[]{row,row}),new DailyQuestsConfig(empty?Array.Empty<QuestTemplate>():new[]{new QuestTemplate("q","event",2,new Reward(7))},empty?0:1),
+                new DailyCheckInConfig(new[]{row,row}),new DailyQuestsConfig(empty?Array.Empty<QuestTemplate>():new[]{new QuestTemplate("win1","event",2,new Reward(7))},empty?0:1),
                 new SettingsConfig(true,true,true,"en",new[]{"en","vi"}),new RemoteConfigRules(new RemoteConfig(1,60),1000,1,3600));
         }
         public static ProductCatalog Catalog()=>new ProductCatalog(new[]{new Product("p",PriceKind.Iap,0,new Reward(10))});
@@ -29,7 +29,7 @@ namespace IndieGame.Shell.Tests
             var table=new Dictionary<string,string> {
                 {"shell.checkin.title","Check in"},{"shell.checkin.slot","Slot {0}: {1}"},{"shell.checkin.other","Upcoming"},
                 {"shell.claim","Claim"},{"shell.gold","Gold {0}"},{"shell.hearts","Hearts {0}"},{"shell.reward","{0}"},{"shell.separator",", "},
-                {"shell.reward.unavailable","Unavailable"},{"shell.quests.title","Quests"},{"shell.quests.empty","No quests"},{"shell.quest.q","Quest"},{"shell.quest.row","{0} {1}/{2} {3}"},
+                {"shell.reward.unavailable","Unavailable"},{"shell.quests.title","Quests"},{"shell.quests.empty","No quests"},{"shell.quest.q","Quest"},{"shell.quest.win1","Win 1"},{"shell.quest.win3","Win 3"},{"shell.quest.win5","Win 5"},{"shell.quest.play3","Play 3"},{"shell.quest.play5","Play 5"},{"shell.quest.row","{0} {1}/{2} {3}"},
                 {"shell.main.title","Main"},{"shell.play","Play"},{"shell.lives.full","Full"},{"shell.lives.countdown","Full in {0}s"},
                 {"shell.shop.title","Shop"},{"shell.shop.empty","No products"},{"shell.product.p","Product"},{"shell.shop.row","{0} {1} {2}"},{"shell.price.iap","Purchase"},{"shell.buy","Buy"},
                 {"shell.error.title","Error"},{"shell.error.commit","Save failed: {0} {1}"},{"shell.error.None",""},{"shell.error.Io","Storage error"},
