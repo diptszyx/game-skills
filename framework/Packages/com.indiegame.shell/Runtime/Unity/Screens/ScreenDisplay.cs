@@ -43,7 +43,7 @@ namespace IndieGame.Shell.Unity.Screens
     internal static class ScreenWidgets
     {
         internal const float RowTitleFont=32, RowTitleMinFont=26, RowDetailFont=26, MinRowOpacity=.92f;
-        internal const float EmptyCardBottom=.17f, EmptyCardTop=.29f, ModalFooterErrorHeight=56;
+        internal const float DisabledActionAlpha=.45f, EmptyCardBottom=.17f, EmptyCardTop=.29f, ModalFooterErrorHeight=56;
         internal const float TrackMinContrast=1.8f, TrackBlend=.4f, FillMinContrast=3f;
         const float TopBarHeight=110, TitledBodyTop=266, UntitledBodyGap=12;
         internal const float TabBarHeight=160;
@@ -138,7 +138,7 @@ namespace IndieGame.Shell.Unity.Screens
             }
             if(row.Highlight) text.fontStyle=FontStyles.Bold;
             if(!string.IsNullOrEmpty(row.Action))
-            { var b=f.IconButton(r,row.Icon,row.Action,()=>clicked(row.Id),row.Amount!=null?ShellLayoutCategory.IconAmount:ShellLayoutCategory.IconAction,row.Amount); b.interactable=row.Enabled;
+            { var b=f.IconButton(r,row.Icon,row.Action,()=>clicked(row.Id),row.Amount!=null?ShellLayoutCategory.IconAmount:ShellLayoutCategory.IconAction,row.Amount); b.interactable=row.Enabled; b.gameObject.AddComponent<CanvasGroup>().alpha=row.Enabled?1f:DisabledActionAlpha;
               var rt=(RectTransform)b.transform; rt.anchorMin=rt.anchorMax=new Vector2(1,.5f); rt.pivot=new Vector2(1,.5f); rt.anchoredPosition=new Vector2(-12,0);
             }
             return r;

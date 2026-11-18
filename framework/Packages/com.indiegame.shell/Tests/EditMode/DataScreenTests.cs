@@ -32,6 +32,14 @@ namespace IndieGame.Shell.Tests
             var v=CheckIn(out var p); v.RequestClaim(); var restored=ScreenTestData.Session(clock,files); Assert.That(restored.LoadAll().Success,Is.True);
             Assert.That(restored.Economy.Gold,Is.EqualTo(125)); Assert.That(restored.DailyCheckIn.Preview().CanClaimNow,Is.False); Assert.That(restored.Lives.Hearts,Is.EqualTo(2));
         }
+        [Test] public void QuestClaimButtonLooksDisabledUntilTheQuestIsComplete()
+        {
+            var v=new QuestsView(f,root.transform); var p=new QuestsPresenter(session,v,text,clock); owned.Add(p);
+            float Alpha() => v.Root.GetComponentsInChildren<UnityEngine.UI.Button>(true).Select(b=>b.GetComponent<CanvasGroup>()).Where(g=>g!=null).Select(g=>g.alpha).First();
+            Assert.That(Alpha(),Is.LessThan(1f),"incomplete quest: claim looks disabled");
+            session.DailyQuests.RecordEvent("event",2); p.Refresh();
+            Assert.That(v.Root.GetComponentsInChildren<UnityEngine.UI.Button>(true).Any(b=>b.interactable && (b.GetComponent<CanvasGroup>()?.alpha ?? 1f)==1f),Is.True,"complete quest: claim looks enabled");
+        }
         [Test] public void QuestClaimOnlyWhenComplete()
         {
             var v=new QuestsView(f,root.transform); var p=new QuestsPresenter(session,v,text,clock); owned.Add(p);
