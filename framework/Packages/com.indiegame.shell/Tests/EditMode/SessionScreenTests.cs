@@ -109,9 +109,25 @@ namespace IndieGame.Shell.Tests
                 {
                     Assert.That(view.Snapshot.State,Is.EqualTo(LeaderboardState.Empty));
                     service.Enqueue(ServiceError.Unavailable); p.Refresh(); Assert.That(view.Snapshot.State,Is.EqualTo(LeaderboardState.Error));
-                    Assert.That(view.Snapshot.MessageKey,Is.EqualTo("shell.error.Unavailable"));
+                    Assert.That(view.Snapshot.MessageKey,Is.EqualTo("shell.leaderboard.offline"));
                     service.SubmitScore("board",42); p.Refresh(); Assert.That(view.Snapshot.State,Is.EqualTo(LeaderboardState.Populated));
                     Assert.That(view.Snapshot.Entries.Count,Is.EqualTo(1)); Assert.That(view.Snapshot.MyRank.Rank,Is.EqualTo(1));
+                }
+            }
+        }
+        [Test] public void LeaderboardShowsOwnUnrankedRowOnEmptyBoardAndOffline()
+        {
+            using(var f=new PopupFixture())
+            {
+                var service=new FakeLeaderboardService("me",new FakeLeaderboardState());
+                var view=new LeaderboardView(f.Factory,f.Root.transform);
+                using(var p=new LeaderboardPresenter(f.Session,view,ScreenTestData.Text(),new LeaderboardRequests(service),"board",3,()=>0))
+                {
+                    Assert.That(view.Snapshot.State,Is.EqualTo(LeaderboardState.Empty));
+                    Assert.That(view.Snapshot.MyRank.Rank,Is.EqualTo(0)); Assert.That(view.Snapshot.MyRank.Score,Is.EqualTo(0));
+                    service.Enqueue(ServiceError.Unavailable); p.Refresh();
+                    Assert.That(view.Snapshot.State,Is.EqualTo(LeaderboardState.Error));
+                    Assert.That(view.Snapshot.MessageKey,Is.EqualTo("shell.leaderboard.offline")); Assert.That(view.Snapshot.MyRank,Is.Not.Null);
                 }
             }
         }

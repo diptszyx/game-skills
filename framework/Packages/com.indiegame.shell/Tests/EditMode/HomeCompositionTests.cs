@@ -54,7 +54,7 @@ namespace IndieGame.Shell.Tests
                 { Assert.That(view.Snapshot.Play,Is.EqualTo("Level 8")); label="Level 9"; presenter.Refresh(); Assert.That(view.Snapshot.Play,Is.EqualTo("Level 9")); }
             }
         }
-        [Test] public void CheckInCellsFollowFiveDayCycleAndWrap()
+        [Test] public void CheckInCellsFollowSevenDayCycleAndWrap()
         {
             using(var f=new PopupFixture())
             {
@@ -64,7 +64,7 @@ namespace IndieGame.Shell.Tests
                 using(var presenter=new CheckInPresenter(session,view,IndieGame.Shell.Unity.Localization.SampleLocalization.Load(),clock))
                 {
                     string[] Roles()=>view.Root.GetComponentsInChildren<ShellAppearance>().Where(a=>a.Role.StartsWith("day")).Select(a=>a.Role).ToArray();
-                    for(int day=0;day<5;day++)
+                    for(int day=0;day<CheckInPack.Days;day++)
                     {
                         var roles=Roles(); Assert.That(roles[day],Is.EqualTo("dayToday"));
                         Assert.That(roles.Take(day),Is.All.EqualTo("dayCollected")); Assert.That(roles.Skip(day+1),Is.All.EqualTo("dayLocked"));

@@ -70,12 +70,37 @@ namespace IndieGame.Shell.Unity.UI
             foreach(var icon in close.GetComponentsInChildren<ShellAppearance>(true))
                 if(icon.Role=="actionIcon") ((RectTransform)icon.transform).sizeDelta=ShellUiFactory.GlyphSize(size);
         }
+        internal const float ModalFallbackAreaHeight=1440;
+        float modalContentHeight=-1, modalArea;
+        // Sizes the panel to header + content + bottom inset, clamped by style.Modal; the caller supplies content height in UI units.
+        public float FitModal(float contentHeight)
+        {
+            modalContentHeight=contentHeight; return ApplyModalFit();
+        }
+        float ModalAreaHeight()
+        {
+            var area=Panel.parent as RectTransform; float height=area!=null?area.rect.height:0;
+            return height>1?height:ModalFallbackAreaHeight;
+        }
+        float ApplyModalFit()
+        {
+            if(style==null||Panel==null) return 0;
+            var heading=(RectTransform)Panel.Find("Title"); bool closeVisible=CloseButton!=null&&CloseButton.gameObject.activeSelf;
+            modalArea=ModalAreaHeight();
+            float band=LayoutHeading(heading,closeVisible);
+            float min=style.Modal.MinHeightFraction*modalArea, max=style.Modal.MaxHeightFraction*modalArea;
+            float height=Mathf.Clamp(band+modalContentHeight+ManagedBottomInset,min,Mathf.Max(min,max));
+            Panel.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical,height);
+            LayoutHeading(heading,closeVisible);
+            return height;
+        }
         void OnEnable() { RefreshCloseTarget(); Reflow(); }
         int layoutSignature;
         RectTransform actionRow;
         void LateUpdate()
         {
-            if(ManagedContent) return;
+            if(ManagedContent)
+            { if(modalContentHeight>=0 && !Mathf.Approximately(ModalAreaHeight(),modalArea)) ApplyModalFit(); return; }
             int signature=LayoutSignature();
             if(signature==layoutSignature) return;
             Reflow();
@@ -100,7 +125,8 @@ namespace IndieGame.Shell.Unity.UI
             if(style==null||Content==null) return;
             const float padding=48;
             float headingBand=LayoutHeading((RectTransform)Panel.Find("Title"),CloseButton!=null&&CloseButton.gameObject.activeSelf);
-            if(ManagedContent) return;
+            if(ManagedContent)
+            { if(modalContentHeight>=0) ApplyModalFit(); return; }
             float width=Mathf.Max(1,Panel.rect.width-2*padding);
             var layout=Content.GetComponent<VerticalLayoutGroup>();
             if(layout==null) layout=Content.gameObject.AddComponent<VerticalLayoutGroup>();

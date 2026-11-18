@@ -137,7 +137,7 @@ namespace IndieGame.Shell.Unity
                         if(service==null) throw new InvalidOperationException("Unavailable ShellScreen Shop: ShopFactory returned null");
                         owned.Add(new ShopPresenter(Session,service,shop,Text)); root=shop.Root; break;
                     case ShellScreen.Leaderboard:
-                        var board=new LeaderboardView(factory,parent,frame); owned.Add(new LeaderboardPresenter(Session,board,Text,config.Leaderboard,config.BoardId,config.LeaderboardRows)); root=board.Root; break;
+                        var board=new LeaderboardView(factory,parent,frame); owned.Add(new LeaderboardPresenter(Session,board,Text,config.Leaderboard,config.BoardId,config.LeaderboardRows,config.LeaderboardLocalBest)); root=board.Root; break;
                     default: throw new InvalidOperationException("Unavailable ShellScreen: "+screen);
                 }
                 if(!modal)

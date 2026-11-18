@@ -18,23 +18,24 @@ namespace IndieGame.Shell.Unity.Screens
         public void Refresh()
         {
             day=clock.UtcNow.Date; language=session.Settings.Language; var p=session.DailyCheckIn.Preview(); var rows=new List<RowDisplay>();
-            for(int i=0;i<5;i++) rows.Add(new RowDisplay(i.ToString(),text.Get("shell.checkin.slot",i+1,
+            for(int i=0;i<CheckInPack.Days;i++) rows.Add(new RowDisplay(i.ToString(),text.Get("shell.checkin.slot",i+1,
                 i==p.NextSlot?text.Reward(p.Reward):text.Get("shell.checkin.other")),i==p.NextSlot?text.Get("shell.claim"):"",i==p.NextSlot&&p.CanClaimNow));
             view.Render(new ListDisplay(text.Get("shell.checkin.title"),rows));
             if(view.UsesDayCells)
             {
-            var labels=new string[5]; var rewards=new string[5]; var states=new DayState[5]; var goldOnly=new bool[5];
-            // NextSlot advances immediately after a claim and wraps modulo five. At wrap,
+            var labels=new string[CheckInPack.Days]; var rewards=new string[CheckInPack.Days]; var states=new DayState[CheckInPack.Days]; var goldOnly=new bool[CheckInPack.Days];
+            // NextSlot advances immediately after a claim and wraps modulo the cycle length. At wrap,
             // retain the completed cycle until the next UTC day becomes claimable.
-            int collected=p.NextSlot==0 && p.Error==DailyError.AlreadyClaimed?5:p.NextSlot;
-            for(int i=0;i<5;i++)
+            int collected=p.NextSlot==0 && p.Error==DailyError.AlreadyClaimed?CheckInPack.Days:p.NextSlot;
+            for(int i=0;i<CheckInPack.Days;i++)
             {
                 labels[i]=text.Get("shell.checkin.day",i+1);
-                goldOnly[i]=i==p.NextSlot && p.Reward!=null && p.Reward.Gold>0 && p.Reward.Hearts==0 && p.Reward.Boosters.Count==0;
-                rewards[i]=i!=p.NextSlot?"":goldOnly[i]?p.Reward.Gold.ToString(System.Globalization.CultureInfo.InvariantCulture):text.Reward(p.Reward);
+                var slotReward=session.DailyCheckIn.RewardAtSlot(i);
+                goldOnly[i]=slotReward!=null && slotReward.Gold>0;
+                rewards[i]=slotReward==null?"":goldOnly[i]?slotReward.Gold.ToString(System.Globalization.CultureInfo.InvariantCulture):text.Reward(slotReward);
                 states[i]=i<collected?DayState.Collected:i==p.NextSlot&&p.CanClaimNow?DayState.Today:DayState.Locked;
             }
-            view.RenderDays(labels,rewards,states,goldOnly);
+            view.RenderDays(labels,rewards,states,goldOnly,text.Get("shell.claim"));
             }
             if(!p.Success) view.ShowError(text.Get("shell.error."+p.Error));
         }

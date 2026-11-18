@@ -46,7 +46,7 @@ namespace IndieGame.Shell.Tests
             app=new GameObject("Shell Test").AddComponent<ShellApp>();
             config=new ShellAppConfig { Style=demos.Make(false),SavePath=path,
                 Lives=new LivesConfig(5,2,TimeSpan.FromSeconds(60)), Economy=new EconomyConfig(100),
-                CheckIn=new DailyCheckInConfig(new[]{Enumerable.Repeat(new Reward(1),5).ToArray(),Enumerable.Repeat(new Reward(1),5).ToArray()}), Quests=new DailyQuestsConfig(Array.Empty<QuestTemplate>(),0),
+                CheckIn=new DailyCheckInConfig(new[]{Enumerable.Repeat(new Reward(1),CheckInPack.Days).ToArray(),Enumerable.Repeat(new Reward(1),CheckInPack.Days).ToArray()}), Quests=new DailyQuestsConfig(Array.Empty<QuestTemplate>(),0),
                 Settings=new SettingsConfig(true,true,true,"en",new[]{"en","vi"}), RemoteConfig=new RemoteConfigRules(new RemoteConfig(1,60),1000,1,3600),
                 SessionPopups=new SessionPopupConfig(new Reward(1),1,"revive","double"),Actions=game,
                 LanguageTables=new Dictionary<string,TextAsset>{{"en",Resources.Load<TextAsset>("ShellLocalization/en")},{"vi",Resources.Load<TextAsset>("ShellLocalization/vi")}},
@@ -231,7 +231,7 @@ namespace IndieGame.Shell.Tests
             Assert.That(Tab("checkin").transform.Find("Cell").GetComponent<ShellAppearance>().Selected,Is.True);
             yield return new RealPointer(mouse).Click(Tab("home")); Assert.That(app.Screens.Current,Is.SameAs(app.Main.Root));
             yield return Until(()=>app.Popups.Top==null,"tab popup closed by Home tab");
-            yield return new RealPointer(mouse).Click(Tab("checkin")); var claim=app.Popups.Top.Content.GetComponentsInChildren<Button>().Single();
+            yield return new RealPointer(mouse).Click(Tab("checkin")); var claim=app.Popups.Top.Content.GetComponentsInChildren<Button>().Single(b=>b.interactable);
             var gold=app.Session.Economy.Gold; yield return new RealPointer(mouse).Click(claim);
             Assert.That(claim.IsInteractable(),Is.False,"Claim must disable after collection");
             claim.onClick.Invoke(); // Also exercise the presenter guard against a duplicate callback.
@@ -262,6 +262,19 @@ namespace IndieGame.Shell.Tests
             app.Back(); yield return Until(()=>app.Popups.Top==null,"Back closes the tab popup"); yield return null;
             Assert.That(app.Screens.Current,Is.SameAs(app.Main.Root));
             Assert.That(TabButton("home").transform.Find("Cell").GetComponent<ShellAppearance>().Selected,Is.True,"closing returns the highlight to Home");
+        }
+        [UnityTest] public IEnumerator TabModalsFitTheirContentInsideTheAreaAboveTheTabBar()
+        {
+            config.Style=demos.MakeChunky(); yield return Boot();
+            var modal=config.Style.Modal;
+            foreach(var screen in new[]{ShellScreen.CheckIn,ShellScreen.Quests})
+            {
+                app.Navigate(screen); yield return Settled(); var top=app.Popups.Top; var area=((RectTransform)top.transform).rect.height; var panel=top.Panel.rect.height;
+                Assert.That(panel,Is.InRange(modal.MinHeightFraction*area-1,modal.MaxHeightFraction*area+1),screen+" panel height within the style limits");
+                Assert.That(panel,Is.LessThan(.8f*area),screen+" is not a near full-height panel");
+                Assert.That(top.Panel.rect.width/((RectTransform)top.transform).rect.width,Is.EqualTo(modal.WidthFraction).Within(.003f));
+                app.Back(); yield return Until(()=>app.Popups.Top==null,"closed");
+            }
         }
         [UnityTest] public IEnumerator SwipeSwitchesTheOpenModalToTheNeighbouringTab()
         {

@@ -13,19 +13,19 @@ namespace IndieGame.Shell.Tests
         sealed class Game : IGameSessionActions { public void Play() {} public void Retry() {} public void Revive() {} public void NextLevel() {} public void Leave() {} public void Pause() {} public void Resume() {} }
         ShellAppConfig Config()=>new ShellAppConfig {
             Style=demos.Make(false), SavePath="test.json", Lives=new LivesConfig(5,2,TimeSpan.FromSeconds(60)), Economy=new EconomyConfig(100),
-            CheckIn=new DailyCheckInConfig(new[]{Enumerable.Repeat(new Reward(1),5).ToArray(),Enumerable.Repeat(new Reward(1),5).ToArray()}), Quests=new DailyQuestsConfig(Array.Empty<QuestTemplate>(),0),
+            CheckIn=new DailyCheckInConfig(new[]{Enumerable.Repeat(new Reward(1),CheckInPack.Days).ToArray(),Enumerable.Repeat(new Reward(1),CheckInPack.Days).ToArray()}), Quests=new DailyQuestsConfig(Array.Empty<QuestTemplate>(),0),
             Settings=new SettingsConfig(true,true,true,"en",new[]{"en","vi"}), RemoteConfig=new RemoteConfigRules(new RemoteConfig(1,60),1000,1,3600),
             SessionPopups=new SessionPopupConfig(new Reward(1),1,"revive","double"), Actions=new Game(),
             LanguageTables=new Dictionary<string,TextAsset>{{"en",Resources.Load<TextAsset>("ShellLocalization/en")},{"vi",Resources.Load<TextAsset>("ShellLocalization/vi")}},
             GameScreenFactory=c=>c.Factory.ScreenRoot(c.Parent,"Game") };
         [SetUp] public void Setup()=>demos=new DemoStyles();
         [TearDown] public void Cleanup()=>demos.Dispose();
-        ShellAppConfig Standard(ShellGameConfig game=null)
+        ShellAppConfig Standard(ShellGameConfig game=null,DailyCheckInConfig checkIn=null)
         {
             var existing=Config();
             return ShellAppConfig.Standard(game??ShellGameConfig.Parse("{\"gameId\":\"taporder\"}"),
                 existing.Style,new Dictionary<string,TextAsset>(existing.LanguageTables),
-                existing.Actions,existing.GameScreenFactory,existing.SavePath);
+                existing.Actions,existing.GameScreenFactory,existing.SavePath,checkIn:checkIn);
         }
         [Test] public void StandardConfigPassesShellAppConfigValidation()
         {
@@ -46,6 +46,10 @@ namespace IndieGame.Shell.Tests
             c.RewardedAds=new FakeRewardedAdService(); c.Leaderboard=new AsyncLeaderboard();
             Assert.DoesNotThrow(c.Validate);
         }
+        [Test] public void StandardConfigAcceptsACheckInOverride()
+        {
+            var own=CheckInPack.Standard(3); Assert.That(Standard(null,own).CheckIn,Is.SameAs(own));
+        }
         [Test] public void StandardConfigUsesGameConfigValues()
         {
             var g=new ShellGameConfig { gameId="custom",initialGold=111,maxHearts=8,initialHearts=3,
@@ -58,8 +62,9 @@ namespace IndieGame.Shell.Tests
             Assert.That(c.Economy.InitialGold,Is.EqualTo(111));
             Assert.That(c.CheckIn.RewardTables.Count,Is.EqualTo(2));
             foreach(var row in c.CheckIn.RewardTables) {
-                Assert.That(row.Count,Is.EqualTo(5));
-                foreach(var reward in row) Assert.That(reward.Gold,Is.EqualTo(12));
+                Assert.That(row.Count,Is.EqualTo(CheckInPack.Days));
+                Assert.That(row.Select(r=>r.Gold).ToArray(),Is.EqualTo(new long[]{12,24,36,48,60,72,120}));
+                Assert.That(row[CheckInPack.Days-1].Hearts,Is.EqualTo(CheckInPack.FinalDayHearts));
             }
             Assert.That(c.Quests.DailyCount,Is.EqualTo(3)); Assert.That(c.Quests.Daily.Count,Is.EqualTo(5));
             Assert.That(c.Quests.Daily[0].Id,Is.EqualTo("win1"));
@@ -68,13 +73,31 @@ namespace IndieGame.Shell.Tests
             Assert.That(c.Quests.Daily[0].Reward.Gold,Is.EqualTo(13));
             Assert.That(c.SessionPopups.WinReward.Gold,Is.EqualTo(14));
             Assert.That(c.SessionPopups.ReviveGold,Is.EqualTo(15));
-            Assert.That(c.ShopCatalog.Products.Count,Is.EqualTo(1));
-            var product=c.ShopCatalog.Products[0];
-            Assert.That(product.Id,Is.EqualTo("p")); Assert.That(product.PriceKind,Is.EqualTo(PriceKind.Gold));
-            Assert.That(product.Price,Is.EqualTo(17)); Assert.That(product.Reward.Gold,Is.EqualTo(16));
+            Assert.That(c.ShopCatalog.Products.Select(x=>x.Id),Is.EqualTo(new[]{ShopPack.Hearts,ShopPack.GoldSmall,ShopPack.GoldMedium,ShopPack.GoldLarge}));
+            var hearts=c.ShopCatalog.Find(ShopPack.Hearts);
+            Assert.That(hearts.PriceKind,Is.EqualTo(PriceKind.Gold)); Assert.That(hearts.Price,Is.EqualTo(17)); Assert.That(hearts.Reward.Hearts,Is.EqualTo(8));
+            Assert.That(c.ShopCatalog.Find(ShopPack.GoldSmall).Reward.Gold,Is.EqualTo(16));
             Assert.That(c.Settings.DefaultLanguage,Is.EqualTo("vi"));
             Assert.That(c.Settings.Languages,Is.EquivalentTo(g.languages));
             Assert.That(c.Settings.Sound && c.Settings.Music && c.Settings.Haptics,Is.True);
+        }
+        [Test] public void StandardConfigCompletesEveryIapProductWithItsFakePurchases()
+        {
+            var c=Standard(); var session=ScreenTestData.Session(new ScreenClock(),new ScreenFiles()); session.LoadAll();
+            var service=new ShopService(c.ShopCatalog,session,c.Purchases);
+            foreach(var product in c.ShopCatalog.Products.Where(x=>x.PriceKind==PriceKind.Iap))
+            {
+                var before=session.Economy.Gold;
+                Assert.That(service.Buy(product.Id,Guid.NewGuid().ToString("N")).Success,Is.True,product.Id);
+                Assert.That(session.Economy.Gold,Is.EqualTo(before+product.Reward.Gold),product.Id);
+            }
+        }
+        [Test] public void StandardConfigUsesTheShopOverrideWhenGiven()
+        {
+            var existing=Config(); var shop=ScreenTestData.Catalog();
+            var c=ShellAppConfig.Standard(ShellGameConfig.Parse("{\"gameId\":\"taporder\"}"),existing.Style,
+                new Dictionary<string,TextAsset>(existing.LanguageTables),existing.Actions,existing.GameScreenFactory,existing.SavePath,shop:shop);
+            Assert.That(c.ShopCatalog,Is.SameAs(shop));
         }
         [Test] public void ParseRejectsBlankGameIdAndBadHearts()
         {

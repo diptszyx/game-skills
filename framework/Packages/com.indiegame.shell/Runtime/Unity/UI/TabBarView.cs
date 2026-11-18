@@ -41,7 +41,7 @@ namespace IndieGame.Shell.Unity.UI
                 var r=ShellUiFactory.Node("Tab "+definition.Key,content);
                 var target=factory.AppearanceImage(r,"Cell","tabCell",true); ShellUiFactory.Stretch(target.rectTransform); target.raycastTarget=true;
                 r.gameObject.AddComponent<ActionAccessibility>().Set(definition.Key,definition.Label);
-                var button=r.gameObject.AddComponent<Button>(); button.targetGraphic=target; button.transition=Selectable.Transition.None;
+                var button=r.gameObject.AddComponent<Button>(); button.targetGraphic=target; button.transition=Selectable.Transition.None; factory.WithPressFeedback(button);
                 var size=r.gameObject.AddComponent<LayoutElement>(); size.minWidth=size.minHeight=44; size.flexibleWidth=1;
                 var icon=factory.AppearanceImage(r,"Icon","tabIcon",iconKey:definition.IconKey);
                 TopBarView.Place(icon.rectTransform,new Vector2(.28f,.5f),new Vector2(.72f,.96f));

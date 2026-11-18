@@ -18,8 +18,9 @@ namespace IndieGame.Shell.Unity.Screens
         public string Icon { get; }
         public string Amount { get; }
         public string Detail { get; }
-        public RowDisplay(string id, string text, string action = "", bool enabled = false, float progress = -1,string icon="check",string amount=null,string detail=null)
-        { Id=id; Text=text; Action=action; Enabled=enabled; Progress=progress; Icon=icon; Amount=amount; Detail=detail; }
+        public bool Highlight { get; }
+        public RowDisplay(string id, string text, string action = "", bool enabled = false, float progress = -1,string icon="check",string amount=null,string detail=null,bool highlight=false)
+        { Id=id; Text=text; Action=action; Enabled=enabled; Progress=progress; Icon=icon; Amount=amount; Detail=detail; Highlight=highlight; }
     }
     public sealed class ListDisplay
     {
@@ -39,7 +40,8 @@ namespace IndieGame.Shell.Unity.Screens
     internal static class ScreenWidgets
     {
         internal const float RowTitleFont=32, RowTitleMinFont=26, RowDetailFont=26, MinRowOpacity=.92f;
-        internal const float EmptyCardBottom=.17f, EmptyCardTop=.29f;
+        internal const float EmptyCardBottom=.17f, EmptyCardTop=.29f, ModalFooterErrorHeight=56;
+        internal const float TrackMinContrast=1.8f, TrackBlend=.4f, FillMinContrast=3f;
         const float TopBarHeight=110, TitledBodyTop=266, UntitledBodyGap=12;
         internal const float TabBarHeight=160;
         internal static bool HidesTitle(ShellStyle style) => style.EnableHomeChrome && !style.ShowScreenTitleWithChrome;
@@ -76,21 +78,37 @@ namespace IndieGame.Shell.Unity.Screens
                 LocalizedLayout.Row(row,title,!string.IsNullOrEmpty(data.Action)); title.alignment=TextAlignmentOptions.Left;
                 title.fontSizeMin=RowTitleMinFont; title.fontSizeMax=Mathf.Max(title.fontSizeMax,RowTitleMinFont); return;
             }
-            StyleRowLabel(title,RowTitleFont,RowTitleMinFont,.5f,.96f,xMax);
+            bool bar=data.Progress>=0;
+            StyleRowLabel(title,RowTitleFont,RowTitleMinFont,bar?.56f:.5f,.96f,xMax);
             var detail=f.Label(row,data.Detail,role:"rowText"); detail.gameObject.name="Detail";
-            StyleRowLabel(detail,RowDetailFont,RowDetailFont,.1f,.52f,xMax);
+            StyleRowLabel(detail,RowDetailFont,RowDetailFont,bar?.27f:.1f,bar?.56f:.52f,xMax);
         }
-        internal static RectTransform EmptyCard(ShellUiFactory f, RectTransform root)
+        internal static RectTransform EmptyCard(ShellUiFactory f, RectTransform root, bool topAnchored=false)
         {
-            var card=ShellUiFactory.Node("Empty card",root); card.anchorMin=new Vector2(.04f,EmptyCardBottom); card.anchorMax=new Vector2(.96f,EmptyCardTop);
-            card.offsetMin=card.offsetMax=Vector2.zero;
+            var card=ShellUiFactory.Node("Empty card",root);
+            if(topAnchored)
+            {
+                card.anchorMin=new Vector2(0,1); card.anchorMax=Vector2.one; card.pivot=new Vector2(.5f,1);
+                card.anchoredPosition=Vector2.zero; card.sizeDelta=new Vector2(0,ShellLayout.Standard.Row.y);
+            }
+            else { card.anchorMin=new Vector2(.04f,EmptyCardBottom); card.anchorMax=new Vector2(.96f,EmptyCardTop); card.offsetMin=card.offsetMax=Vector2.zero; }
             var image=f.AppearanceImage(card,"Surface","row",true); ShellUiFactory.Stretch(image.rectTransform); OpaqueCard(image);
             var label=f.Label(card,"",role:"rowText"); ShellUiFactory.Stretch(label.rectTransform);
             label.rectTransform.offsetMin=new Vector2(24,12); label.rectTransform.offsetMax=new Vector2(-24,-12);
             label.enableAutoSizing=true; label.fontSizeMax=34; label.fontSizeMin=RowTitleMinFont; label.fontSize=34;
             card.gameObject.SetActive(false); return card;
         }
-        const float ProgressInset=14,ProgressHeight=8;
+        const float ProgressInset=16,ProgressBottom=12,ProgressHeight=12;
+        // Falls back to a blend towards the row text colour when the style's bar colours are too faint on the row.
+        internal static void ProgressColors(ShellStyle style,out Color track,out Color fill)
+        {
+            var row=new Color(style.ListRowColor.r,style.ListRowColor.g,style.ListRowColor.b,1);
+            var text=new Color(style.ListRowTextColor.r,style.ListRowTextColor.g,style.ListRowTextColor.b,1);
+            track=style.ProgressTrackColor; track.a=1;
+            if(ShellStyle.Contrast(track,row)<TrackMinContrast) track=Color.Lerp(row,text,TrackBlend);
+            fill=style.ProgressFillColor; fill.a=1;
+            if(ShellStyle.Contrast(fill,track)<FillMinContrast) fill=text;
+        }
         static void OpaqueCard(Image card)
         { var c=card.color; c.a=Mathf.Max(c.a,MinRowOpacity); card.color=c; }
         internal static void Rows(ShellUiFactory f, RectTransform content, IReadOnlyList<RowDisplay> rows, Action<string> clicked)
@@ -102,11 +120,13 @@ namespace IndieGame.Shell.Unity.Screens
                 OpaqueCard(r.GetComponent<Image>()); LayoutRowText(r,text,f,row);
                 if(row.Progress>=0)
                 {
-                    var track=ShellUiFactory.Node("Progress",r); track.anchorMin=Vector2.zero; track.anchorMax=new Vector2(.64f,0); track.pivot=Vector2.zero; track.offsetMin=new Vector2(ProgressInset,ProgressInset); track.offsetMax=new Vector2(0,ProgressInset+ProgressHeight);
-                    track.gameObject.AddComponent<Image>().color=f.Style.ProgressTrackColor;
+                    ProgressColors(f.Style,out var trackColor,out var fillColor);
+                    var track=ShellUiFactory.Node("Progress",r); track.anchorMin=Vector2.zero; track.anchorMax=new Vector2(.64f,0); track.pivot=Vector2.zero; track.offsetMin=new Vector2(ProgressInset,ProgressBottom); track.offsetMax=new Vector2(-8,ProgressBottom+ProgressHeight);
+                    track.gameObject.AddComponent<Image>().color=trackColor;
                     var fill=ShellUiFactory.Node("Fill",track); fill.anchorMin=Vector2.zero; fill.anchorMax=new Vector2(Mathf.Clamp01(row.Progress),1); fill.offsetMin=fill.offsetMax=Vector2.zero;
-                    fill.gameObject.AddComponent<Image>().color=f.Style.ProgressFillColor; fill.gameObject.SetActive(true); track.gameObject.SetActive(true);
+                    fill.gameObject.AddComponent<Image>().color=fillColor; fill.gameObject.SetActive(true); track.gameObject.SetActive(true);
                 }
+                if(row.Highlight) text.fontStyle=FontStyles.Bold;
                 if(!string.IsNullOrEmpty(row.Action))
                 { var b=f.IconButton(r,row.Icon,row.Action,()=>clicked(row.Id),row.Amount!=null?ShellLayoutCategory.IconAmount:ShellLayoutCategory.IconAction,row.Amount); b.interactable=row.Enabled;
                   var rt=(RectTransform)b.transform; rt.anchorMin=rt.anchorMax=new Vector2(1,.5f); rt.pivot=new Vector2(1,.5f); rt.anchoredPosition=new Vector2(-12,0);
@@ -120,10 +140,11 @@ namespace IndieGame.Shell.Unity.Screens
         internal readonly ScreenLifetime Lifetime;
         readonly ShellUiFactory factory;
         readonly TMP_Text title,empty,error;
-        readonly ScrollRect list; readonly RectTransform emptyCard;
+        readonly ScrollRect list; readonly RectTransform emptyCard; readonly PopupView modal;
+        int rowCount;
         internal ListSurface(ShellUiFactory factory, Transform parent, string name, PopupView modal=null)
         {
-            this.factory=factory;
+            this.factory=factory; this.modal=modal;
             RectTransform body;
             if(modal!=null)
             {
@@ -132,12 +153,13 @@ namespace IndieGame.Shell.Unity.Screens
             }
             else { Root=factory.ScreenRoot(parent,name); title=ScreenWidgets.Heading(factory,Root); body=ScreenWidgets.Body(factory,Root); }
             Lifetime=Root.gameObject.AddComponent<ScreenLifetime>();
-            list=factory.ScrollList(body); list.GetComponent<RectTransform>().offsetMin=new Vector2(0,100);
+            list=factory.ScrollList(body); list.GetComponent<RectTransform>().offsetMin=new Vector2(0,modal!=null?0:100);
             list.gameObject.AddComponent<SwipeForwarder>();
             if(factory.Style.EnableHomeChrome && modal==null) { emptyCard=ScreenWidgets.EmptyCard(factory,Root); empty=emptyCard.GetComponentInChildren<TMP_Text>(true); }
+            else if(modal!=null) { emptyCard=ScreenWidgets.EmptyCard(factory,body,true); empty=emptyCard.GetComponentInChildren<TMP_Text>(true); }
             else empty=factory.Label(body,"");
             error=factory.Label(body,""); error.rectTransform.anchorMin=error.rectTransform.anchorMax=new Vector2(.5f,0);
-            error.rectTransform.anchoredPosition=new Vector2(0,45);
+            error.rectTransform.anchoredPosition=new Vector2(0,modal!=null?ScreenWidgets.ModalFooterErrorHeight/2:45);
         }
         internal static RectTransform ModalRoot(PopupView modal,string name)
         { var root=ShellUiFactory.Node(name,modal.Content); ShellUiFactory.Stretch(root); root.gameObject.SetActive(true); return root; }
@@ -146,7 +168,20 @@ namespace IndieGame.Shell.Unity.Screens
             title.text=display.Title; empty.text=display.Empty;
             bool showEmpty=display.Rows.Count==0; (emptyCard!=null?emptyCard.gameObject:empty.gameObject).SetActive(showEmpty);
             ScreenWidgets.Rows(factory,list.content,display.Rows,clicked);
+            rowCount=display.Rows.Count; FitModal();
         }
-        internal void Error(string text) { error.text=text; }
+        internal void Error(string text)
+        {
+            error.text=text; if(modal==null) return;
+            list.GetComponent<RectTransform>().offsetMin=new Vector2(0,string.IsNullOrEmpty(text)?0:ScreenWidgets.ModalFooterErrorHeight);
+            FitModal();
+        }
+        void FitModal()
+        {
+            if(modal==null) return;
+            float rowHeight=ShellLayout.Standard.Row.y;
+            float rows=rowCount==0?rowHeight:rowCount*rowHeight+(rowCount-1)*factory.Style.Spacing;
+            modal.FitModal(rows+list.GetComponent<RectTransform>().offsetMin.y);
+        }
     }
 }

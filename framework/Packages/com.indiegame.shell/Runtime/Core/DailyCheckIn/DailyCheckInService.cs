@@ -57,7 +57,7 @@ namespace IndieGame.Shell
             if (clock == null || grantor == null || config?.RewardTables == null || config.RewardTables.Count != 2) return;
             foreach (var row in config.RewardTables)
             {
-                if (row == null || row.Count != 5) return;
+                if (row == null || row.Count != CheckInPack.Days) return;
                 var copy = new List<Reward>();
                 foreach (var r in row) { var reward = DailyRules.Copy(r); if (reward == null) return; copy.Add(reward); }
                 tables.Add(copy);
@@ -77,6 +77,8 @@ namespace IndieGame.Shell
                 ? new DateTime((long)nextDay * TimeSpan.TicksPerDay, DateTimeKind.Utc) : (DateTime?)null;
             return new DailyCheckInPreview(nextSlot, RewardFor(today), next, Eligibility(today));
         }
+        // Reward a given slot pays out in today's table; null when the config is invalid or the slot is out of range.
+        public Reward RewardAtSlot(int slot) => valid && slot >= 0 && slot < tables[0].Count ? tables[DailyRules.Day(clock) % tables.Count][slot] : null;
         public DailyResult Claim()
         {
             if (!valid) return new DailyResult(DailyError.InvalidConfig);
@@ -107,6 +109,8 @@ namespace IndieGame.Shell
             if (!valid) return new DailyResult(DailyError.InvalidConfig);
             var read = document.ReadSection("dailyCheckIn", () => new State { Version = 1, Day = -1, ClaimedDay = -1 });
             var s = read.Value;
+            if (read.Success && s != null && s.Version == 1 && s.NextSlot >= tables[0].Count)
+            { day = -1; claimedDay = -1; nextSlot = 0; return new DailyResult(); }
             bool ok = read.Success && s != null && s.Version == 1 && s.NextSlot >= 0 && s.NextSlot < tables[0].Count &&
                 ((s.Day == -1 && s.ClaimedDay == -1 && s.NextSlot == 0) || (DailyRules.ValidDay(s.Day) && s.ClaimedDay == s.Day));
             day = ok ? s!.Day : -1; claimedDay = ok ? s!.ClaimedDay : -1; nextSlot = ok ? s!.NextSlot : 0;

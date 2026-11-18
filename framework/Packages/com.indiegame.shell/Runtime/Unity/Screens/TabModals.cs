@@ -7,7 +7,6 @@ namespace IndieGame.Shell.Unity.Screens
     // Bottom-tab screens shown as popups over Home. Uses the shared PopupHost; at most one tab popup is open.
     public sealed class TabModals
     {
-        const float PanelMarginX=.06f, PanelMarginY=.02f;
         readonly PopupHost host; readonly ShellUiFactory factory;
         readonly Dictionary<ShellScreen,PopupView> frames=new Dictionary<ShellScreen,PopupView>();
         public event Action<PopupView> FrameCreated;
@@ -23,8 +22,9 @@ namespace IndieGame.Shell.Unity.Screens
         {
             var frame=factory.PopupFrame(host.transform,"",true,closeLabel); frame.ManagedContent=true; frame.name="Tab "+screen;
             var root=(RectTransform)frame.transform; root.offsetMin=new Vector2(0,ScreenWidgets.TabBarHeight);
-            var panel=frame.Panel; panel.anchorMin=new Vector2(PanelMarginX,PanelMarginY); panel.anchorMax=new Vector2(1-PanelMarginX,1-PanelMarginY);
-            panel.offsetMin=panel.offsetMax=Vector2.zero;
+            var modal=factory.Style.Modal; float marginX=(1-modal.WidthFraction)/2;
+            var panel=frame.Panel; panel.anchorMin=new Vector2(marginX,.5f); panel.anchorMax=new Vector2(1-marginX,.5f); panel.pivot=new Vector2(.5f,.5f);
+            panel.anchoredPosition=Vector2.zero; panel.sizeDelta=new Vector2(0,modal.MaxHeightFraction*PopupView.ModalFallbackAreaHeight);
             frames.Add(screen,frame); FrameCreated?.Invoke(frame); return frame;
         }
         public void Open(ShellScreen screen)

@@ -58,13 +58,13 @@ namespace IndieGame.Shell.Tests
         {
             var view=new CheckInView(f,screen); var p=new CheckInPresenter(session,view,text,clock); owned.Add(p);
             var cells=view.Root.GetComponentsInChildren<ShellAppearance>().Where(a=>a.Role.StartsWith("day")).Select(a=>Normalized((RectTransform)a.transform.parent)).ToArray();
-            Assert.That(cells.Length,Is.EqualTo(5));
+            Assert.That(cells.Length,Is.EqualTo(CheckInPack.Days));
             foreach(var c in cells)
             {
                 Assert.That(c.yMin,Is.EqualTo(cells[0].yMin).Within(1e-4f)); Assert.That(c.height,Is.EqualTo(cells[0].height).Within(1e-4f)); Assert.That(c.width,Is.EqualTo(cells[0].width).Within(1e-4f));
-                Assert.That(Overlaps(c,Bear),Is.False,"day cell overlaps the bear"); Assert.That(c.xMin,Is.GreaterThanOrEqualTo(0)); Assert.That(c.xMax,Is.LessThanOrEqualTo(1));
+                Assert.That(Overlaps(c,Bear),Is.False,"day cell overlaps the bear"); Assert.That(c.xMin,Is.GreaterThanOrEqualTo(0)); Assert.That(c.xMax,Is.LessThanOrEqualTo(1)); Assert.That(c.width*ScreenW,Is.GreaterThanOrEqualTo(84),"cell wide enough at 720 wide");
             }
-            for(int i=1;i<5;i++) Assert.That(cells[i].xMin,Is.GreaterThanOrEqualTo(cells[i-1].xMax));
+            for(int i=1;i<cells.Length;i++) Assert.That(cells[i].xMin,Is.GreaterThanOrEqualTo(cells[i-1].xMax));
         }
         [Test] public void DayCellShowsTheCurrencyIconOnlyForGoldOnlyRewards()
         {
@@ -75,21 +75,48 @@ namespace IndieGame.Shell.Tests
             cell.Render("Day 1","Gold 25, Heart 1",DayState.Today,false);
             Assert.That(icon.gameObject.activeSelf,Is.False,"mixed reward keeps the text");
         }
-        [Test] public void CheckInClaimIsLargeBelowCellsAndClearOfTheBear()
+        [Test] public void CheckInHasNoSeparateClaimButtonAndTappingTodaysCellClaims()
         {
             var view=new CheckInView(f,screen); var p=new CheckInPresenter(session,view,text,clock); owned.Add(p);
-            var claim=(RectTransform)view.Root.GetComponentsInChildren<Button>(true).Single().transform; var rect=Normalized(claim);
-            Assert.That(claim.rect.width,Is.GreaterThanOrEqualTo(ShellLayout.Standard.IconAction.x)); Assert.That(claim.rect.height,Is.GreaterThanOrEqualTo(ShellLayout.Standard.IconAction.y));
-            Assert.That(Overlaps(rect,Bear),Is.False); Assert.That(rect.yMin,Is.GreaterThanOrEqualTo(160/ScreenH),"above the tab bar");
-            var cell=view.Root.GetComponentsInChildren<ShellAppearance>().First(a=>a.Role.StartsWith("day")).transform.parent;
-            Assert.That(rect.yMax,Is.LessThanOrEqualTo(Normalized((RectTransform)cell).yMin));
+            var buttons=view.Root.GetComponentsInChildren<Button>(true);
+            Assert.That(buttons.Length,Is.EqualTo(CheckInPack.Days),"only the day cells are buttons");
+            Assert.That(buttons.All(b=>b.GetComponent<ActionAccessibility>().Key==DayCellView.AccessibilityKey&&b.GetComponent<PressFeedback>()!=null),Is.True);
+            var live=buttons.Where(b=>b.interactable).ToArray(); Assert.That(live.Length,Is.EqualTo(1),"locked and collected cells are not interactive");
+            Assert.That(live[0].GetComponent<ActionAccessibility>().Label,Is.EqualTo("Claim"));
+            Assert.That(live[0].GetComponentsInChildren<ShellAppearance>().Any(a=>a.Role=="dayToday"),Is.True,"the tappable cell is today's");
+            long gold=session.Economy.Gold; live[0].onClick.Invoke();
+            Assert.That(session.Economy.Gold,Is.EqualTo(gold+25)); Assert.That(buttons.Any(b=>b.interactable),Is.False,"nothing to claim after collecting");
+            live[0].onClick.Invoke(); Assert.That(session.Economy.Gold,Is.EqualTo(gold+25),"second tap grants nothing");
         }
-        [Test] public void CheckInDayLabelSitsInsideTheCellAndRewardBelowIt()
+        static Rect InCell(RectTransform r,RectTransform cell)
         {
-            var view=new CheckInView(f,screen); var p=new CheckInPresenter(session,view,text,clock); owned.Add(p);
-            var cell=(RectTransform)view.Root.GetComponentsInChildren<ShellAppearance>().First(a=>a.Role.StartsWith("day")).transform.parent;
-            var background=Normalized((RectTransform)cell.Find("State")); var day=cell.GetComponentsInChildren<TMP_Text>(true).First(t=>t.text.StartsWith("Day")); var reward=(RectTransform)cell.Find("Reward card");
-            Assert.That(background.Contains(Normalized(day.rectTransform).center),Is.True); Assert.That(Normalized(reward).yMax,Is.LessThanOrEqualTo(background.yMin+1e-4f));
+            var c=new Vector3[4]; r.GetWorldCorners(c); var lo=cell.InverseTransformPoint(c[0]); var hi=cell.InverseTransformPoint(c[2]);
+            return Rect.MinMaxRect(lo.x,lo.y,hi.x,hi.y);
+        }
+        [Test] public void CheckInDayCellStacksLabelIconAndRewardInsideEachStateWithoutOverlap()
+        {
+            var cell=new DayCellView(f,screen);
+            foreach(float width in new[]{122f,260f})
+            foreach(DayState state in Enum.GetValues(typeof(DayState)))
+                foreach(bool gold in new[]{true,false})
+                {
+                    cell.Root.sizeDelta=new Vector2(width,160); var bounds=cell.Root.rect;
+                    cell.Render("Day 1","25",state,gold);
+                    var label=cell.Root.Find("Day label").GetComponent<TMP_Text>(); var reward=cell.Root.Find("Reward card/Reward text").GetComponent<TMP_Text>();
+                    var rects=new[]{InCell(label.rectTransform,cell.Root),InCell((RectTransform)cell.Root.Find("State"),cell.Root),InCell((RectTransform)cell.Root.Find("Reward card"),cell.Root)};
+                    foreach(var r in rects) { Assert.That(r.xMin>=bounds.xMin-1e-3f&&r.yMin>=bounds.yMin-1e-3f&&r.xMax<=bounds.xMax+1e-3f&&r.yMax<=bounds.yMax+1e-3f,Is.True,state+" rect outside cell: "+r+" bounds "+bounds); }
+                    Assert.That(rects[0].yMin,Is.GreaterThanOrEqualTo(rects[1].yMax-1e-3f),state+" label overlaps icon"); Assert.That(rects[1].yMin,Is.GreaterThanOrEqualTo(rects[2].yMax-1e-3f),state+" icon overlaps reward");
+                    Assert.That(label.fontSizeMin,Is.GreaterThanOrEqualTo(14)); Assert.That(reward.alignment,Is.EqualTo(TextAlignmentOptions.Center));
+                    Assert.That(InCell(reward.rectTransform,cell.Root).center.x,Is.EqualTo(bounds.center.x).Within(.5f),state+" reward text off-centre");
+                    Assert.That(reward.alpha,Is.EqualTo(state==DayState.Locked?DayCellView.LockedRewardAlpha:1f).Within(1e-4f)); Assert.That(reward.alpha,Is.GreaterThanOrEqualTo(.7f),state+" reward too faint");
+                    Assert.That(reward.fontSizeMin,Is.GreaterThanOrEqualTo(14)); Assert.That(cell.Root.Find("Reward card").gameObject.activeSelf,Is.True,state+" hides its reward");
+                    Assert.That(cell.Root.Find("State").GetComponent<Image>().preserveAspect,Is.True,"state sprite must fit its zone");
+                }
+        }
+        [Test] public void CheckInLockedCellsStillShowTheirRewardAmount()
+        {
+            var cell=new DayCellView(f,screen); cell.Render("Day 3","100",DayState.Locked,true);
+            Assert.That(cell.Root.Find("Reward card").gameObject.activeSelf,Is.True); Assert.That(cell.Root.Find("Reward card/Reward text").GetComponent<TMP_Text>().text,Is.EqualTo("100"));
         }
         [Test] public void QuestRowHasTwoLinesWithoutDuplicatedAmounts()
         {

@@ -40,7 +40,7 @@ namespace IndieGame.Shell.Unity.UI
             countdown.fontSize=26; countdown.fontSizeMax=26; countdown.fontSizeMin=18;
             var gear=factory.AppearanceImage(Root,"Shell Settings","gearButton"); gear.raycastTarget=true;
             Place(gear.rectTransform,new Vector2(.86f,0),new Vector2(.98f,1)); gear.rectTransform.offsetMin=new Vector2(0,10); gear.rectTransform.offsetMax=new Vector2(0,-10);
-            Settings=gear.gameObject.AddComponent<Button>(); Settings.targetGraphic=gear; Settings.transition=Selectable.Transition.None;
+            Settings=gear.gameObject.AddComponent<Button>(); Settings.targetGraphic=gear; Settings.transition=Selectable.Transition.None; factory.WithPressFeedback(Settings);
             Root.gameObject.SetActive(true);
         }
         internal static void Place(RectTransform r, Vector2 min, Vector2 max)

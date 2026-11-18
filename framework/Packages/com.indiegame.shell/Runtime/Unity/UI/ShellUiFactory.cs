@@ -100,6 +100,8 @@ namespace IndieGame.Shell.Unity.UI
             if(parent.GetComponent<PopupView>()==null && parent.parent!=null && parent.parent.GetComponentInParent<PopupView>(true)!=null) LocalizedLayout.PopupChild(r,false);
             r.gameObject.SetActive(true); return t;
         }
+        public Button WithPressFeedback(Button button)
+        { var f = button.gameObject.AddComponent<PressFeedback>(); f.Configure(Style); return button; }
         public Button Button(Transform parent, string text, ButtonRole role = ButtonRole.Primary, Action clicked = null)
         {
             var r = Node("Button " + role, parent); var b = role == ButtonRole.Secondary ? Style.Theme.Secondary : Style.Theme.Primary;
@@ -107,7 +109,7 @@ namespace IndieGame.Shell.Unity.UI
             var parentCategory=parent.GetComponent<LayoutCategory>();
             LayoutCategory.Record(r,parent.GetComponentInParent<PopupView>(true)!=null ? ShellLayoutCategory.PopupAction
                 : parentCategory!=null && parentCategory.Category==ShellLayoutCategory.Row ? ShellLayoutCategory.RowAction : ShellLayoutCategory.Standard); var image = r.gameObject.AddComponent<Image>(); image.type = UnityEngine.UI.Image.Type.Sliced; Bind(image, "button", role);
-            var button = r.gameObject.AddComponent<Button>(); button.targetGraphic = image; button.transition = Selectable.Transition.None;
+            var button = r.gameObject.AddComponent<Button>(); button.targetGraphic = image; button.transition = Selectable.Transition.None; WithPressFeedback(button);
             button.interactable = role != ButtonRole.Locked; if (clicked != null) button.onClick.AddListener(() => clicked());
             var label = Label(r, text); var binding = label.GetComponent<ShellAppearance>(); binding.Role = "buttonText"; binding.ButtonRole = role; binding.Apply(Style);
             label.fontSize = b.FontSize; LocalizedLayout.Text(label,b.FontSize);
@@ -124,14 +126,18 @@ namespace IndieGame.Shell.Unity.UI
                 image.raycastPadding=new Vector4(-padding,-padding,-padding,-padding);
             }
             var appearance=r.gameObject.AddComponent<ShellAppearance>(); appearance.Role="iconSurface"; appearance.IconKey=category==ShellLayoutCategory.IconButton?"_round":"_pill"; appearance.Apply(Style);
-            var b=r.gameObject.AddComponent<Button>(); b.targetGraphic=image; b.transition=Selectable.Transition.None;
+            var b=r.gameObject.AddComponent<Button>(); b.targetGraphic=image; b.transition=Selectable.Transition.None; WithPressFeedback(b);
             if(clicked!=null) b.onClick.AddListener(()=>clicked());
-            r.gameObject.AddComponent<ActionAccessibility>().Set(accessibilityKey??key,label);
-            var icon=AppearanceImage(r,"Icon "+key,"actionIcon",iconKey:key); icon.rectTransform.sizeDelta=GlyphSize(size);
-            if(amount!=null||secondIcon!=null) icon.rectTransform.anchoredPosition=new Vector2(-30,0);
+            bool hasIcon=!string.IsNullOrEmpty(key);
+            r.gameObject.AddComponent<ActionAccessibility>().Set(accessibilityKey??(hasIcon?key:"text"),label);
+            if(hasIcon) {
+                var icon=AppearanceImage(r,"Icon "+key,"actionIcon",iconKey:key); icon.rectTransform.sizeDelta=GlyphSize(size);
+                if(amount!=null||secondIcon!=null) icon.rectTransform.anchoredPosition=new Vector2(-30,0);
+            }
             if(secondIcon!=null) { var second=AppearanceImage(r,"Icon "+secondIcon,"actionIcon",iconKey:secondIcon); second.rectTransform.sizeDelta=GlyphSize(size); second.rectTransform.anchoredPosition=new Vector2(30,0); }
             if(amount!=null) {
-                var text=Label(r,amount,role:"chromeText"); text.rectTransform.anchorMin=text.rectTransform.anchorMax=new Vector2(.5f,.5f); text.rectTransform.sizeDelta=new Vector2(76,48); text.rectTransform.anchoredPosition=new Vector2(28,0);
+                var text=Label(r,amount,role:"chromeText"); text.rectTransform.anchorMin=text.rectTransform.anchorMax=new Vector2(.5f,.5f); text.rectTransform.sizeDelta=hasIcon?new Vector2(76,48):new Vector2(size.x-24,48); text.rectTransform.anchoredPosition=hasIcon?new Vector2(28,0):Vector2.zero;
+                if(!hasIcon) text.alignment=TextAlignmentOptions.Center;
                 text.fontSize=text.fontSizeMax=30; text.color=Style.ActionIconColor;
             }
             r.gameObject.SetActive(true); return b;
@@ -190,6 +196,7 @@ namespace IndieGame.Shell.Unity.UI
         {
             if (style == null) throw new InvalidOperationException("Missing style role: ShellStyle"); style.Validate(); Style = style;
             foreach (var binding in root.GetComponentsInChildren<ShellAppearance>(true)) binding.Apply(style);
+            foreach (var press in root.GetComponentsInChildren<PressFeedback>(true)) press.Configure(style);
             foreach (var view in root.GetComponentsInChildren<PopupView>(true)) { view.Motion = style.Theme.Motion; view.Configure(style); }
         }
     }

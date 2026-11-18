@@ -22,6 +22,14 @@ namespace IndieGame.Shell.Unity.UI
             public float PanelMinHeight, PanelMaxHeight;
         }
         public PopupLayoutTheme PopupLayout=new PopupLayoutTheme();
+        // Tab modals fit their rows; fractions are of the screen area above the tab bar.
+        [Serializable] public sealed class ModalLayoutTheme
+        {
+            public float WidthFraction=.894f, MinHeightFraction=.30f, MaxHeightFraction=.84f;
+        }
+        public ModalLayoutTheme Modal=new ModalLayoutTheme();
+        // Button press feedback: scale and colour multiplier while held, seconds to return.
+        public float PressScale=.94f, PressDarken=.88f, PressSeconds=.12f;
         // Sprite pixel rows [top,bottom) of the visible header band; zero keeps the full top border as the title area.
         public Vector2 PanelHeaderRows, MandatoryPanelHeaderRows;
         public Vector2 PopupHeaderRows(bool mandatory)=>mandatory&&MandatoryPanelSprite!=null?MandatoryPanelHeaderRows:PanelHeaderRows;
@@ -158,6 +166,10 @@ namespace IndieGame.Shell.Unity.UI
                 Require(TabCellBackground, nameof(TabCellBackground)); Require(TabCellSelectedBackground, nameof(TabCellSelectedBackground));
                 foreach (var key in new[] { "home", "checkin", "quests", "shop", "leaderboard" }) Require(TabIcon(key), "TabIcons." + key);
             }
+            if(Modal.WidthFraction<=0||Modal.WidthFraction>1||Modal.MinHeightFraction<=0||Modal.MaxHeightFraction>1||Modal.MinHeightFraction>Modal.MaxHeightFraction)
+                throw new InvalidOperationException("Invalid Modal layout: width (0,1], 0 < min <= max <= 1");
+            if(PressScale<=0||PressScale>1||PressDarken<=0||PressDarken>1||PressSeconds<=0)
+                throw new InvalidOperationException("Invalid press feedback: PressScale and PressDarken in (0,1], PressSeconds > 0");
             Require(Theme, "Theme"); Require(Theme.Font, "Theme.Font");
             Require(ScreenBackground, "ScreenBackground"); Require(CurrencyIcon, "CurrencyIcon");
             Require(HeartIcon, "HeartIcon"); Require(BoosterIcon, "BoosterIcon");

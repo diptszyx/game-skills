@@ -101,12 +101,14 @@ namespace IndieGame.Shell.Tests
                     var rect=(RectTransform)back.transform;
                     Assert.That(rect.anchorMin,Is.EqualTo(new Vector2(0,1))); Assert.That(rect.anchorMax,Is.EqualTo(new Vector2(0,1)));
                     Assert.That(rect.anchoredPosition,Is.EqualTo(new Vector2(16,-16)));
-                    foreach(var b in screens.Current.GetComponentsInChildren<Button>()) {
+                    foreach(var b in screens.Current.GetComponentsInChildren<Button>().Where(b=>b.GetComponent<ActionAccessibility>()?.Key!=DayCellView.AccessibilityKey)) {
                         var accessible=b.GetComponent<ActionAccessibility>();
                         Assert.That(accessible,Is.Not.Null,b.name); Assert.That(accessible.Label,Is.Not.Empty.And.Not.Contain("["));
                         Assert.That(b.name,Is.EqualTo(accessible.Label));
-                        Assert.That(b.GetComponentsInChildren<ShellAppearance>().Any(a=>a.Role=="actionIcon"),Is.True,b.name);
-                        Assert.That(b.GetComponentsInChildren<TMP_Text>().All(t=>long.TryParse(t.text,out _)),Is.True,b.name);
+                        bool hasIcon=b.GetComponentsInChildren<ShellAppearance>().Any(a=>a.Role=="actionIcon");
+                        var texts=b.GetComponentsInChildren<TMP_Text>();
+                        if(hasIcon) Assert.That(texts.All(t=>long.TryParse(t.text,out _)),Is.True,b.name);
+                        else Assert.That(texts.Any(t=>t.text.Any(char.IsDigit)),Is.True,b.name+" has neither an icon nor a price");
                         Assert.That(((RectTransform)b.transform).rect.size,Is.EqualTo(ShellUiFactory.IconSize(b.GetComponent<LayoutCategory>().Category)),b.name);
                     }
                 }

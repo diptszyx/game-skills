@@ -15,7 +15,7 @@ namespace IndieGame.Shell.Tests
         CheckInView CheckIn(out CheckInPresenter p) { var v=new CheckInView(f,root.transform); p=new CheckInPresenter(session,v,text,clock); owned.Add(p); return v; }
         [Test] public void CheckInSnapshotMatchesClaim()
         {
-            var v=CheckIn(out var p); var preview=session.DailyCheckIn.Preview(); Assert.That(v.Snapshot.Rows.Count,Is.EqualTo(5));
+            var v=CheckIn(out var p); var preview=session.DailyCheckIn.Preview(); Assert.That(v.Snapshot.Rows.Count,Is.EqualTo(CheckInPack.Days));
             Assert.That(v.Snapshot.Rows[preview.NextSlot].Text,Does.Contain(preview.Reward.Gold.ToString()));
             Assert.That(v.Snapshot.Rows.Count(r=>r.Enabled),Is.EqualTo(1)); v.RequestClaim();
             Assert.That(session.Economy.Gold,Is.EqualTo(100+preview.Reward.Gold)); Assert.That(v.Snapshot.Rows.Any(r=>r.Enabled),Is.False);

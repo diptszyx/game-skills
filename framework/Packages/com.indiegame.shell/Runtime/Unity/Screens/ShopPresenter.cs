@@ -17,11 +17,15 @@ namespace IndieGame.Shell.Unity.Screens
         public void Refresh()
         {
             language=session.Settings.Language; view.SetCloseName(text.Get("shell.close")); var rows=new List<RowDisplay>();
-            foreach(var p in shop.Catalog.Products) rows.Add(new RowDisplay(p.Id,text.Get(p.TitleKey),text.Get("shell.buy"),!busy,icon:"coin",
-                amount:p.PriceKind==PriceKind.Gold?p.Price.ToString(System.Globalization.CultureInfo.InvariantCulture):null,
-                detail:p.PriceKind==PriceKind.Gold?text.RewardShort(p.Reward):text.RewardShort(p.Reward)+" · "+text.Get("shell.price.iap")));
+            foreach(var p in shop.Catalog.Products) rows.Add(Row(p));
             view.Render(new ListDisplay(text.Get("shell.shop.title"),rows,text.Get("shell.shop.empty")));
         }
+        RowDisplay Row(Product p)
+        {
+            bool gold=p.PriceKind==PriceKind.Gold;
+            return new RowDisplay(p.Id,text.Get(p.TitleKey),text.Get("shell.buy"),!busy,icon:gold?"coin":"",amount:gold?p.Price.ToString(Invariant):text.Get("shell.price.iap",(p.Price/100m).ToString("0.00",Invariant)),detail:text.RewardShort(p.Reward));
+        }
+        static readonly System.Globalization.CultureInfo Invariant=System.Globalization.CultureInfo.InvariantCulture;
         void Buy(string id)
         {
             if(busy) return; busy=true;

@@ -18,7 +18,7 @@ namespace IndieGame.Shell.Tests
     {
         public static ShellSession Session(ScreenClock clock,ScreenFiles files,bool empty=false)
         {
-            var row=Enumerable.Repeat(new Reward(25,1),5).ToArray();
+            var row=Enumerable.Repeat(new Reward(25,1),CheckInPack.Days).ToArray();
             return new ShellSession(new SaveStore(fileSystem:files),"screen.json",clock,new LivesConfig(5,1,TimeSpan.FromSeconds(30)),new EconomyConfig(100),
                 new DailyCheckInConfig(new[]{row,row}),new DailyQuestsConfig(empty?Array.Empty<QuestTemplate>():new[]{new QuestTemplate("q","event",2,new Reward(7))},empty?0:1),
                 new SettingsConfig(true,true,true,"en",new[]{"en","vi"}),new RemoteConfigRules(new RemoteConfig(1,60),1000,1,3600));
@@ -31,7 +31,7 @@ namespace IndieGame.Shell.Tests
                 {"shell.claim","Claim"},{"shell.gold","Gold {0}"},{"shell.hearts","Hearts {0}"},{"shell.reward","{0}"},{"shell.separator",", "},
                 {"shell.reward.unavailable","Unavailable"},{"shell.quests.title","Quests"},{"shell.quests.empty","No quests"},{"shell.quest.q","Quest"},{"shell.quest.win1","Win 1"},{"shell.quest.win3","Win 3"},{"shell.quest.win5","Win 5"},{"shell.quest.play3","Play 3"},{"shell.quest.play5","Play 5"},{"shell.quest.row","{0} {1}/{2} {3}"},
                 {"shell.main.title","Main"},{"shell.play","Play"},{"shell.lives.full","Full"},{"shell.lives.countdown","Full in {0}s"},
-                {"shell.shop.title","Shop"},{"shell.shop.empty","No products"},{"shell.product.p","Product"},{"shell.shop.row","{0} {1} {2}"},{"shell.price.iap","Purchase"},{"shell.buy","Buy"},
+                {"shell.shop.title","Shop"},{"shell.shop.empty","No products"},{"shell.product.p","Product"},{"shell.product.hearts","Hearts"},{"shell.product.gold_s","Small"},{"shell.product.gold_m","Medium"},{"shell.product.gold_l","Large"},{"shell.shop.row","{0} {1} {2}"},{"shell.price.iap","${0}"},{"shell.buy","Buy"},
                 {"shell.error.title","Error"},{"shell.error.commit","Save failed: {0} {1}"},{"shell.error.None",""},{"shell.error.Io","Storage error"},
                 {"shell.error.PurchaseFailed","Purchase failed"},{"shell.error.Cancelled","Cancelled"},{"shell.error.Incomplete","Incomplete"} };
             foreach(var kind in new[]{"win","lose","revive","pause","leave"}) { table["popup."+kind+".title"]=kind; table["popup."+kind+".body"]=kind; }
@@ -41,7 +41,7 @@ namespace IndieGame.Shell.Tests
             table["shell.retrySave"]="Retry save"; table["shell.on"]="On"; table["shell.off"]="Off"; table["popup.revive.price"]="Gold {0}";
             table["shell.loading.tip"]="Tip"; table["shell.refresh"]="Refresh"; table["shell.leaderboard.title"]="Leaderboard";
             table["shell.leaderboard.row"]="{0} {1} {2}"; table["shell.leaderboard.mine"]="My rank {0} {1}";
-            table["shell.leaderboard.loading"]="Loading"; table["shell.leaderboard.empty"]="Empty";
+            table["shell.leaderboard.loading"]="Loading"; table["shell.leaderboard.mine.unranked"]="Best {0}"; table["shell.leaderboard.offline"]="Offline"; table["shell.leaderboard.empty"]="Empty";
             table["shell.home"]="Home"; table["shell.back"]="Back";
             var l=new LocalizationService(new LocalizationConfig("en")); l.LoadLayeredTable("vi",UnityEngine.Resources.Load<UnityEngine.TextAsset>("ShellLocalization/vi").text,"{}"); l.LoadLayeredTable("en",UnityEngine.Resources.Load<UnityEngine.TextAsset>("ShellLocalization/en").text,"{"+string.Join(",",table.Select(p=>"\""+p.Key+"\":\""+p.Value+"\""))+"}"); return l;
         }
