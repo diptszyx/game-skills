@@ -66,6 +66,15 @@ namespace IndieGame.Shell.Tests
             }
             for(int i=1;i<5;i++) Assert.That(cells[i].xMin,Is.GreaterThanOrEqualTo(cells[i-1].xMax));
         }
+        [Test] public void DayCellShowsTheCurrencyIconOnlyForGoldOnlyRewards()
+        {
+            var cell=new DayCellView(f,screen);
+            var icon=cell.Root.GetComponentsInChildren<ShellAppearance>(true).First(a=>a.Role=="currencyIcon");
+            cell.Render("Day 1","25",DayState.Today,true);
+            Assert.That(icon.gameObject.activeSelf,Is.True,"gold-only reward shows the coin icon");
+            cell.Render("Day 1","Gold 25, Heart 1",DayState.Today,false);
+            Assert.That(icon.gameObject.activeSelf,Is.False,"mixed reward keeps the text");
+        }
         [Test] public void CheckInClaimIsLargeBelowCellsAndClearOfTheBear()
         {
             var view=new CheckInView(f,screen); var p=new CheckInPresenter(session,view,text,clock); owned.Add(p);

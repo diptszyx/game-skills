@@ -62,6 +62,20 @@ namespace IndieGame.Shell.Tests
             app.ShowGame(); Assert.That(app.Screens.Current,Is.SameAs(app.GameRoot));
             app.ShowMain(); Assert.That(app.Screens.Current,Is.SameAs(app.Main.Root));
         }
+        [UnityTest] public IEnumerator HomeStageIsBuiltOnceInsideMainAndStaysBehindItsContent()
+        {
+            int calls=0;
+            config.HomeStageFactory=c=>{ calls++; var s=ShellUiFactory.Node("Fake stage",c.Parent); s.sizeDelta=new Vector2(100,200); s.gameObject.SetActive(true); return s; };
+            yield return Boot();
+            Assert.That(calls,Is.EqualTo(1)); Assert.That(app.HomeStage.parent.parent,Is.SameAs(app.Main.Root)); Assert.That(app.HomeStage.parent.GetSiblingIndex(),Is.EqualTo(0));
+            app.ShowGame(); Assert.That(app.HomeStage.gameObject.activeInHierarchy,Is.False);
+            app.ShowMain(); Assert.That(app.HomeStage.gameObject.activeInHierarchy,Is.True); Assert.That(calls,Is.EqualTo(1));
+        }
+        [UnityTest] public IEnumerator NoHomeStageFactoryLeavesMainUnchanged()
+        {
+            yield return Boot();
+            Assert.That(app.HomeStage,Is.Null); Assert.That(app.Main.Root.Find(HomeStageBuilder.HolderName),Is.Null);
+        }
         static int Count<T>() where T:UnityEngine.Object =>UnityEngine.Object.FindObjectsByType<T>(FindObjectsInactive.Include,FindObjectsSortMode.None).Length;
         [TearDown] public void Cleanup()
         {

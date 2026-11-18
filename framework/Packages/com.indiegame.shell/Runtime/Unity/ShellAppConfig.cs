@@ -22,6 +22,12 @@ namespace IndieGame.Shell.Unity
         public Action<ShellScreen> Navigate { get; internal set; }
         public Action ShowMain { get; internal set; }
     }
+    public sealed class HomeStageContext
+    {
+        public ShellUiFactory Factory { get; internal set; }
+        public ShellStyle Style { get; internal set; }
+        public RectTransform Parent { get; internal set; }
+    }
     public sealed class ShellAppConfig
     {
         public ShellStyle Style;
@@ -48,6 +54,8 @@ namespace IndieGame.Shell.Unity
         public int LeaderboardRows = 10;
         public IDictionary<string,AudioClip> Sounds;
         public Func<ShellGameContext,RectTransform> GameScreenFactory;
+        // Optional. Builds game decoration for Home; see HomeStageBuilder for the placement and fit contract.
+        public Func<HomeStageContext,RectTransform> HomeStageFactory;
         public static ShellAppConfig Standard(ShellGameConfig game, ShellStyle style,
             IReadOnlyDictionary<string,TextAsset> languageTables, IGameSessionActions actions,
             Func<ShellGameContext,RectTransform> gameScreen, string savePath, DailyQuestsConfig quests = null)

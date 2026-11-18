@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- New optional `ShellAppConfig.HomeStageFactory` (`Func<HomeStageContext,RectTransform>`): lets a game place animated characters or props on Home. `HomeStageBuilder` creates the stage once as the first child of Main (above the screen background, below Main content, the tab bar and every popup including tab modals), blocks no raycasts and scales the design-sized stage to Main with the same stretch the screen background uses, so layers stay registered to the picture at every aspect ratio. `ShellApp.HomeStage` exposes it; a null factory changes nothing.
 - Bottom-tab screens (Check-in, Quests, Shop, Leaderboard) open as modals over Home through the shared `PopupHost`/`PopupView` (new `TabModals`), matching the original Hole It! UI: dim scrim, centred panel with the popup title zone and close X, tab bar left visible and clickable (the scrim stops above it), active tab highlighted, Home stays behind. Back/Escape closes one layer; a session popup above a tab popup closes first.
 - New `ShellStyle.TabsAsModals` (default true; only effective with `EnableHomeChrome`). Set false to keep flat full-screen pages with a Back button.
 - Swipe now switches the open tab modal to its neighbour (and past the first tab returns Home). Tab popups carry their own `TabSwipeHandler`; `SwipeForwarder` on list scrolls forwards drags the `ScrollRect` would swallow (also fixes swipe over lists in page mode).

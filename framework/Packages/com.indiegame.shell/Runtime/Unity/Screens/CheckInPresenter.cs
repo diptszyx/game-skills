@@ -23,17 +23,18 @@ namespace IndieGame.Shell.Unity.Screens
             view.Render(new ListDisplay(text.Get("shell.checkin.title"),rows));
             if(view.UsesDayCells)
             {
-            var labels=new string[5]; var rewards=new string[5]; var states=new DayState[5];
+            var labels=new string[5]; var rewards=new string[5]; var states=new DayState[5]; var goldOnly=new bool[5];
             // NextSlot advances immediately after a claim and wraps modulo five. At wrap,
             // retain the completed cycle until the next UTC day becomes claimable.
             int collected=p.NextSlot==0 && p.Error==DailyError.AlreadyClaimed?5:p.NextSlot;
             for(int i=0;i<5;i++)
             {
                 labels[i]=text.Get("shell.checkin.day",i+1);
-                rewards[i]=i==p.NextSlot?text.Reward(p.Reward):"";
+                goldOnly[i]=i==p.NextSlot && p.Reward!=null && p.Reward.Gold>0 && p.Reward.Hearts==0 && p.Reward.Boosters.Count==0;
+                rewards[i]=i!=p.NextSlot?"":goldOnly[i]?p.Reward.Gold.ToString(System.Globalization.CultureInfo.InvariantCulture):text.Reward(p.Reward);
                 states[i]=i<collected?DayState.Collected:i==p.NextSlot&&p.CanClaimNow?DayState.Today:DayState.Locked;
             }
-            view.RenderDays(labels,rewards,states);
+            view.RenderDays(labels,rewards,states,goldOnly);
             }
             if(!p.Success) view.ShowError(text.Get("shell.error."+p.Error));
         }

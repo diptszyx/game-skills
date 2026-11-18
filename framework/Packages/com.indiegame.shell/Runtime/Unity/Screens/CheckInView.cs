@@ -43,8 +43,8 @@ namespace IndieGame.Shell.Unity.Screens
         public void Render(ListDisplay display) { Snapshot=display; if(surface!=null) surface.Render(new ListDisplay(display.Title,System.Linq.Enumerable.ToArray(System.Linq.Enumerable.Select(display.Rows,r=>new RowDisplay(r.Id,r.Text,r.Action,r.Enabled,r.Progress,"gift"))),display.Empty),_=>RequestClaim());
             else { heading.text=display.Title; claim.GetComponent<ActionAccessibility>().Set("gift",System.Linq.Enumerable.First(display.Rows,r=>!string.IsNullOrEmpty(r.Action)).Action); claim.interactable=false;
                 foreach(var row in display.Rows) if(row.Enabled) { claim.interactable=true; break; } } }
-        public void RenderDays(string[] labels,string[] rewards,DayState[] states)
-        { if(cells!=null) for(int i=0;i<cells.Length;i++) cells[i].Render(labels[i],rewards[i],states[i]); }
+        public void RenderDays(string[] labels,string[] rewards,DayState[] states,bool[] goldOnly=null)
+        { if(cells!=null) for(int i=0;i<cells.Length;i++) cells[i].Render(labels[i],rewards[i],states[i],goldOnly!=null && goldOnly[i]); }
         public void RequestClaim() { if(Snapshot!=null) foreach(var r in Snapshot.Rows) if(r.Enabled) { ClaimRequested?.Invoke(); break; } }
         public void ShowError(string error) { Error=error; if(surface!=null) surface.Error(error); else this.error.text=error; }
     }

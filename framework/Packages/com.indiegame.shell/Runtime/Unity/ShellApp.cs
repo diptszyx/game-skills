@@ -21,6 +21,7 @@ namespace IndieGame.Shell.Unity
         public PopupHost Popups { get; private set; }
         public SessionPopupPresenter Flow { get; private set; }
         public MainView Main { get; private set; }
+        public RectTransform HomeStage { get; private set; }
         public RectTransform GameRoot { get; private set; }
         public GameHudView GameHud { get; private set; }
         public IAudioService Audio { get; private set; }
@@ -93,6 +94,7 @@ namespace IndieGame.Shell.Unity
                     lifetime.Entered+=RefreshPauseName; lifetime.Ticked+=RefreshPauseName;
                 }
                 Main=new MainView(factory,Screens.SafeRoot);
+                if(config.HomeStageFactory!=null) HomeStage=HomeStageBuilder.Create(Main.Root,factory,config.HomeStageFactory);
                 MainPresenter=new MainPresenter(Session,Main,Text,clock,actions,Navigate,config.PlayLabel); owned.Add(MainPresenter);
                 if(config.Style.EnableHomeChrome) owned.Add(new ChromePresenter(Session,Text,clock,factory,Screens,Main.Root,GameRoot,ShowMain,Navigate,()=>{ if(!Ready || Popups.Top!=null) return; if(Screens.Current==GameRoot) Flow.ShowPause(); else Flow.ShowSettings(); },error=>ErrorLabel.text=error,tabModals));
                 Screens.Show(Main.Root);

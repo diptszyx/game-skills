@@ -19,6 +19,9 @@ Updated 2026-11-17. Tool state: commit 0280c9d on origin/main. Gates green: shel
 3. Run EditMode, PlayMode, and the capture test pattern from `game-2-v2/Assets/Tests/PlayMode/PilotScreenCaptureTests.cs` (screenshots both ratios, both languages; assertions on overlap, size consistency, structure).
 4. Real ads later: AdMob test ids first (`AdMobAdsSettings.TestRewarded`), real unit id and App ID from the dev lead.
 
+## Tab screens
+With home chrome (tab bar) the four tab screens open as popups over Home by default (`ShellStyle.TabsAsModals = true`). Do not build your own; Home stays behind, the tab bar stays visible, Back/Escape/scrim/X close it, tab taps or a horizontal swipe switch to the neighbouring tab modal (Home tab or swiping past the first tab closes it). Set `TabsAsModals = false` for flat pages with a Back button. Panel art comes from the style's popup panel sprite (`Theme.PanelSprite`, `PanelHeaderRows`).
+
 ## Known limits (not blockers)
 - Flat style without home chrome (game-2-v2 `PilotStyle`) shows the shell's nav icons stacked with no labels; chrome styles (tab bar) are fine.
 - Real leaderboard and real ads are unverified on device beyond the Google test ad.
@@ -31,3 +34,5 @@ Read `game-skills/skills/using-game-shell/SKILL.md` and `game-skills/docs/ADOPT_
 ## Popup art kits (0.2.0)
 Set the panel sprite's top 9-slice border to cover its title header (including the rim). The shell centres the title within that rendered border when it fits the font's minimum line height; unusable or absent borders keep the legacy 104/8 geometry. Set TitleColor and TitleTextRegion to validate contrast over the actual header; sampling regions do not position text.
 Supply ShellStyle.RoundButtonSprite for Simple round controls and PillButtonSprite for Sliced action pills. Null uses procedural defaults. Custom button surfaces render white; ActionSurfaceColor tints fallback shapes and ActionIconColor tints glyphs. One to three icon actions share an equal-size centred row; labelled actions and larger sets stack. Lower popups stay hidden until they return to the top.
+
+Optional Home decoration: set `config.HomeStageFactory = ctx => ...` to place animated characters or props on Home. Return a stage `RectTransform` whose `sizeDelta` is the design size of the `ScreenBackground` picture and position children in that design space (centre pivot); the shell registers it to the background at every aspect ratio, keeps it behind the Home content, tab bar and popups, and disables raycasts. Example: `game-5/unity/HoleItClone/Assets/Scripts/ShellApp/ForestHomeStage.cs`. If the style's `ScreenColor` tints the background, tint the layers with `ctx.Style.ScreenColor` too.
