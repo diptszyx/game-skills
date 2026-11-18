@@ -23,7 +23,8 @@ namespace IndieGame.Shell.Unity.Screens
         {
             this.factory=factory; surface=new ListSurface(factory,parent,"Leaderboard");
             refresh=factory.IconButton(Root,"refresh","Refresh",()=>RefreshRequested?.Invoke());
-            var rect=(RectTransform)refresh.transform; rect.anchorMin=rect.anchorMax=new Vector2(1,1); rect.pivot=new Vector2(1,1); rect.anchoredPosition=ShellLayout.Standard.HeaderRightPosition;
+            var rect=(RectTransform)refresh.transform; if(ScreenWidgets.HidesTitle(factory.Style)) { rect.anchorMin=rect.anchorMax=new Vector2(1,0); rect.pivot=new Vector2(1,0); rect.anchoredPosition=new Vector2(-16,180); }
+            else { rect.anchorMin=rect.anchorMax=new Vector2(1,1); rect.pivot=new Vector2(1,1); rect.anchoredPosition=ShellLayout.Standard.HeaderRightPosition; }
         }
         public void Render(LeaderboardSnapshot snapshot, ScreenText text)
         {

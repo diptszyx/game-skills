@@ -21,6 +21,10 @@ namespace IndieGame.Shell.Unity.UI
         public Vector2 Row => new Vector2(600,120);
         public Vector2 CloseHit => Vector2.one*IconHitSize;
         public Vector2 CloseHitPosition => new Vector2(-36,-40);
+        public float IconGlyphFraction => .6f;
+        public float TitleInset => 4;
+        public float TitleSideMargin => 48;
+        public Vector2 CloseDrawnPosition(float size) => new Vector2(-size/2,-size/2);
         public float BackBottomOffset(bool homeChrome) => homeChrome ? 200 : 68;
     }
 }

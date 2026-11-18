@@ -17,6 +17,11 @@ namespace IndieGame.Shell.Unity.Screens
             foreach(var item in reward.Boosters) items.Add(Get("shell.booster",Get("shell.booster."+item.Key),item.Value));
             return Get("shell.reward",string.Join(Get("shell.separator"),items));
         }
+        public string RewardShort(Reward reward)
+        {
+            if(reward==null || reward.Gold<=0 || reward.Hearts>0 || reward.Boosters.Count>0) return Reward(reward);
+            return "+"+reward.Gold.ToString(System.Globalization.CultureInfo.InvariantCulture);
+        }
         internal string CommitError(SessionResult result)
         {
             var codes=new List<string>(); foreach(var item in result.ModuleErrors) codes.Add(Get("shell.error."+item.Value));

@@ -34,23 +34,31 @@ namespace IndieGame.Shell.Unity.Localization
             rect.anchorMax=new Vector2(action?.64f:1,1);
             rect.offsetMin=new Vector2(12,8); rect.offsetMax=new Vector2(-8,-8);
         }
-        internal static float Popup(RectTransform panel, RectTransform heading, RectTransform content)
+        internal static float Popup(RectTransform panel, RectTransform heading, RectTransform content, Vector2 headerRows=default, float sideMargin=0)
         {
             var image=panel.GetComponent<Image>();
             var sprite=image!=null?image.sprite:null;
-            float band=0;
+            float band=0, headerTop=0, headerHeight=0;
             if(sprite!=null && sprite.border.w>0 && sprite.border.w<sprite.rect.height)
             {
                 float units=image.pixelsPerUnit*image.pixelsPerUnitMultiplier;
                 float vertical=(sprite.border.y+sprite.border.w)/units;
-                band=sprite.border.w/units*Mathf.Min(1,panel.rect.height/vertical);
+                float fit=Mathf.Min(1,panel.rect.height/vertical);
+                band=sprite.border.w/units*fit;
+                if(headerRows.y>headerRows.x) {
+                    float inset=ShellLayout.Standard.TitleInset;
+                    headerTop=headerRows.x/units*fit+inset; headerHeight=(headerRows.y-headerRows.x)/units*fit-2*inset;
+                }
             }
             var title=heading.GetComponent<TMP_Text>();
-            bool derived=title!=null && band>=MinTitleHeight(title);
+            bool framed=title!=null && headerHeight>=MinTitleHeight(title);
+            bool derived=framed || (title!=null && band>=MinTitleHeight(title));
             if(!derived) band=PopupHeadingBand;
+            if(!framed) { headerTop=0; headerHeight=band; }
             float contentTop=band+28;
+            float side=Mathf.Max(ShellLayout.Standard.TitleSideMargin,sideMargin);
             heading.anchorMin=heading.anchorMax=new Vector2(.5f,1);
-            heading.pivot=new Vector2(.5f,1); heading.anchoredPosition=Vector2.zero; heading.sizeDelta=new Vector2(panel.rect.width-48,band);
+            heading.pivot=new Vector2(.5f,1); heading.anchoredPosition=new Vector2(0,-headerTop); heading.sizeDelta=new Vector2(panel.rect.width-2*side,headerHeight);
             if(title!=null) { title.alignment=derived?TextAlignmentOptions.Center:TextAlignmentOptions.Top; title.margin=new Vector4(0,derived?0:8,0,0); }
             if(content==null) return contentTop;
             content.anchorMin=Vector2.zero; content.anchorMax=Vector2.one; content.pivot=new Vector2(.5f,1);

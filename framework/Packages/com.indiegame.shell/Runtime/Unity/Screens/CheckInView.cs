@@ -7,6 +7,7 @@ namespace IndieGame.Shell.Unity.Screens
 {
     public sealed class CheckInView
     {
+        internal const float CellsMargin=.035f, CellWidth=.17f, CellStep=.19f, CellsBottom=.21f, CellsTop=.31f, ClaimCenterY=.17f;
         readonly ListSurface surface;
         readonly RectTransform homeRoot; readonly ScreenLifetime homeLifetime;
         readonly DayCellView[] cells; readonly Button claim; readonly TMP_Text heading,error;
@@ -19,18 +20,18 @@ namespace IndieGame.Shell.Unity.Screens
         public CheckInView(ShellUiFactory factory, Transform parent) {
             if(!factory.Style.EnableHomeChrome) { surface=new ListSurface(factory,parent,"CheckIn"); return; }
             homeRoot=factory.ScreenRoot(parent,"CheckIn"); homeLifetime=homeRoot.gameObject.AddComponent<ScreenLifetime>();
-            var content=ShellUiFactory.Node("Check-in content",homeRoot); ShellUiFactory.Stretch(content);
-            content.offsetMin=new Vector2(24,240); content.offsetMax=new Vector2(-24,-110); content.gameObject.SetActive(true);
-            heading=factory.Label(content,"",true,"screenTitle"); TopBarView.Place(heading.rectTransform,new Vector2(0,.82f),Vector2.one);
+            var content=ShellUiFactory.Node("Check-in content",homeRoot); ShellUiFactory.Stretch(content); content.gameObject.SetActive(true);
+            heading=factory.Label(content,"",true,"screenTitle"); TopBarView.Place(heading.rectTransform,new Vector2(0,.82f),new Vector2(1,.90f));
+            if(ScreenWidgets.HidesTitle(factory.Style)) heading.gameObject.SetActive(false);
             cells=new DayCellView[5];
             for(int i=0;i<5;i++)
             {
-                cells[i]=new DayCellView(factory,content); int col=i<3?i:i-3;
-                float shift=i<3?0f:.165f; TopBarView.Place(cells[i].Root,new Vector2(.02f+col*.33f+shift,i<3?.49f:.20f),new Vector2(.31f+col*.33f+shift,i<3?.78f:.49f));
+                cells[i]=new DayCellView(factory,content); float left=CellsMargin+i*CellStep;
+                TopBarView.Place(cells[i].Root,new Vector2(left,CellsBottom),new Vector2(left+CellWidth,CellsTop));
             }
             claim=factory.IconButton(content,"gift","Claim",RequestClaim,ShellLayoutCategory.IconAction);
-            var claimRect=(RectTransform)claim.transform; claimRect.anchorMin=claimRect.anchorMax=new Vector2(.5f,.1f);
-            error=factory.Label(content,""); TopBarView.Place(error.rectTransform,Vector2.zero,new Vector2(1,.05f));
+            var claimRect=(RectTransform)claim.transform; claimRect.anchorMin=claimRect.anchorMax=new Vector2(.5f,ClaimCenterY);
+            error=factory.Label(content,""); TopBarView.Place(error.rectTransform,new Vector2(.04f,.105f),new Vector2(.96f,.15f));
         }
         public void Render(ListDisplay display) { Snapshot=display; if(surface!=null) surface.Render(new ListDisplay(display.Title,System.Linq.Enumerable.ToArray(System.Linq.Enumerable.Select(display.Rows,r=>new RowDisplay(r.Id,r.Text,r.Action,r.Enabled,r.Progress,"gift"))),display.Empty),_=>RequestClaim());
             else { heading.text=display.Title; claim.GetComponent<ActionAccessibility>().Set("gift",System.Linq.Enumerable.First(display.Rows,r=>!string.IsNullOrEmpty(r.Action)).Action); claim.interactable=false;

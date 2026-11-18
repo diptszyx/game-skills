@@ -127,15 +127,17 @@ namespace IndieGame.Shell.Unity.UI
             var b=r.gameObject.AddComponent<Button>(); b.targetGraphic=image; b.transition=Selectable.Transition.None;
             if(clicked!=null) b.onClick.AddListener(()=>clicked());
             r.gameObject.AddComponent<ActionAccessibility>().Set(accessibilityKey??key,label);
-            var icon=AppearanceImage(r,"Icon "+key,"actionIcon",iconKey:key); icon.rectTransform.sizeDelta=new Vector2(44,44);
+            var icon=AppearanceImage(r,"Icon "+key,"actionIcon",iconKey:key); icon.rectTransform.sizeDelta=GlyphSize(size);
             if(amount!=null||secondIcon!=null) icon.rectTransform.anchoredPosition=new Vector2(-30,0);
-            if(secondIcon!=null) { var second=AppearanceImage(r,"Icon "+secondIcon,"actionIcon",iconKey:secondIcon); second.rectTransform.sizeDelta=new Vector2(40,40); second.rectTransform.anchoredPosition=new Vector2(30,0); }
+            if(secondIcon!=null) { var second=AppearanceImage(r,"Icon "+secondIcon,"actionIcon",iconKey:secondIcon); second.rectTransform.sizeDelta=GlyphSize(size); second.rectTransform.anchoredPosition=new Vector2(30,0); }
             if(amount!=null) {
                 var text=Label(r,amount,role:"chromeText"); text.rectTransform.anchorMin=text.rectTransform.anchorMax=new Vector2(.5f,.5f); text.rectTransform.sizeDelta=new Vector2(76,48); text.rectTransform.anchoredPosition=new Vector2(28,0);
                 text.fontSize=text.fontSizeMax=30; text.color=Style.ActionIconColor;
             }
             r.gameObject.SetActive(true); return b;
         }
+        public static Vector2 GlyphSize(Vector2 button)
+        { return Vector2.one*Mathf.Round(Mathf.Min(button.x,button.y)*ShellLayout.Standard.IconGlyphFraction); }
         public static Vector2 IconSize(ShellLayoutCategory category)
         { return category==ShellLayoutCategory.IconButton?ShellLayout.Standard.IconButton:category==ShellLayoutCategory.IconAmount?ShellLayout.Standard.IconAmount:ShellLayout.Standard.IconAction; }
         public void SetIcon(Button button,string key,string label)
@@ -180,7 +182,6 @@ namespace IndieGame.Shell.Unity.UI
             RectTransform slot = null;
             if (contentSlot) { slot = Node("Content", panel); slot.sizeDelta = Style.Theme.BodySize; slot.gameObject.SetActive(true); }
             var view = r.gameObject.AddComponent<PopupView>(); view.Initialize(group, panel, slot, Style.Theme.Motion); view.CloseButton=closeButton; view.Configure(Style);
-            LocalizedLayout.Popup(panel,heading.rectTransform,slot);
             scrim.onClick.AddListener(() => view.RequestDismiss()); closeButton.onClick.AddListener(() => view.RequestDismiss()); panel.gameObject.SetActive(true);
             // Remains inactive until a host owns it.
             return view;

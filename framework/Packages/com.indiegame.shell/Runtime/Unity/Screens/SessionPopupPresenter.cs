@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.UI;
 namespace IndieGame.Shell.Unity.Screens
 {
-    public enum SessionPopupKind { Win, Lose, Revive, Pause, Leave }
+    public enum SessionPopupKind { Win, Lose, Revive, Pause, Leave, Settings }
     public sealed class SessionPopupConfig
     {
         public Reward WinReward { get; }
@@ -31,6 +31,7 @@ namespace IndieGame.Shell.Unity.Screens
         public PopupView View { get; internal set; }
         public readonly Dictionary<string,Button> Buttons=new Dictionary<string,Button>();
         public TMP_Text ErrorLabel { get; internal set; }
+        internal TMP_Text Title, Body;
         public string Error { get; internal set; }
         internal bool AdPending, Exited;
     }
@@ -61,6 +62,8 @@ namespace IndieGame.Shell.Unity.Screens
             if(!paused) { priorScale=Time.timeScale; paused=true; game.Pause(); Time.timeScale=0; }
             Save(Open(SessionPopupKind.Pause));
         }
+        public void ShowSettings()=>Open(SessionPopupKind.Settings);
+        static bool HasSettingsControls(SessionPopupKind kind)=>kind==SessionPopupKind.Pause||kind==SessionPopupKind.Settings;
         public void ShowLeave() { if(!paused) ShowPause(); Open(SessionPopupKind.Leave); }
         SessionPopupContent Open(SessionPopupKind kind)
         {
@@ -70,25 +73,26 @@ namespace IndieGame.Shell.Unity.Screens
             consumed.Remove(kind);
             var p=new SessionPopupContent { View=factory.PopupFrame(host.transform,text.Get("popup."+kind.ToString().ToLowerInvariant()+".title"),closeLabel:text.Get("shell.close")) };
             popups[kind]=p;
-            p.View.Policy=kind==SessionPopupKind.Pause||kind==SessionPopupKind.Leave?DismissalPolicy.Dismissible:DismissalPolicy.Mandatory;
+            p.View.Policy=HasSettingsControls(kind)||kind==SessionPopupKind.Leave?DismissalPolicy.Dismissible:DismissalPolicy.Mandatory;
             p.View.FitContent=true;
 
             var layout=p.View.Content.gameObject.AddComponent<VerticalLayoutGroup>(); layout.childControlHeight=false; layout.childForceExpandHeight=false; layout.childControlWidth=false; layout.childForceExpandWidth=false; layout.childAlignment=TextAnchor.MiddleCenter; layout.spacing=factory.Style.Spacing;
-            factory.Label(p.View.Content,text.Get("popup."+kind.ToString().ToLowerInvariant()+".body"),role:"popupText");
+            p.Body=factory.Label(p.View.Content,text.Get("popup."+kind.ToString().ToLowerInvariant()+".body"),role:"popupText");
+            p.Title=p.View.Panel.Find("Title").GetComponent<TMP_Text>();
             if(kind==SessionPopupKind.Win) factory.Label(p.View.Content,text.Reward(config.WinReward),role:"popupText");
             if(kind==SessionPopupKind.Revive) factory.Label(p.View.Content,text.Get("popup.revive.price",config.ReviveGold),role:"popupText");
             Transform toggleRow=null;
-            if(kind==SessionPopupKind.Pause) {
+            if(HasSettingsControls(kind)) {
                 var row=ShellUiFactory.Node("Settings icons",p.View.Content); row.sizeDelta=new Vector2(ShellLayout.Standard.ToggleRowWidth,ShellLayout.Standard.IconHitSize);
                 var element=row.gameObject.AddComponent<LayoutElement>(); element.preferredHeight=ShellLayout.Standard.IconHitSize;
                 row.gameObject.SetActive(true); toggleRow=row;
             }
-            string[] actions=kind==SessionPopupKind.Win?new[]{"next","double"}:kind==SessionPopupKind.Lose?new[]{"retry","revive"}:kind==SessionPopupKind.Revive?new[]{"ad","gold"}:kind==SessionPopupKind.Pause?new[]{"sound","music","haptics","resume","leave"}:new[]{"confirm","cancel"};
+            string[] actions=kind==SessionPopupKind.Win?new[]{"next","double"}:kind==SessionPopupKind.Lose?new[]{"retry","revive"}:kind==SessionPopupKind.Revive?new[]{"ad","gold"}:kind==SessionPopupKind.Pause?new[]{"sound","music","haptics","resume","leave"}:kind==SessionPopupKind.Settings?new[]{"sound","music","haptics","language"}:new[]{"confirm","cancel"};
             foreach(var action in actions)
             {
                 var captured=action;
-                bool toggle=kind==SessionPopupKind.Pause&&(action=="sound"||action=="music"||action=="haptics");
-                string icon=toggle?action+"_on":action=="resume"?"play":action=="leave"?"home":action=="double"||action=="ad"?"video":action=="gold"?"coin":action=="revive"?"heart":action=="confirm"?"check":action=="cancel"?"close":action;
+                bool toggle=HasSettingsControls(kind)&&(action=="sound"||action=="music"||action=="haptics");
+                string icon=toggle?action+"_on":action=="resume"?"play":action=="language"?"globe":action=="leave"?"home":action=="double"||action=="ad"?"video":action=="gold"?"coin":action=="revive"?"heart":action=="confirm"?"check":action=="cancel"?"close":action;
                 string label=text.Get(action=="leave"?"shell.home":"popup.action."+action);
                 string amount=action=="double"?"x2":action=="gold"?config.ReviveGold.ToString(System.Globalization.CultureInfo.InvariantCulture):null;
                 var category=toggle?ShellLayoutCategory.IconButton:amount!=null?ShellLayoutCategory.IconAmount:ShellLayoutCategory.IconAction;
@@ -109,13 +113,9 @@ namespace IndieGame.Shell.Unity.Screens
             busy=true;
             try
             {
+                if(HasSettingsControls(kind)&&ChangeSetting(p,action)) return;
                 if(kind==SessionPopupKind.Pause)
                 {
-                    if(action=="sound"||action=="music"||action=="haptics")
-                    {
-                        var result=action=="sound"?session.Settings.SetSound(!session.Settings.Sound):action=="music"?session.Settings.SetMusic(!session.Settings.Music):session.Settings.SetHaptics(!session.Settings.Haptics);
-                        if(!result.Success) Error(p,result.Error.ToString()); else Save(p); RenderSettings(); return;
-                    }
                     if(action=="leave") { ShowLeave(); return; }
                     if(action=="resume") { Complete(kind); RestorePause(p); } return;
                 }
@@ -200,12 +200,36 @@ namespace IndieGame.Shell.Unity.Screens
             if(!paused) return; paused=false; Time.timeScale=priorScale;
             try { game.Resume(); Save(p); } catch(Exception) { Error(p,"Failed"); }
         }
+        bool ChangeSetting(SessionPopupContent p,string action)
+        {
+            SaveResult<bool> result;
+            if(action=="sound") result=session.Settings.SetSound(!session.Settings.Sound);
+            else if(action=="music") result=session.Settings.SetMusic(!session.Settings.Music);
+            else if(action=="haptics") result=session.Settings.SetHaptics(!session.Settings.Haptics);
+            else if(action=="language") result=session.Settings.SetLanguage(NextLanguage());
+            else return false;
+            if(!result.Success) Error(p,result.Error.ToString()); else Save(p);
+            RenderSettings(); return true;
+        }
+        string NextLanguage()
+        {
+            var codes=new List<string>(session.Settings.Languages); codes.Sort(StringComparer.Ordinal);
+            return codes[(codes.IndexOf(session.Settings.Language)+1)%codes.Count];
+        }
         void RenderSettings()
         {
-            if(!popups.TryGetValue(SessionPopupKind.Pause,out var p)) return;
-            foreach(var key in new[]{"sound","music","haptics"})
-            { bool value=key=="sound"?session.Settings.Sound:key=="music"?session.Settings.Music:session.Settings.Haptics;
-              factory.SetIcon(p.Buttons[key],key+(value?"_on":"_off"),text.Get("popup.setting."+key,text.Get(value?"shell.on":"shell.off"))); }
+            foreach(var entry in popups)
+            {
+                var p=entry.Value; if(!HasSettingsControls(entry.Key)||p.View==null) continue;
+                string kind=entry.Key.ToString().ToLowerInvariant();
+                if(p.Title!=null) p.Title.text=text.Get("popup."+kind+".title");
+                if(p.Body!=null) p.Body.text=text.Get("popup."+kind+".body");
+                foreach(var key in new[]{"sound","music","haptics"})
+                { bool value=key=="sound"?session.Settings.Sound:key=="music"?session.Settings.Music:session.Settings.Haptics;
+                  factory.SetIcon(p.Buttons[key],key+(value?"_on":"_off"),text.Get("popup.setting."+key,text.Get(value?"shell.on":"shell.off"))); }
+                if(p.Buttons.TryGetValue("language",out var language))
+                    factory.SetIcon(language,"globe",text.Get("popup.setting.language",text.Get("shell.language."+session.Settings.Language)));
+            }
         }
         void Error(SessionPopupContent p,string key) { p.Error=text.Get("shell.error."+key); if(p.ErrorLabel!=null) p.ErrorLabel.text=p.Error; }
         bool Save(SessionPopupContent p)

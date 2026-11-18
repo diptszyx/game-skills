@@ -9,6 +9,8 @@ namespace IndieGame.Shell.Unity.UI
     public sealed class ShellStyle : ScriptableObject
     {
         public bool EnableHomeChrome;
+        public bool ShowScreenTitleWithChrome=true;
+        public bool EnableTabSwipe = true;
         // Mandatory popups disable close input even when the optional no-badge art is absent.
         public bool PanelHasBakedCloseIcon, ShowCloseHotspot=true;
         [Serializable] public sealed class PopupLayoutTheme
@@ -17,6 +19,11 @@ namespace IndieGame.Shell.Unity.UI
             public float PanelMinHeight, PanelMaxHeight;
         }
         public PopupLayoutTheme PopupLayout=new PopupLayoutTheme();
+        // Sprite pixel rows [top,bottom) of the visible header band; zero keeps the full top border as the title area.
+        public Vector2 PanelHeaderRows, MandatoryPanelHeaderRows;
+        public Vector2 PopupHeaderRows(bool mandatory)=>mandatory&&MandatoryPanelSprite!=null?MandatoryPanelHeaderRows:PanelHeaderRows;
+        // Zero keeps the 64 unit close button at the legacy position; above zero draws a larger close button on the panel corner.
+        public float CloseVisibleSize;
         public Rect PanelTextRegion=new Rect(.25f,.25f,.5f,.3f);
         public Rect TitleTextRegion=new Rect(.25f,.25f,.5f,.5f);
         public Rect ButtonTextRegion=new Rect(.25f,.35f,.5f,.3f);

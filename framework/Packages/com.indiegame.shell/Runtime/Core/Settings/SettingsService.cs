@@ -29,6 +29,7 @@ namespace IndieGame.Shell
         public bool Music { get; private set; }
         public bool Haptics { get; private set; }
         public string Language { get; private set; }
+        public IReadOnlyCollection<string> Languages => config.Languages;
         public SettingsService(SettingsConfig config)
         {
             this.config = config ?? throw new ArgumentNullException(nameof(config));

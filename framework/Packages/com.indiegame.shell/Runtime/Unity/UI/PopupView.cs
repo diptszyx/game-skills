@@ -26,20 +26,40 @@ namespace IndieGame.Shell.Unity.UI
                 Panel.GetComponent<Image>().sprite=policy==DismissalPolicy.Mandatory && style.MandatoryPanelSprite!=null
                     ? style.MandatoryPanelSprite : style.Theme.PanelSprite;
             var heading=Panel.Find("Title") as RectTransform;
-            if(heading!=null) LocalizedLayout.Popup(Panel,heading,Content);
-            var close=CloseButton!=null?CloseButton.transform:null; if(close==null) return;
-            bool enabled=policy==DismissalPolicy.Dismissible && (style==null||style.ShowCloseHotspot);
+            var close=CloseButton!=null?CloseButton.transform:null;
+            bool enabled=close!=null && policy==DismissalPolicy.Dismissible && (style==null||style.ShowCloseHotspot);
+            if(heading!=null) LayoutHeading(heading,enabled);
+            if(close==null) return;
             close.GetComponent<Button>().interactable=enabled;
             close.GetComponent<Image>().raycastTarget=enabled;
             // The style's sliced panel may already contain the close circle and X.
             // Keep one accessible, expanded hit target aligned with that artwork.
             bool baked=style!=null&&style.PanelHasBakedCloseIcon;
+            PlaceClose((RectTransform)close,baked);
             var surface=close.GetComponent<ShellAppearance>();
             if(surface!=null && style!=null) surface.Apply(style);
             if(baked) close.GetComponent<Image>().color=Color.clear;
             foreach(var icon in close.GetComponentsInChildren<ShellAppearance>(true))
                 if(icon.Role=="actionIcon") icon.GetComponent<Image>().enabled=!baked;
             close.gameObject.SetActive(enabled);
+        }
+        bool DrawsOwnClose=>style!=null&&!style.PanelHasBakedCloseIcon&&style.CloseVisibleSize>0;
+        float LayoutHeading(RectTransform heading,bool closeVisible)
+        {
+            if(style==null) return LocalizedLayout.Popup(Panel,heading,Content);
+            float clear=closeVisible&&DrawsOwnClose?style.CloseVisibleSize+ShellLayout.Standard.TitleInset*2:0;
+            return LocalizedLayout.Popup(Panel,heading,Content,style.PopupHeaderRows(policy==DismissalPolicy.Mandatory),clear);
+        }
+        void PlaceClose(RectTransform close,bool baked)
+        {
+            bool drawn=!baked&&DrawsOwnClose;
+            var size=drawn?Vector2.one*style.CloseVisibleSize:ShellLayout.Standard.IconButton;
+            close.sizeDelta=size;
+            close.anchoredPosition=drawn?ShellLayout.Standard.CloseDrawnPosition(size.x):ShellLayout.Standard.CloseHitPosition;
+            float padding=Mathf.Max(0,(ShellLayout.Standard.IconHitSize-size.x)/2);
+            close.GetComponent<Image>().raycastPadding=new Vector4(-padding,-padding,-padding,-padding);
+            foreach(var icon in close.GetComponentsInChildren<ShellAppearance>(true))
+                if(icon.Role=="actionIcon") ((RectTransform)icon.transform).sizeDelta=ShellUiFactory.GlyphSize(size);
         }
         void OnEnable() { RefreshCloseTarget(); Reflow(); }
         int layoutSignature;
@@ -69,7 +89,7 @@ namespace IndieGame.Shell.Unity.UI
         {
             if(style==null||Content==null) return;
             const float padding=48;
-            float headingBand=LocalizedLayout.Popup(Panel,(RectTransform)Panel.Find("Title"),Content);
+            float headingBand=LayoutHeading((RectTransform)Panel.Find("Title"),CloseButton!=null&&CloseButton.gameObject.activeSelf);
             float width=Mathf.Max(1,Panel.rect.width-2*padding);
             var layout=Content.GetComponent<VerticalLayoutGroup>();
             if(layout==null) layout=Content.gameObject.AddComponent<VerticalLayoutGroup>();
@@ -142,7 +162,7 @@ namespace IndieGame.Shell.Unity.UI
             float max=sizing.PanelMaxHeight>0?sizing.PanelMaxHeight:FitContent?ShellLayout.Standard.SessionPopupMaxHeight:style.Theme.PanelSize.y;
             if(style.PopupLayout.PanelMaxHeight>0||FitContent)
                 Panel.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical,Mathf.Clamp(headingBand+preferred+padding,min,Mathf.Max(min,max)));
-            LocalizedLayout.Popup(Panel,(RectTransform)Panel.Find("Title"),Content);
+            LayoutHeading((RectTransform)Panel.Find("Title"),CloseButton!=null&&CloseButton.gameObject.activeSelf);
             LayoutRebuilder.ForceRebuildLayoutImmediate(Content);
         }
         static bool IsIconAction(Transform button)

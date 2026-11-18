@@ -22,6 +22,7 @@ namespace IndieGame.Shell.Unity.Screens
             TopBar=new TopBarView(factory,host.ChromeRoot);
             TabBar=new TabBarView(factory,host.ChromeRoot,Keys.Select(k=>new TabDefinition(k,Label(k),k)).ToArray());
             TopBar.Settings.onClick.AddListener(()=>settings()); host.SetTabBar(TabBar); TabBar.TabSelected+=Selected; host.Shown+=Shown;
+            TabSwipeHandler.Attach(factory.Style,host,TabBar);
             lifetime=host.ChromeRoot.gameObject.AddComponent<ScreenLifetime>(); lifetime.Ticked+=Refresh; lifetime.Resumed+=Refresh;
             Refresh();
         }
@@ -41,7 +42,7 @@ namespace IndieGame.Shell.Unity.Screens
         void Selected(string key) { if(key=="home") home(); else navigate((ShellScreen)(Array.IndexOf(Keys,key)-1)); }
         void Shown(RectTransform screen)
         {
-            bool visible=screen!=game; TopBar.Root.gameObject.SetActive(screen==main||screen==game); TopBar.SetCompact(!visible); host.ShowTabBar(visible);
+            bool visible=screen!=game; TopBar.Root.gameObject.SetActive(screen==main||screen==game); host.ShowTabBar(visible);
             if(visible) TabBar.SetSelected(screen==main?"home":screen.name.ToLowerInvariant());
             Refresh();
         }

@@ -20,8 +20,8 @@ namespace IndieGame.Shell.Unity.Screens
             if(result.Success) RetrySave(); else view.ShowError(text.Get("shell.error."+result.Error));
             var rows=new List<RowDisplay>();
             foreach(var q in session.DailyQuests.Quests)
-                rows.Add(new RowDisplay(q.Template.Id,text.Get("shell.quest.row",text.Get("shell.quest."+q.Template.Id),q.Progress,q.Template.Target,text.Reward(q.Template.Reward)),
-                    text.Get("shell.claim"),CanClaim(q),(float)q.Progress/q.Template.Target));
+                rows.Add(new RowDisplay(q.Template.Id,text.Get("shell.quest."+q.Template.Id),
+                    text.Get("shell.claim"),CanClaim(q),(float)q.Progress/q.Template.Target,detail:q.Progress+"/"+q.Template.Target+" · "+text.RewardShort(q.Template.Reward)));
             view.Render(new ListDisplay(text.Get("shell.quests.title"),rows,text.Get("shell.quests.empty")));
         }
         public static bool CanClaim(QuestStatus quest) => !quest.Claimed && quest.Progress>=quest.Template.Target;

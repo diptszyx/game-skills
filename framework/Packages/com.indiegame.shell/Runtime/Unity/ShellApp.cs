@@ -92,7 +92,7 @@ namespace IndieGame.Shell.Unity
                 }
                 Main=new MainView(factory,Screens.SafeRoot);
                 MainPresenter=new MainPresenter(Session,Main,Text,clock,actions,Navigate,config.PlayLabel); owned.Add(MainPresenter);
-                if(config.Style.EnableHomeChrome) owned.Add(new ChromePresenter(Session,Text,clock,factory,Screens,Main.Root,GameRoot,ShowMain,Navigate,()=>{ if(Ready && Popups.Top==null) Flow.ShowPause(); },error=>ErrorLabel.text=error));
+                if(config.Style.EnableHomeChrome) owned.Add(new ChromePresenter(Session,Text,clock,factory,Screens,Main.Root,GameRoot,ShowMain,Navigate,()=>{ if(!Ready || Popups.Top!=null) return; if(Screens.Current==GameRoot) Flow.ShowPause(); else Flow.ShowSettings(); },error=>ErrorLabel.text=error));
                 Screens.Show(Main.Root);
                 Screens.Loading.gameObject.AddComponent<LoadingContentView>().Initialize(factory,Screens.Loading,screenText,"shell.loading.tip");
                 Screens.Loading.transform.SetAsLastSibling(); Screens.Loading.Show(); Screens.Loading.SetProgress(1); Screens.Loading.Hide();

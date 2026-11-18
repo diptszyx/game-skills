@@ -48,6 +48,10 @@ namespace IndieGame.Shell
             Config = new RemoteConfigService(config);
         }
 
+        // Game-owned sections ride in the same document; Commit persists them with the modules.
+        public SaveResult<T> ReadGameSection<T>(string key, Func<T> defaultFactory) => document.ReadSection(key, defaultFactory);
+        public SaveResult<bool> WriteGameSection<T>(string key, T value) => document.WriteSection(key, value);
+
         public SessionResult LoadAll()
         {
             var loaded = store.Load(path);

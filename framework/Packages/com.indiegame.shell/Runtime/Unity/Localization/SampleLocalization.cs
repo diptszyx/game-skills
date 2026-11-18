@@ -27,6 +27,8 @@ namespace IndieGame.Shell.Unity.Localization
             "popup.lose.body",
             "popup.lose.title",
             "popup.pause.body",
+            "popup.settings.title", "popup.settings.body", "popup.action.language", "popup.setting.language",
+            "shell.language.en", "shell.language.vi", "shell.settings",
             "popup.pause.title",
             "popup.revive.body",
             "popup.revive.price",

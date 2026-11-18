@@ -17,8 +17,9 @@ namespace IndieGame.Shell.Unity.Screens
         public float Progress { get; }
         public string Icon { get; }
         public string Amount { get; }
-        public RowDisplay(string id, string text, string action = "", bool enabled = false, float progress = -1,string icon="check",string amount=null)
-        { Id=id; Text=text; Action=action; Enabled=enabled; Progress=progress; Icon=icon; Amount=amount; }
+        public string Detail { get; }
+        public RowDisplay(string id, string text, string action = "", bool enabled = false, float progress = -1,string icon="check",string amount=null,string detail=null)
+        { Id=id; Text=text; Action=action; Enabled=enabled; Progress=progress; Icon=icon; Amount=amount; Detail=detail; }
     }
     public sealed class ListDisplay
     {
@@ -37,23 +38,66 @@ namespace IndieGame.Shell.Unity.Screens
     }
     internal static class ScreenWidgets
     {
+        internal const float RowTitleFont=32, RowTitleMinFont=26, RowDetailFont=26, MinRowOpacity=.92f;
+        internal const float EmptyCardBottom=.17f, EmptyCardTop=.29f;
+        const float TopBarHeight=110, TabBarHeight=160, TitledBodyTop=266, UntitledBodyGap=12;
+        internal static bool HidesTitle(ShellStyle style) => style.EnableHomeChrome && !style.ShowScreenTitleWithChrome;
         internal static RectTransform Body(ShellUiFactory f, RectTransform root)
         {
             var body=ShellUiFactory.Node("Body",root); ShellUiFactory.Stretch(body);
             LocalizedLayout.Body(body,f.Style.Spacing);
-            if(f.Style.EnableHomeChrome) { body.offsetMin+=new Vector2(0,160); body.offsetMax-=new Vector2(0,110); }
+            if(f.Style.EnableHomeChrome)
+            {
+                body.offsetMin+=new Vector2(0,TabBarHeight);
+                body.offsetMax=new Vector2(body.offsetMax.x,-(HidesTitle(f.Style)?TopBarHeight+UntitledBodyGap:TitledBodyTop));
+            }
             body.gameObject.SetActive(true); return body;
         }
         internal static TMP_Text Heading(ShellUiFactory f, RectTransform root)
-        { var label=f.Label(root,"",true,"screenTitle"); if(f.Style.EnableHomeChrome) label.rectTransform.anchoredPosition+=new Vector2(0,-110); return label; }
+        {
+            var label=f.Label(root,"",true,"screenTitle");
+            if(f.Style.EnableHomeChrome) label.rectTransform.anchoredPosition+=new Vector2(0,-TopBarHeight);
+            if(HidesTitle(f.Style)) label.gameObject.SetActive(false);
+            return label;
+        }
+        static void StyleRowLabel(TMP_Text label,float max,float min,float yMin,float yMax,float xMax)
+        {
+            label.alignment=TextAlignmentOptions.Left; label.enableAutoSizing=true; label.fontSizeMax=max; label.fontSizeMin=min; label.fontSize=max;
+            label.textWrappingMode=TextWrappingModes.NoWrap; label.overflowMode=TextOverflowModes.Ellipsis;
+            var rect=label.rectTransform; rect.anchorMin=new Vector2(0,yMin); rect.anchorMax=new Vector2(xMax,yMax);
+            rect.offsetMin=new Vector2(16,0); rect.offsetMax=new Vector2(-8,0);
+        }
+        static void LayoutRowText(RectTransform row,TMP_Text title,ShellUiFactory f,RowDisplay data)
+        {
+            float xMax=string.IsNullOrEmpty(data.Action)?1:.64f;
+            if(data.Detail==null)
+            {
+                LocalizedLayout.Row(row,title,!string.IsNullOrEmpty(data.Action)); title.alignment=TextAlignmentOptions.Left;
+                title.fontSizeMin=RowTitleMinFont; title.fontSizeMax=Mathf.Max(title.fontSizeMax,RowTitleMinFont); return;
+            }
+            StyleRowLabel(title,RowTitleFont,RowTitleMinFont,.5f,.96f,xMax);
+            var detail=f.Label(row,data.Detail,role:"rowText"); detail.gameObject.name="Detail";
+            StyleRowLabel(detail,RowDetailFont,RowDetailFont,.1f,.52f,xMax);
+        }
+        internal static RectTransform EmptyCard(ShellUiFactory f, RectTransform root)
+        {
+            var card=ShellUiFactory.Node("Empty card",root); card.anchorMin=new Vector2(.04f,EmptyCardBottom); card.anchorMax=new Vector2(.96f,EmptyCardTop);
+            card.offsetMin=card.offsetMax=Vector2.zero;
+            var image=f.AppearanceImage(card,"Surface","row",true); ShellUiFactory.Stretch(image.rectTransform); OpaqueCard(image);
+            var label=f.Label(card,"",role:"rowText"); ShellUiFactory.Stretch(label.rectTransform);
+            label.rectTransform.offsetMin=new Vector2(24,12); label.rectTransform.offsetMax=new Vector2(-24,-12);
+            label.enableAutoSizing=true; label.fontSizeMax=34; label.fontSizeMin=RowTitleMinFont; label.fontSize=34;
+            card.gameObject.SetActive(false); return card;
+        }
+        static void OpaqueCard(Image card)
+        { var c=card.color; c.a=Mathf.Max(c.a,MinRowOpacity); card.color=c; }
         internal static void Rows(ShellUiFactory f, RectTransform content, IReadOnlyList<RowDisplay> rows, Action<string> clicked)
         {
             for(int i=content.childCount-1;i>=0;i--) { var child=content.GetChild(i); child.gameObject.SetActive(false); if(Application.isPlaying) UnityEngine.Object.Destroy(child.gameObject); else UnityEngine.Object.DestroyImmediate(child.gameObject); }
             foreach(var row in rows)
             {
                 var r=f.ListRow(content,""); var text=r.GetComponentInChildren<TMP_Text>(); text.text=row.Text;
-                text.alignment=TextAlignmentOptions.Left;
-                LocalizedLayout.Row(r,text,!string.IsNullOrEmpty(row.Action));
+                OpaqueCard(r.GetComponent<Image>()); LayoutRowText(r,text,f,row);
                 if(row.Progress>=0)
                 {
                     var track=ShellUiFactory.Node("Progress",r); track.anchorMin=new Vector2(0,0); track.anchorMax=new Vector2(.64f,0); track.sizeDelta=new Vector2(0,8);
@@ -74,17 +118,23 @@ namespace IndieGame.Shell.Unity.Screens
         internal readonly ScreenLifetime Lifetime;
         readonly ShellUiFactory factory;
         readonly TMP_Text title,empty,error;
-        readonly ScrollRect list;
+        readonly ScrollRect list; readonly RectTransform emptyCard;
         internal ListSurface(ShellUiFactory factory, Transform parent, string name)
         {
             this.factory=factory; Root=factory.ScreenRoot(parent,name); Lifetime=Root.gameObject.AddComponent<ScreenLifetime>();
             title=ScreenWidgets.Heading(factory,Root); var body=ScreenWidgets.Body(factory,Root);
             list=factory.ScrollList(body); list.GetComponent<RectTransform>().offsetMin=new Vector2(0,100);
-            empty=factory.Label(body,""); error=factory.Label(body,""); error.rectTransform.anchorMin=error.rectTransform.anchorMax=new Vector2(.5f,0);
+            if(factory.Style.EnableHomeChrome) { emptyCard=ScreenWidgets.EmptyCard(factory,Root); empty=emptyCard.GetComponentInChildren<TMP_Text>(true); }
+            else empty=factory.Label(body,"");
+            error=factory.Label(body,""); error.rectTransform.anchorMin=error.rectTransform.anchorMax=new Vector2(.5f,0);
             error.rectTransform.anchoredPosition=new Vector2(0,45);
         }
         internal void Render(ListDisplay display, Action<string> clicked)
-        { title.text=display.Title; empty.text=display.Empty; empty.gameObject.SetActive(display.Rows.Count==0); ScreenWidgets.Rows(factory,list.content,display.Rows,clicked); }
+        {
+            title.text=display.Title; empty.text=display.Empty;
+            bool showEmpty=display.Rows.Count==0; (emptyCard!=null?emptyCard.gameObject:empty.gameObject).SetActive(showEmpty);
+            ScreenWidgets.Rows(factory,list.content,display.Rows,clicked);
+        }
         internal void Error(string text) { error.text=text; }
     }
 }

@@ -17,8 +17,9 @@ namespace IndieGame.Shell.Unity.Screens
         public void Refresh()
         {
             language=session.Settings.Language; view.SetCloseName(text.Get("shell.close")); var rows=new List<RowDisplay>();
-            foreach(var p in shop.Catalog.Products) rows.Add(new RowDisplay(p.Id,text.Get("shell.shop.row",text.Get(p.TitleKey),
-                p.PriceKind==PriceKind.Gold?text.Get("shell.gold",p.Price):text.Get("shell.price.iap"),text.Reward(p.Reward)),text.Get("shell.buy"),!busy,icon:"coin",amount:p.PriceKind==PriceKind.Gold?p.Price.ToString(System.Globalization.CultureInfo.InvariantCulture):null));
+            foreach(var p in shop.Catalog.Products) rows.Add(new RowDisplay(p.Id,text.Get(p.TitleKey),text.Get("shell.buy"),!busy,icon:"coin",
+                amount:p.PriceKind==PriceKind.Gold?p.Price.ToString(System.Globalization.CultureInfo.InvariantCulture):null,
+                detail:p.PriceKind==PriceKind.Gold?text.RewardShort(p.Reward):text.RewardShort(p.Reward)+" · "+text.Get("shell.price.iap")));
             view.Render(new ListDisplay(text.Get("shell.shop.title"),rows,text.Get("shell.shop.empty")));
         }
         void Buy(string id)
