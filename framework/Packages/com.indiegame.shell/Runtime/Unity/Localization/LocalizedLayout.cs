@@ -34,19 +34,38 @@ namespace IndieGame.Shell.Unity.Localization
             rect.anchorMax=new Vector2(action?.64f:1,1);
             rect.offsetMin=new Vector2(12,8); rect.offsetMax=new Vector2(-8,-8);
         }
-        internal static void Popup(RectTransform panel, RectTransform heading, RectTransform content)
+        internal static float Popup(RectTransform panel, RectTransform heading, RectTransform content)
         {
-            heading.anchorMin=heading.anchorMax=new Vector2(.5f,1);
-            heading.pivot=new Vector2(.5f,1); heading.anchoredPosition=Vector2.zero; heading.sizeDelta=new Vector2(panel.sizeDelta.x-48,PopupHeadingBand);
+            var image=panel.GetComponent<Image>();
+            var sprite=image!=null?image.sprite:null;
+            float band=0;
+            if(sprite!=null && sprite.border.w>0 && sprite.border.w<sprite.rect.height)
+            {
+                float units=image.pixelsPerUnit*image.pixelsPerUnitMultiplier;
+                float vertical=(sprite.border.y+sprite.border.w)/units;
+                band=sprite.border.w/units*Mathf.Min(1,panel.rect.height/vertical);
+            }
             var title=heading.GetComponent<TMP_Text>();
-            if(title!=null) { title.alignment=TextAlignmentOptions.Top; title.margin=new Vector4(0,PopupTitleTopMargin,0,0); }
-            if(content==null) return;
+            bool derived=title!=null && band>=MinTitleHeight(title);
+            if(!derived) band=PopupHeadingBand;
+            float contentTop=band+28;
+            heading.anchorMin=heading.anchorMax=new Vector2(.5f,1);
+            heading.pivot=new Vector2(.5f,1); heading.anchoredPosition=Vector2.zero; heading.sizeDelta=new Vector2(panel.rect.width-48,band);
+            if(title!=null) { title.alignment=derived?TextAlignmentOptions.Center:TextAlignmentOptions.Top; title.margin=new Vector4(0,derived?0:8,0,0); }
+            if(content==null) return contentTop;
             content.anchorMin=Vector2.zero; content.anchorMax=Vector2.one; content.pivot=new Vector2(.5f,1);
-            content.offsetMin=new Vector2(48,48); content.offsetMax=new Vector2(-48,-132);
+            content.offsetMin=new Vector2(48,48); content.offsetMax=new Vector2(-48,-contentTop);
+            return contentTop;
+        }
+        static float MinTitleHeight(TMP_Text title)
+        {
+            var face=title.font.faceInfo;
+            float lineRatio=face.pointSize>0?face.lineHeight/face.pointSize:1.2f;
+            return (title.enableAutoSizing?title.fontSizeMin:title.fontSize)*lineRatio;
         }
         internal static void PopupChild(RectTransform rect, bool button)
         { rect.sizeDelta=button?ShellLayout.Standard.PopupAction:new Vector2(rect.sizeDelta.x,64); }
-        const float PopupHeadingBand=104f, PopupTitleTopMargin=8f;
+        const float PopupHeadingBand=104f;
         internal static void LoadingTip(RectTransform rect)
         {
             rect.anchorMin=new Vector2(0,.5f); rect.anchorMax=new Vector2(1,.5f);

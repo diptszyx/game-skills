@@ -56,7 +56,7 @@ namespace IndieGame.Shell.Unity.UI
                 var motion = view.Motion;
                 float duration = view.Closing ? motion.CloseSeconds : motion.OpenSeconds;
                 float t = duration <= 0 ? 1 : Mathf.Clamp01(view.Progress / duration);
-                view.Group.alpha = Mathf.Lerp(view.StartAlpha, view.Closing ? 0 : 1, view.Closing ? t : motion.ScrimFadeSeconds <= 0 ? 1 : Mathf.Clamp01(view.Progress / motion.ScrimFadeSeconds));
+                view.Group.alpha = view!=Top ? 0 : Mathf.Lerp(view.StartAlpha, view.Closing ? 0 : 1, view.Closing ? t : motion.ScrimFadeSeconds <= 0 ? 1 : Mathf.Clamp01(view.Progress / motion.ScrimFadeSeconds));
                 if (view.Closing) view.Panel.localScale = Vector3.Lerp(view.StartScale, Vector3.one * motion.CloseEndScale, t);
                 else
                 {
@@ -84,6 +84,9 @@ namespace IndieGame.Shell.Unity.UI
         {
             foreach (var view in stack)
             {
+                view.Group.alpha = view!=Top ? 0 : Mathf.Lerp(view.StartAlpha,view.Closing?0:1,
+                    view.Closing ? (view.Motion.CloseSeconds<=0?1:Mathf.Clamp01(view.Progress/view.Motion.CloseSeconds))
+                    : (view.Motion.ScrimFadeSeconds<=0?1:Mathf.Clamp01(view.Progress/view.Motion.ScrimFadeSeconds)));
                 view.Group.ignoreParentGroups = false;
                 view.Group.interactable = view == Top && !view.Closing;
                 view.Group.blocksRaycasts = view == Top;

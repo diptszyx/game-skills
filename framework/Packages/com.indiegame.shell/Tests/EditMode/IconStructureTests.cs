@@ -41,14 +41,15 @@ namespace IndieGame.Shell.Tests
                     Assert.That(b.transform.parent,Is.SameAs(pause.Buttons["sound"].transform.parent));
                 }
                 f.Presenter.ShowLeave(); f.Presenter.ShowWin("icons"); f.Presenter.ShowLose(); f.Presenter.ShowRevive();
-                foreach(var popup in f.Presenter.Popups.Values) foreach(var b in popup.Buttons.Values) {
+                foreach(var popup in f.Presenter.Popups.Values) { popup.View.Reflow(); foreach(var b in popup.Buttons.Values) {
                     Assert.That(b.name,Is.Not.Null.And.Not.Empty);
                     Assert.That(b.GetComponentsInChildren<ShellAppearance>(true).Any(a=>a.Role=="actionIcon"),Is.True,b.name);
                     Assert.That(b.GetComponentsInChildren<TMP_Text>(true).All(t=>t.text=="x2"||t.text=="20"),Is.True,b.name);
                     var category=b.GetComponent<LayoutCategory>().Category.ToString();
-                    var expected=category=="IconButton"?new Vector2(64,64):category=="IconAmount"?new Vector2(160,72):new Vector2(140,72);
+                    var expected=category=="IconButton"?new Vector2(64,64):new Vector2(popup.Buttons.Values.Where(action=>action.gameObject.activeSelf && action.GetComponent<LayoutCategory>().Category!=ShellLayoutCategory.IconButton).Max(action=>ShellUiFactory.IconSize(action.GetComponent<LayoutCategory>().Category).x),72);
+                    if(!b.gameObject.activeSelf) expected=ShellUiFactory.IconSize(b.GetComponent<LayoutCategory>().Category);
                     Assert.That(((RectTransform)b.transform).rect.size,Is.EqualTo(expected),b.name);
-                }
+                } }
                 foreach(var kind in new[]{SessionPopupKind.Win,SessionPopupKind.Lose,SessionPopupKind.Revive}) {
                     var b=f.Presenter.Popups[kind].Buttons[kind==SessionPopupKind.Win?"double":kind==SessionPopupKind.Lose?"revive":"ad"];
                     Assert.That(b.GetComponentsInChildren<ShellAppearance>().Any(a=>a.IconKey=="video"),Is.True);

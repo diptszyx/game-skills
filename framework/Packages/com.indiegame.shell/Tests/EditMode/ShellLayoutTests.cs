@@ -119,6 +119,72 @@ namespace IndieGame.Shell.Tests
             }
             finally { UnityEngine.Object.DestroyImmediate(sprite); UnityEngine.Object.DestroyImmediate(texture); }
         }
+        [TestCase(0)] [TestCase(2)] [TestCase(80)]
+        public void PopupHeadingUsesRenderedTopBorderOrLegacyGeometry(float top)
+        {
+            var texture=new Texture2D(200,200);
+            var sprite=Sprite.Create(texture,new Rect(0,0,200,200),Vector2.one*.5f,100,0,SpriteMeshType.FullRect,new Vector4(8,8,8,top));
+            try {
+                style.Theme.PanelSprite=sprite;
+                var popup=factory.PopupFrame(root.transform,"Title");
+                popup.gameObject.SetActive(true); popup.Reflow();
+                var title=popup.Panel.Find("Title").GetComponent<TMPro.TMP_Text>();
+                Assert.That(title.rectTransform.rect.height,Is.EqualTo(top>=24?top:104).Within(.01));
+                Assert.That(title.alignment,Is.EqualTo(top>=24?TMPro.TextAlignmentOptions.Center:TMPro.TextAlignmentOptions.Top));
+                Assert.That(title.margin.y,Is.EqualTo(top>=24?0:8));
+                Assert.That(popup.Content.offsetMax.y,Is.EqualTo(-(top>=24?top+28:132)).Within(.01));
+                popup.Panel.GetComponent<Image>().pixelsPerUnitMultiplier=2;
+                popup.Reflow();
+                Assert.That(title.rectTransform.rect.height,Is.EqualTo(top>=48?top/2:104).Within(.01));
+            }
+            finally { UnityEngine.Object.DestroyImmediate(sprite); UnityEngine.Object.DestroyImmediate(texture); }
+        }
+        [Test] public void LabelledTextButtonsStayStackedSoLongCaptionsKeepFullWidth()
+        {
+            style.PopupLayout.PanelMinHeight=240; style.PopupLayout.PanelMaxHeight=1200;
+            var popup=factory.PopupFrame(root.transform,"Actions");
+            var buttons=new[]{factory.Button(popup.Content,"A long caption that needs the whole width"),factory.Button(popup.Content,"Another long caption")};
+            popup.gameObject.SetActive(true); popup.Reflow(); Canvas.ForceUpdateCanvases();
+            foreach(var button in buttons) Assert.That(button.transform.parent,Is.SameAs(popup.Content));
+            Assert.That(buttons.Select(b=>b.transform.position.y).Distinct().Count(),Is.EqualTo(2));
+        }
+        [TestCase(1)] [TestCase(2)] [TestCase(3)] [TestCase(4)]
+        public void PopupGroupsUpToThreeActionsAndStacksFour(int count)
+        {
+            style.PopupLayout.PanelMinHeight=240; style.PopupLayout.PanelMaxHeight=1200;
+            var popup=factory.PopupFrame(root.transform,"Actions");
+            var buttons=Enumerable.Range(0,count).Select(i=>factory.IconButton(popup.Content,"retry","Action "+i,category:ShellLayoutCategory.IconAction)).ToArray();
+            popup.gameObject.SetActive(true); popup.Reflow(); Canvas.ForceUpdateCanvases();
+            foreach(var button in buttons) {
+                var rect=(RectTransform)button.transform;
+                Assert.That(rect.rect.width,Is.GreaterThanOrEqualTo(96));
+                Assert.That(rect.rect.height,Is.GreaterThanOrEqualTo(72));
+                if(count<=3) Assert.That(button.transform.parent.GetComponent<HorizontalLayoutGroup>(),Is.Not.Null);
+                else Assert.That(button.transform.parent,Is.SameAs(popup.Content));
+                Assert.That(rect.rect.size,Is.EqualTo(((RectTransform)buttons[0].transform).rect.size));
+            }
+            if(count<=3) Assert.That(buttons.Select(b=>b.transform.position.y).Distinct().Count(),Is.EqualTo(1));
+            else Assert.That(buttons.Select(b=>b.transform.position.y).Distinct().Count(),Is.EqualTo(4));
+        }
+        [Test] public void CustomIconShapesReplaceFallbacksAndSurviveStyleSwitch()
+        {
+            var round=factory.IconButton(root.transform,"back","Back");
+            var pill=factory.IconButton(root.transform,"retry","Retry",category:ShellLayoutCategory.IconAction);
+            var defaultRound=round.GetComponent<Image>().sprite; var defaultPill=pill.GetComponent<Image>().sprite;
+            style.RoundButtonSprite=style.PillButtonSprite=style.Theme.Primary.Enabled;
+            Assert.DoesNotThrow(()=>style.Validate());
+            factory.SwitchStyle(root.transform,style);
+            foreach(var button in new[]{round,pill}) {
+                Assert.That(button.GetComponent<Image>().sprite,Is.SameAs(style.Theme.Primary.Enabled));
+                Assert.That(button.GetComponent<Image>().color,Is.EqualTo(Color.white));
+            }
+            Assert.That(round.GetComponent<Image>().type,Is.EqualTo(Image.Type.Simple));
+            Assert.That(pill.GetComponent<Image>().type,Is.EqualTo(Image.Type.Sliced));
+            style.RoundButtonSprite=style.PillButtonSprite=null; factory.SwitchStyle(root.transform,style);
+            Assert.That(round.GetComponent<Image>().sprite,Is.SameAs(defaultRound));
+            Assert.That(pill.GetComponent<Image>().sprite,Is.SameAs(defaultPill));
+            Assert.That(pill.GetComponent<Image>().color,Is.EqualTo(style.ActionSurfaceColor));
+        }
         [Test] public void StandardLayoutIsImmutable()
         {
             var type=typeof(ShellUiFactory).Assembly.GetType("IndieGame.Shell.Unity.UI.ShellLayout");

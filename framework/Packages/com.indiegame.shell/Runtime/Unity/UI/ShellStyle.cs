@@ -24,6 +24,8 @@ namespace IndieGame.Shell.Unity.UI
         public Sprite Logo, Mascot;
         public Sprite GearButton, BoardFrame, TabBarPlainBackground, DayCellCollected, DayCellToday, DayCellLocked, BadgeSprite, PlainPillBackground, TabCellBackground, TabCellSelectedBackground;
         [Serializable] public sealed class TabIconEntry { public string Key; public Sprite Sprite; }
+        public Sprite RoundButtonSprite, PillButtonSprite;
+        // ActionSurfaceColor tints fallback shapes; custom button sprites render white.
         public Color ActionSurfaceColor=new Color(.10f,.28f,.36f,1), ActionIconColor=Color.white;
         public List<TabIconEntry> Icons = new List<TabIconEntry>();
         public Sprite Icon(string key) { var entry=Icons.Find(e=>e!=null&&e.Key==key&&e.Sprite!=null); return entry!=null?entry.Sprite:ShellIcons.Get(key); }
@@ -160,6 +162,10 @@ namespace IndieGame.Shell.Unity.UI
             ValidateButtonBorders(Theme.Primary.Enabled,"Primary");
             ValidateButtonBorders(Theme.Secondary.Enabled,"Secondary");
             ValidateButtonBorders(LockedButtonSprite,"Locked");
+            foreach(var sprite in new[]{RoundButtonSprite,PillButtonSprite})
+                if(sprite!=null && (sprite.texture==null || sprite.rect.width<=0 || sprite.rect.height<=0 || sprite.vertices.Length<3))
+                    throw new InvalidOperationException("Invalid icon button sprite: "+sprite.name);
+            if(PillButtonSprite!=null) RequireButtonBorderFit(PillButtonSprite,ShellLayout.Standard.IconAction,"PillButtonSprite");
             ValidateRenderedContrast();
         }
     }

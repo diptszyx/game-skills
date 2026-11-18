@@ -1,4 +1,6 @@
+using System.Collections.Generic;
 using GameKit.UI;
+using IndieGame.Shell.Unity.Localization;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -23,6 +25,8 @@ namespace IndieGame.Shell.Unity.UI
             if(style!=null)
                 Panel.GetComponent<Image>().sprite=policy==DismissalPolicy.Mandatory && style.MandatoryPanelSprite!=null
                     ? style.MandatoryPanelSprite : style.Theme.PanelSprite;
+            var heading=Panel.Find("Title") as RectTransform;
+            if(heading!=null) LocalizedLayout.Popup(Panel,heading,Content);
             var close=CloseButton!=null?CloseButton.transform:null; if(close==null) return;
             bool enabled=policy==DismissalPolicy.Dismissible && (style==null||style.ShowCloseHotspot);
             close.GetComponent<Button>().interactable=enabled;
@@ -30,13 +34,16 @@ namespace IndieGame.Shell.Unity.UI
             // The style's sliced panel may already contain the close circle and X.
             // Keep one accessible, expanded hit target aligned with that artwork.
             bool baked=style!=null&&style.PanelHasBakedCloseIcon;
-            close.GetComponent<Image>().color=baked?Color.clear:style!=null?style.ActionSurfaceColor:Color.white;
+            var surface=close.GetComponent<ShellAppearance>();
+            if(surface!=null && style!=null) surface.Apply(style);
+            if(baked) close.GetComponent<Image>().color=Color.clear;
             foreach(var icon in close.GetComponentsInChildren<ShellAppearance>(true))
                 if(icon.Role=="actionIcon") icon.GetComponent<Image>().enabled=!baked;
             close.gameObject.SetActive(enabled);
         }
         void OnEnable() { RefreshCloseTarget(); Reflow(); }
         int layoutSignature;
+        RectTransform actionRow;
         void LateUpdate()
         {
             int signature=LayoutSignature();
@@ -48,9 +55,9 @@ namespace IndieGame.Shell.Unity.UI
         {
             if(Content==null||Panel==null) return 0;
             int hash=Mathf.RoundToInt(Panel.rect.width);
-            foreach(Transform child in Content)
+            foreach(var child in Content.GetComponentsInChildren<RectTransform>(true))
             {
-                if(!child.gameObject.activeSelf) continue;
+                hash=hash*31+(child.gameObject.activeSelf?1:0);
                 var label=child.GetComponent<TMP_Text>();
                 hash=hash*31+(label!=null?(label.text??"").GetHashCode():child.GetInstanceID());
             }
@@ -60,8 +67,9 @@ namespace IndieGame.Shell.Unity.UI
         // This also handles text changes and retry/error controls appearing after Open.
         public void Reflow()
         {
-            if(style==null||Content==null||style.PopupLayout.PanelMaxHeight<=0&&!FitContent) return;
-            const float padding=48, headingBand=132;
+            if(style==null||Content==null) return;
+            const float padding=48;
+            float headingBand=LocalizedLayout.Popup(Panel,(RectTransform)Panel.Find("Title"),Content);
             float width=Mathf.Max(1,Panel.rect.width-2*padding);
             var layout=Content.GetComponent<VerticalLayoutGroup>();
             if(layout==null) layout=Content.gameObject.AddComponent<VerticalLayoutGroup>();
@@ -84,13 +92,63 @@ namespace IndieGame.Shell.Unity.UI
                 if(label!=null) element.preferredHeight=Mathf.Max(32,label.GetPreferredValues(label.text,width,float.PositiveInfinity).y);
                 else if(button) element.preferredHeight=buttonSize.y;
             }
+            var actions=new List<RectTransform>();
+            foreach(Transform child in Content)
+            {
+                if(child==actionRow) {
+                    foreach(Transform action in actionRow) if(action.gameObject.activeSelf) actions.Add((RectTransform)action);
+                }
+                else if(child.gameObject.activeSelf && child.GetComponent<Button>()!=null && IsIconAction(child)) actions.Add((RectTransform)child);
+            }
+            if(actions.Count>0 && actions.Count<=3)
+            {
+                int index=actionRow!=null?actionRow.GetSiblingIndex():actions[0].GetSiblingIndex();
+                if(actionRow==null) {
+                    actionRow=ShellUiFactory.Node("Actions",Content);
+                    var row=actionRow.gameObject.AddComponent<HorizontalLayoutGroup>();
+                    row.childAlignment=TextAnchor.MiddleCenter; row.childControlWidth=false; row.childControlHeight=false;
+                    row.childForceExpandWidth=false; row.childForceExpandHeight=false;
+                    row.spacing=ShellLayout.Standard.PopupActionSpacing;
+                    actionRow.gameObject.AddComponent<LayoutElement>();
+                }
+                float desiredWidth=0,height=0;
+                foreach(var action in actions) {
+                    var category=action.GetComponent<LayoutCategory>();
+                    var size=category!=null && category.Category!=ShellLayoutCategory.PopupAction?ShellUiFactory.IconSize(category.Category):ShellLayout.Standard.PopupAction;
+                    desiredWidth=Mathf.Max(desiredWidth,size.x); height=Mathf.Max(height,size.y);
+                }
+                float actionWidth=Mathf.Min(desiredWidth,(width-(actions.Count-1)*ShellLayout.Standard.PopupActionSpacing)/actions.Count);
+                foreach(var action in actions) {
+                    action.SetParent(actionRow,false);
+                    var element=action.GetComponent<LayoutElement>()??action.gameObject.AddComponent<LayoutElement>();
+                    element.preferredWidth=actionWidth; element.preferredHeight=height;
+                    action.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,actionWidth);
+                    action.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical,height);
+                }
+                actionRow.SetSiblingIndex(index); actionRow.gameObject.SetActive(true);
+                actionRow.SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal,width);
+                actionRow.GetComponent<LayoutElement>().preferredHeight=height;
+            }
+            else if(actionRow!=null)
+            {
+                int index=actionRow.GetSiblingIndex();
+                foreach(var action in actions) { action.SetParent(Content,false); action.SetSiblingIndex(index++); }
+                actionRow.gameObject.SetActive(false);
+            }
             LayoutRebuilder.ForceRebuildLayoutImmediate(Content);
             float preferred=LayoutUtility.GetPreferredHeight(Content);
             var sizing=style.PopupLayout;
             float min=sizing.PanelMinHeight>0?sizing.PanelMinHeight:FitContent?ShellLayout.Standard.SessionPopupMinHeight:style.Theme.PanelSize.y;
             float max=sizing.PanelMaxHeight>0?sizing.PanelMaxHeight:FitContent?ShellLayout.Standard.SessionPopupMaxHeight:style.Theme.PanelSize.y;
-            Panel.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical,Mathf.Clamp(headingBand+preferred+padding,min,Mathf.Max(min,max)));
+            if(style.PopupLayout.PanelMaxHeight>0||FitContent)
+                Panel.SetSizeWithCurrentAnchors(RectTransform.Axis.Vertical,Mathf.Clamp(headingBand+preferred+padding,min,Mathf.Max(min,max)));
+            LocalizedLayout.Popup(Panel,(RectTransform)Panel.Find("Title"),Content);
             LayoutRebuilder.ForceRebuildLayoutImmediate(Content);
+        }
+        static bool IsIconAction(Transform button)
+        {
+            var category=button.GetComponent<LayoutCategory>();
+            return category!=null && (category.Category==ShellLayoutCategory.IconButton||category.Category==ShellLayoutCategory.IconAction||category.Category==ShellLayoutCategory.IconAmount);
         }
         public UiMotion Motion { get; internal set; }
         internal PopupHost Host;

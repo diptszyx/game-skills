@@ -14,6 +14,7 @@ namespace IndieGame.Shell.Unity.UI
         public Vector2 BackPosition => new Vector2(16,-16);
         public Vector2 HeaderRightPosition => new Vector2(-16,-16);
         public float IconHitSize => 96;
+        public float PopupActionSpacing => 12;
         public float ToggleRowWidth => 288;
         public Vector2 ButtonStandard => new Vector2(280,80);
         public Vector2 PopupAction => new Vector2(400,76);

@@ -149,12 +149,13 @@ namespace IndieGame.Shell.Tests
         [UnityTest] public IEnumerator OnlyTopPopupReceivesInput()
         {
             var a=Popup("A"); var b=Popup("B"); host.Open(a); host.Open(b); yield return null;
+            Assert.That(a.Group.alpha,Is.Zero);
             Assert.That(a.Group.interactable,Is.False); Assert.That(a.Group.blocksRaycasts,Is.False);
             Assert.That(a.InitialFocus.IsInteractable(),Is.False); Assert.That(b.InitialFocus.IsInteractable(),Is.True);
             Assert.That(b.Group.blocksRaycasts,Is.True); Assert.That(a.RequestDismiss(),Is.False);
             Assert.That(host.Back(),Is.True); Assert.That(b.Group.blocksRaycasts,Is.True);
             Assert.That(host.Back(),Is.False); yield return new WaitForSecondsRealtime(.12f);
-            Assert.That(host.Top,Is.SameAs(a));
+            Assert.That(host.Top,Is.SameAs(a)); Assert.That(a.Group.alpha,Is.EqualTo(1).Within(.01));
         }
         [UnityTest] public IEnumerator ReopenLowerMovesToTop()
         {

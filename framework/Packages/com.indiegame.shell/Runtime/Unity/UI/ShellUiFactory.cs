@@ -30,7 +30,11 @@ namespace IndieGame.Shell.Unity.UI
                 case "dayToday": image.sprite = s.DayCellToday; image.color = Color.white; break;
                 case "dayLocked": image.sprite = s.DayCellLocked; image.color = Color.white; break;
                 case "actionIcon": image.sprite=s.Icon(IconKey); image.color=s.ActionIconColor; break;
-                case "iconSurface": image.sprite=ShellIcons.Get(IconKey); image.color=s.ActionSurfaceColor; break;
+                case "iconSurface":
+                    var shape=IconKey=="_round"?s.RoundButtonSprite:s.PillButtonSprite;
+                    image.sprite=shape!=null?shape:ShellIcons.Get(IconKey);
+                    image.type=IconKey=="_round"?Image.Type.Simple:Image.Type.Sliced;
+                    image.color=shape!=null?Color.white:s.ActionSurfaceColor; break;
                 case "tabIcon": image.sprite = s.TabIcon(IconKey); image.color = Selected ? s.TabSelectedTint : s.TabUnselectedTint; break;
                 case "screen": image.sprite = s.ScreenBackground; image.color = s.ScreenColor; break;
                 case "row": image.sprite = s.ListRowSprite; image.color = s.ListRowColor; break;
@@ -114,12 +118,12 @@ namespace IndieGame.Shell.Unity.UI
         public Button IconButton(Transform parent,string key,string label,Action clicked=null,ShellLayoutCategory category=ShellLayoutCategory.IconButton,string amount=null,string secondIcon=null,string accessibilityKey=null)
         {
             var r=Node(label,parent); var size=IconSize(category); r.sizeDelta=size; LayoutCategory.Record(r,category);
-            var image=r.gameObject.AddComponent<Image>(); image.sprite=ShellIcons.Get(category==ShellLayoutCategory.IconButton?"_round":"_pill"); image.color=Style.ActionSurfaceColor;
+            var image=r.gameObject.AddComponent<Image>();
             if(category==ShellLayoutCategory.IconButton) {
                 float padding=(ShellLayout.Standard.IconHitSize-size.x)/2;
                 image.raycastPadding=new Vector4(-padding,-padding,-padding,-padding);
             }
-            var appearance=r.gameObject.AddComponent<ShellAppearance>(); appearance.Role="iconSurface"; appearance.IconKey=category==ShellLayoutCategory.IconButton?"_round":"_pill";
+            var appearance=r.gameObject.AddComponent<ShellAppearance>(); appearance.Role="iconSurface"; appearance.IconKey=category==ShellLayoutCategory.IconButton?"_round":"_pill"; appearance.Apply(Style);
             var b=r.gameObject.AddComponent<Button>(); b.targetGraphic=image; b.transition=Selectable.Transition.None;
             if(clicked!=null) b.onClick.AddListener(()=>clicked());
             r.gameObject.AddComponent<ActionAccessibility>().Set(accessibilityKey??key,label);
