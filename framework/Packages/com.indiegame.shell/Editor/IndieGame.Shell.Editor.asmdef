@@ -1,0 +1,8 @@
+{
+  "name": "IndieGame.Shell.Editor",
+  "rootNamespace": "IndieGame.Shell.Editor",
+  "references": [],
+  "includePlatforms": [
+    "Editor"
+  ]
+}

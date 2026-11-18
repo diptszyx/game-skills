@@ -1,0 +1,12 @@
+{
+  "name": "IndieGame.Shell.Tests.EditMode.TextureImport",
+  "references": [
+    "IndieGame.Shell.Editor"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "optionalUnityReferences": [
+    "TestAssemblies"
+  ]
+}

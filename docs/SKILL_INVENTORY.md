@@ -68,13 +68,13 @@ Trạng thái: hoàn tất kiểm kê 12 miền, 182 bài học; kiểm chéo v�
 | A11. Gắn cờ confidence thấp và buộc xem QA; cache phải khớp nguồn/prompt trước khi tái dùng. | game-2/docs/ASSET_PIPELINE.md:46 | G2 | thiếu |
 | A12. Dùng ảnh đảo đã duyệt làm nguồn duy nhất khi tách vật động, không sinh lại cả đảo. | game-2/docs/ASSET_PIPELINE.md:42; game-2/docs/POLISH_RETRO.md:16 | G2 | thiếu |
 | A13. Đi đúng quy trình neo hướng của sprite-gen và đo cỡ trên ảnh nguồn trước khi cắt khung. | game-1/docs/PHASE1_RETRO.md:70; game-1/docs/PHASE1_RETRO.md:71 | G1 | thiếu |
-| A14. Kiểm đầu ra thực sự đổi khi sửa prompt; ép sinh lại nếu công cụ bỏ hàng đã có. | game-2/docs/SPRITE_RETRO.md:17 | G2 | thiếu |
-| A15. Khớp camera, neo chân, bóng tiếp đất và ánh sáng sprite với sàn trước khi sản xuất chuyển động. | game-2/docs/SPRITE_RETRO.md:30; game-2/docs/PENGUIN2D_RETRO.md:13 | G2 | thiếu |
-| A16. Giữ PNG nguồn, build atlas theo màn/tính năng và kiểm nén Android, không sửa trực tiếp trang atlas. | knowledge/colony-flow-research/11-sprite-png-atlas.md:32; knowledge/colony-flow-research/11-sprite-png-atlas.md:35 | CF/G2 | thiếu |
-| A17. Đặt Full Rect, border và Image Sliced cho khung co giãn; kiểm border của sprite đang dùng và rect tối thiểu. | lessons/bai-hoc-chung.md:134; game-2/docs/UI_MATTE_RETRO.md:15 | G2 | có art-standard/validator; thiếu công thức PPU |
-| A18. Chọn mipmap theo mức thu nhỏ và đo A/B trên máy, không áp lệnh tắt mipmap UI cho mọi sprite. | game-2/docs/UI_MATTE_RETRO.md:16; knowledge/colony-flow-research/11-sprite-png-atlas.md:33 | G2/CF | thiếu; nguồn mâu thuẫn cần C01 |
-| A19. Tách preset pixel-art (nearest, integer scale, alpha cứng) khỏi UI vẽ mịn và kiểm sau import. | game-1/docs/ART.md:32; learning/game/pixel-art-fundamentals.md:389; learning/game/pixel-art-fundamentals.md:392 | G1/chung | thiếu |
-| A20. Ghi prompt, model/phiên bản, nguồn và phép sinh lại ở nơi bền; đổi nguồn chung phải liệt kê đầu ra cần làm lại. | game-1/docs/ART.md:21; game-1/docs/PHASE1_RETRO.md:69; game-2/docs/ART.md:126 | G1/G2 | thiếu |
+| A14. Kiểm đầu ra thực sự đổi khi sửa prompt; ép sinh lại nếu công cụ bỏ hàng đã có. | game-2/docs/SPRITE_RETRO.md:17 | G2 | có (skill sprite-import-atlas) |
+| A15. Khớp camera, neo chân, bóng tiếp đất và ánh sáng sprite với sàn trước khi sản xuất chuyển động. | game-2/docs/SPRITE_RETRO.md:30; game-2/docs/PENGUIN2D_RETRO.md:13 | G2 | có (skill sprite-import-atlas) |
+| A16. Giữ PNG nguồn, build atlas theo màn/tính năng và kiểm nén Android, không sửa trực tiếp trang atlas. | knowledge/colony-flow-research/11-sprite-png-atlas.md:32; knowledge/colony-flow-research/11-sprite-png-atlas.md:35 | CF/G2 | có (skill sprite-import-atlas) |
+| A17. Đặt Full Rect, border và Image Sliced cho khung co giãn; kiểm border của sprite đang dùng và rect tối thiểu. | lessons/bai-hoc-chung.md:134; game-2/docs/UI_MATTE_RETRO.md:15 | G2 | có (skill sprite-import-atlas) |
+| A18. Chọn mipmap theo mức thu nhỏ và đo A/B trên máy, không áp lệnh tắt mipmap UI cho mọi sprite. | game-2/docs/UI_MATTE_RETRO.md:16; knowledge/colony-flow-research/11-sprite-png-atlas.md:33 | G2/CF | có (skill sprite-import-atlas) |
+| A19. Tách preset pixel-art (nearest, integer scale, alpha cứng) khỏi UI vẽ mịn và kiểm sau import. | game-1/docs/ART.md:32; learning/game/pixel-art-fundamentals.md:389; learning/game/pixel-art-fundamentals.md:392 | G1/chung | có (skill sprite-import-atlas) |
+| A20. Ghi prompt, model/phiên bản, nguồn và phép sinh lại ở nơi bền; đổi nguồn chung phải liệt kê đầu ra cần làm lại. | game-1/docs/ART.md:21; game-1/docs/PHASE1_RETRO.md:69; game-2/docs/ART.md:126 | G1/G2 | có (skill sprite-import-atlas) |
 
 ### 1.4 3d-look — hình, material, đèn, render, toon
 | ID / hành động kiểm được | Nguồn | Game | Skill hiện tại |
