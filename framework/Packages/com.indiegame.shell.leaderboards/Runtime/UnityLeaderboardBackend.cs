@@ -21,8 +21,7 @@ namespace IndieGame.Shell.Leaderboards
         }
 
         static LeaderboardEntry Map(SdkEntry entry) => new LeaderboardEntry(
-            string.IsNullOrWhiteSpace(entry.PlayerName) ? entry.PlayerId : entry.PlayerName,
-            (long)entry.Score, entry.Rank + 1);
+            entry.PlayerId, (long)entry.Score, entry.Rank + 1, entry.PlayerName);
 
         // Normalize SDK transport/auth failures without leaking SDK types into the service core.
         static async Task<T> Request<T>(Func<Task<T>> request)

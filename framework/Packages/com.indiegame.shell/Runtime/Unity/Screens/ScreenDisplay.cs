@@ -19,15 +19,18 @@ namespace IndieGame.Shell.Unity.Screens
         public string Amount { get; }
         public string Detail { get; }
         public bool Highlight { get; }
-        public RowDisplay(string id, string text, string action = "", bool enabled = false, float progress = -1,string icon="check",string amount=null,string detail=null,bool highlight=false)
-        { Id=id; Text=text; Action=action; Enabled=enabled; Progress=progress; Icon=icon; Amount=amount; Detail=detail; Highlight=highlight; }
+        public ScoreColumns Columns { get; }
+        public RowDisplay(string id, string text, string action = "", bool enabled = false, float progress = -1,string icon="check",string amount=null,string detail=null,bool highlight=false,ScoreColumns columns=null)
+        { Id=id; Text=text; Action=action; Enabled=enabled; Progress=progress; Icon=icon; Amount=amount; Detail=detail; Highlight=highlight; Columns=columns; }
     }
     public sealed class ListDisplay
     {
         public string Title { get; }
         public string Empty { get; }
         public IReadOnlyList<RowDisplay> Rows { get; }
-        public ListDisplay(string title, IReadOnlyList<RowDisplay> rows, string empty = "") { Title=title; Rows=rows; Empty=empty; }
+        public RowDisplay Pinned { get; }
+        public string Caption { get; }
+        public ListDisplay(string title, IReadOnlyList<RowDisplay> rows, string empty = "", RowDisplay pinned = null, string caption = null) { Title=title; Rows=rows; Empty=empty; Pinned=pinned; Caption=caption; }
     }
     // Unity lifetime only; presenters and views remain ordinary objects.
     public sealed class ScreenLifetime : MonoBehaviour
@@ -109,29 +112,36 @@ namespace IndieGame.Shell.Unity.Screens
             fill=style.ProgressFillColor; fill.a=1;
             if(ShellStyle.Contrast(fill,track)<FillMinContrast) fill=text;
         }
-        static void OpaqueCard(Image card)
+        internal static void OpaqueCard(Image card)
         { var c=card.color; c.a=Mathf.Max(c.a,MinRowOpacity); card.color=c; }
+        internal static void Clear(Transform parent)
+        {
+            for(int i=parent.childCount-1;i>=0;i--) { var child=parent.GetChild(i); child.gameObject.SetActive(false); if(Application.isPlaying) UnityEngine.Object.Destroy(child.gameObject); else UnityEngine.Object.DestroyImmediate(child.gameObject); }
+        }
         internal static void Rows(ShellUiFactory f, RectTransform content, IReadOnlyList<RowDisplay> rows, Action<string> clicked)
         {
-            for(int i=content.childCount-1;i>=0;i--) { var child=content.GetChild(i); child.gameObject.SetActive(false); if(Application.isPlaying) UnityEngine.Object.Destroy(child.gameObject); else UnityEngine.Object.DestroyImmediate(child.gameObject); }
-            foreach(var row in rows)
+            Clear(content);
+            foreach(var row in rows) AddRow(f,content,row,clicked);
+        }
+        internal static RectTransform AddRow(ShellUiFactory f, RectTransform content, RowDisplay row, Action<string> clicked)
+        {
+            var r=f.ListRow(content,""); var text=r.GetComponentInChildren<TMP_Text>(); text.text=row.Text;
+            if(row.Columns!=null) { ScoreRow.Fill(f,r,text,row.Columns); return r; }
+            OpaqueCard(r.GetComponent<Image>()); LayoutRowText(r,text,f,row);
+            if(row.Progress>=0)
             {
-                var r=f.ListRow(content,""); var text=r.GetComponentInChildren<TMP_Text>(); text.text=row.Text;
-                OpaqueCard(r.GetComponent<Image>()); LayoutRowText(r,text,f,row);
-                if(row.Progress>=0)
-                {
-                    ProgressColors(f.Style,out var trackColor,out var fillColor);
-                    var track=ShellUiFactory.Node("Progress",r); track.anchorMin=Vector2.zero; track.anchorMax=new Vector2(.64f,0); track.pivot=Vector2.zero; track.offsetMin=new Vector2(ProgressInset,ProgressBottom); track.offsetMax=new Vector2(-8,ProgressBottom+ProgressHeight);
-                    track.gameObject.AddComponent<Image>().color=trackColor;
-                    var fill=ShellUiFactory.Node("Fill",track); fill.anchorMin=Vector2.zero; fill.anchorMax=new Vector2(Mathf.Clamp01(row.Progress),1); fill.offsetMin=fill.offsetMax=Vector2.zero;
-                    fill.gameObject.AddComponent<Image>().color=fillColor; fill.gameObject.SetActive(true); track.gameObject.SetActive(true);
-                }
-                if(row.Highlight) text.fontStyle=FontStyles.Bold;
-                if(!string.IsNullOrEmpty(row.Action))
-                { var b=f.IconButton(r,row.Icon,row.Action,()=>clicked(row.Id),row.Amount!=null?ShellLayoutCategory.IconAmount:ShellLayoutCategory.IconAction,row.Amount); b.interactable=row.Enabled;
-                  var rt=(RectTransform)b.transform; rt.anchorMin=rt.anchorMax=new Vector2(1,.5f); rt.pivot=new Vector2(1,.5f); rt.anchoredPosition=new Vector2(-12,0);
- }
+                ProgressColors(f.Style,out var trackColor,out var fillColor);
+                var track=ShellUiFactory.Node("Progress",r); track.anchorMin=Vector2.zero; track.anchorMax=new Vector2(.64f,0); track.pivot=Vector2.zero; track.offsetMin=new Vector2(ProgressInset,ProgressBottom); track.offsetMax=new Vector2(-8,ProgressBottom+ProgressHeight);
+                track.gameObject.AddComponent<Image>().color=trackColor;
+                var fill=ShellUiFactory.Node("Fill",track); fill.anchorMin=Vector2.zero; fill.anchorMax=new Vector2(Mathf.Clamp01(row.Progress),1); fill.offsetMin=fill.offsetMax=Vector2.zero;
+                fill.gameObject.AddComponent<Image>().color=fillColor; fill.gameObject.SetActive(true); track.gameObject.SetActive(true);
             }
+            if(row.Highlight) text.fontStyle=FontStyles.Bold;
+            if(!string.IsNullOrEmpty(row.Action))
+            { var b=f.IconButton(r,row.Icon,row.Action,()=>clicked(row.Id),row.Amount!=null?ShellLayoutCategory.IconAmount:ShellLayoutCategory.IconAction,row.Amount); b.interactable=row.Enabled;
+              var rt=(RectTransform)b.transform; rt.anchorMin=rt.anchorMax=new Vector2(1,.5f); rt.pivot=new Vector2(1,.5f); rt.anchoredPosition=new Vector2(-12,0);
+            }
+            return r;
         }
     }
     internal sealed class ListSurface
@@ -141,7 +151,9 @@ namespace IndieGame.Shell.Unity.Screens
         readonly ShellUiFactory factory;
         readonly TMP_Text title,empty,error;
         readonly ScrollRect list; readonly RectTransform emptyCard; readonly PopupView modal;
-        int rowCount;
+        const float CaptionHeight=40,CaptionFont=24,CaptionInset=16;
+        RectTransform pinnedHost; TMP_Text caption;
+        int rowCount; float footerHeight,errorHeight;
         internal ListSurface(ShellUiFactory factory, Transform parent, string name, PopupView modal=null)
         {
             this.factory=factory; this.modal=modal;
@@ -153,13 +165,19 @@ namespace IndieGame.Shell.Unity.Screens
             }
             else { Root=factory.ScreenRoot(parent,name); title=ScreenWidgets.Heading(factory,Root); body=ScreenWidgets.Body(factory,Root); }
             Lifetime=Root.gameObject.AddComponent<ScreenLifetime>();
-            list=factory.ScrollList(body); list.GetComponent<RectTransform>().offsetMin=new Vector2(0,modal!=null?0:100);
+            list=factory.ScrollList(body);
             list.gameObject.AddComponent<SwipeForwarder>();
             if(factory.Style.EnableHomeChrome && modal==null) { emptyCard=ScreenWidgets.EmptyCard(factory,Root); empty=emptyCard.GetComponentInChildren<TMP_Text>(true); }
             else if(modal!=null) { emptyCard=ScreenWidgets.EmptyCard(factory,body,true); empty=emptyCard.GetComponentInChildren<TMP_Text>(true); }
             else empty=factory.Label(body,"");
             error=factory.Label(body,""); error.rectTransform.anchorMin=error.rectTransform.anchorMax=new Vector2(.5f,0);
-            error.rectTransform.anchoredPosition=new Vector2(0,modal!=null?ScreenWidgets.ModalFooterErrorHeight/2:45);
+            ApplyBottom();
+        }
+        float BaseBottom=>modal!=null?0:100;
+        void ApplyBottom()
+        {
+            list.GetComponent<RectTransform>().offsetMin=new Vector2(0,BaseBottom+footerHeight+errorHeight);
+            error.rectTransform.anchoredPosition=new Vector2(0,(modal!=null?ScreenWidgets.ModalFooterErrorHeight/2:45)+footerHeight);
         }
         internal static RectTransform ModalRoot(PopupView modal,string name)
         { var root=ShellUiFactory.Node(name,modal.Content); ShellUiFactory.Stretch(root); root.gameObject.SetActive(true); return root; }
@@ -168,13 +186,38 @@ namespace IndieGame.Shell.Unity.Screens
             title.text=display.Title; empty.text=display.Empty;
             bool showEmpty=display.Rows.Count==0; (emptyCard!=null?emptyCard.gameObject:empty.gameObject).SetActive(showEmpty);
             ScreenWidgets.Rows(factory,list.content,display.Rows,clicked);
-            rowCount=display.Rows.Count; FitModal();
+            rowCount=display.Rows.Count; ShowFooter(display.Pinned,display.Caption); FitModal();
+        }
+        void ShowFooter(RowDisplay pinned,string captionText)
+        {
+            bool hasCaption=!string.IsNullOrEmpty(captionText);
+            if(pinned==null&&!hasCaption&&pinnedHost==null) return;
+            if(pinnedHost==null) BuildFooter();
+            ScreenWidgets.Clear(pinnedHost); pinnedHost.gameObject.SetActive(true);
+            if(pinned!=null) ShellUiFactory.Stretch(ScreenWidgets.AddRow(factory,pinnedHost,pinned,_=>{}));
+            else pinnedHost.gameObject.SetActive(false);
+            caption.text=hasCaption?captionText:""; caption.gameObject.SetActive(hasCaption);
+            float captionHeight=hasCaption?CaptionHeight:0;
+            pinnedHost.anchoredPosition=new Vector2(0,BaseBottom+captionHeight);
+            footerHeight=captionHeight+(pinned!=null?ShellLayout.Standard.Row.y+factory.Style.Spacing:0);
+            ApplyBottom();
+        }
+        void BuildFooter()
+        {
+            var body=(RectTransform)list.transform.parent;
+            pinnedHost=ShellUiFactory.Node("Pinned",body); pinnedHost.anchorMin=Vector2.zero; pinnedHost.anchorMax=new Vector2(1,0); pinnedHost.pivot=new Vector2(.5f,0);
+            pinnedHost.sizeDelta=new Vector2(0,ShellLayout.Standard.Row.y);
+            caption=factory.Label(body,""); caption.gameObject.name="Caption";
+            caption.alignment=TextAlignmentOptions.MidlineLeft; caption.enableAutoSizing=false; caption.fontSize=CaptionFont;
+            caption.textWrappingMode=TextWrappingModes.NoWrap; caption.overflowMode=TextOverflowModes.Ellipsis;
+            var rect=caption.rectTransform; rect.anchorMin=Vector2.zero; rect.anchorMax=new Vector2(1,0); rect.pivot=new Vector2(.5f,0);
+            rect.offsetMin=new Vector2(CaptionInset,BaseBottom); rect.offsetMax=new Vector2(-CaptionInset,BaseBottom+CaptionHeight);
         }
         internal void Error(string text)
         {
             error.text=text; if(modal==null) return;
-            list.GetComponent<RectTransform>().offsetMin=new Vector2(0,string.IsNullOrEmpty(text)?0:ScreenWidgets.ModalFooterErrorHeight);
-            FitModal();
+            errorHeight=string.IsNullOrEmpty(text)?0:ScreenWidgets.ModalFooterErrorHeight;
+            ApplyBottom(); FitModal();
         }
         void FitModal()
         {

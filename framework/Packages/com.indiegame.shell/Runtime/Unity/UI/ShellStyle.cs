@@ -46,7 +46,11 @@ namespace IndieGame.Shell.Unity.UI
         // ActionSurfaceColor tints fallback shapes; custom button sprites render white.
         public Color ActionSurfaceColor=new Color(.10f,.28f,.36f,1), ActionIconColor=Color.white;
         public List<TabIconEntry> Icons = new List<TabIconEntry>();
-        public Sprite Icon(string key) { var entry=Icons.Find(e=>e!=null&&e.Key==key&&e.Sprite!=null); return entry!=null?entry.Sprite:ShellIcons.Get(key); }
+        public Sprite StyleIcon(string key) { var entry=Icons.Find(e=>e!=null&&e.Key==key&&e.Sprite!=null); return entry!=null?entry.Sprite:null; }
+        public Sprite Icon(string key) { var icon=StyleIcon(key); return icon!=null?icon:ShellIcons.Get(key); }
+        // Leaderboard: rank tints for places 1-3, and the player's own pill with its text.
+        public Color LeaderboardGoldColor=new Color(.90f,.59f,0,1), LeaderboardSilverColor=new Color(.43f,.49f,.59f,1), LeaderboardBronzeColor=new Color(.67f,.39f,.20f,1);
+        public Color LeaderboardOwnRowColor=new Color(1,.84f,.36f,1), LeaderboardOwnRowTextColor=new Color(.09f,.19f,.43f,1);
         public List<TabIconEntry> TabIcons = new List<TabIconEntry>();
         public Color TabSelectedTint = Color.white, TabUnselectedTint = new Color(.7f,.7f,.8f); public Color TabLabelColor = Color.white;
         public Color ScreenTitleColorOverride = Color.clear;

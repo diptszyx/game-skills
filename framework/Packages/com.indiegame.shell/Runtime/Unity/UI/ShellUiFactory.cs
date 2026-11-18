@@ -38,6 +38,8 @@ namespace IndieGame.Shell.Unity.UI
                 case "tabIcon": image.sprite = s.TabIcon(IconKey); image.color = Selected ? s.TabSelectedTint : s.TabUnselectedTint; break;
                 case "screen": image.sprite = s.ScreenBackground; image.color = s.ScreenColor; break;
                 case "row": image.sprite = s.ListRowSprite; image.color = s.ListRowColor; break;
+                case "ownRow": image.sprite = s.ListRowSprite; image.color = s.LeaderboardOwnRowColor; break;
+                case "scoreIcon": image.sprite = s.StyleIcon("scoreIcon"); image.color = Color.white; break;
                 case "panel": image.sprite = s.Theme.PanelSprite; image.color = s.SurfaceColor; image.pixelsPerUnitMultiplier = s.Theme.PanelPixelsPerUnitMultiplier; break;
                 case "scrim": image.sprite = s.ScreenBackground; image.color = s.Theme.ScrimColor; break;
                 case "button":

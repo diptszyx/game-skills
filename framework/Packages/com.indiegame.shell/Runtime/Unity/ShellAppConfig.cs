@@ -54,6 +54,8 @@ namespace IndieGame.Shell.Unity
         // Optional. Own best score shown as an unranked row when the board has no entry for the player or is unreachable.
         public Func<long> LeaderboardLocalBest;
         public int LeaderboardRows = 10;
+        // Optional. Localization key or plain text for the one-line caption under the leaderboard (e.g. what the score counts); null hides it.
+        public string LeaderboardCaption;
         public IDictionary<string,AudioClip> Sounds;
         public Func<ShellGameContext,RectTransform> GameScreenFactory;
         // Optional. Builds game decoration for Home; see HomeStageBuilder for the placement and fit contract.

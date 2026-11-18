@@ -125,7 +125,27 @@ namespace IndieGame.Shell
         public string PlayerId { get; }
         public long Score { get; }
         public int Rank { get; }
-        public LeaderboardEntry(string playerId, long score, int rank) { PlayerId = playerId; Score = score; Rank = rank; }
+        public string PlayerName { get; }
+        public LeaderboardEntry(string playerId, long score, int rank, string playerName = null) { PlayerId = playerId; Score = score; Rank = rank; PlayerName = playerName; }
+        const int RawIdMinLength = 20, SuffixLength = 4;
+        // A blank name, or one that is really a service id, shows as "Player" plus the last characters of the id.
+        public string DisplayName
+        {
+            get
+            {
+                var name = string.IsNullOrWhiteSpace(PlayerName) ? PlayerId : PlayerName;
+                if (string.IsNullOrWhiteSpace(name)) return "Player";
+                if (!LooksLikeRawId(name)) return name.Trim();
+                var id = string.IsNullOrWhiteSpace(PlayerId) ? name : PlayerId;
+                return "Player" + id.Substring(Math.Max(0, id.Length - SuffixLength));
+            }
+        }
+        static bool LooksLikeRawId(string name)
+        {
+            if (name.Length < RawIdMinLength) return false;
+            foreach (var c in name) if (!char.IsLetterOrDigit(c) && c != '-') return false;
+            return true;
+        }
     }
     public interface ILeaderboardService
     {

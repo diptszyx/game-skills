@@ -174,9 +174,110 @@ namespace IndieGame.Shell.Tests
             Assert.That(card.gameObject.activeSelf,Is.True); Assert.That(InPanel(frame,card).height,Is.EqualTo(RowHeight).Within(.5f));
             Assert.That(frame.Panel.rect.height,Is.EqualTo(f.Factory.Style.Modal.MinHeightFraction*Area).Within(.5f));
             view.Render(new LeaderboardSnapshot{State=LeaderboardState.Populated,Entries=new[]{new LeaderboardEntry("ann",90,1),new LeaderboardEntry("me",70,2),new LeaderboardEntry("bob",50,3)},MyRank=new LeaderboardEntry("me",70,2)},text);
-            var rows=view.Root.GetComponentsInChildren<Image>(true).Where(i=>i.name=="List Row").ToArray(); Assert.That(rows.Length,Is.EqualTo(3),"own rank row is not repeated when the player is in the list");
-            Assert.That(rows.Select(r=>r.GetComponentInChildren<TMP_Text>().fontStyle.HasFlag(FontStyles.Bold)).ToArray(),Is.EqualTo(new[]{false,true,false}),"own entry is bold");
+            var rows=BoardRows(view); Assert.That(rows.Length,Is.EqualTo(3),"own rank row is not repeated when the player is in the list");
+            Assert.That(rows.Select(r=>Column(r,"Name").GetComponent<TMP_Text>().fontStyle.HasFlag(FontStyles.Bold)).ToArray(),Is.EqualTo(new[]{false,true,false}),"own entry is bold");
             Assert.That(view.Root.GetComponentsInChildren<RectTransform>(true).Any(r=>r.name=="Highlight"),Is.False,"no accent bar");
+        }
+
+        LeaderboardView OpenBoard(out PopupView frame,string caption=null)
+        {
+            frame=modals.CreateFrame(ShellScreen.Leaderboard,"Close"); SetArea(frame);
+            var view=new LeaderboardView(f.Factory,f.Root.transform,frame,caption); modals.Open(ShellScreen.Leaderboard); return view;
+        }
+        ScreenText BoardText()=>new ScreenText(f.Session,ScreenTestData.Text());
+        static LeaderboardSnapshot Populated(LeaderboardEntry mine,params LeaderboardEntry[] entries)=>new LeaderboardSnapshot{State=LeaderboardState.Populated,Entries=entries,MyRank=mine};
+        static Image[] BoardRows(LeaderboardView view)=>view.Root.GetComponentsInChildren<Image>(true).Where(i=>i.name=="List Row").ToArray();
+        static RectTransform Column(Image row,string name)=>row.GetComponentsInChildren<RectTransform>(true).First(r=>r.name==name);
+        static void Settle(LeaderboardView view)=>LayoutRebuilder.ForceRebuildLayoutImmediate(view.Root.GetComponentInChildren<ScrollRect>(true).content);
+        static Rect InRow(Image row,RectTransform rect)
+        {
+            var corners=new Vector3[4]; rect.GetWorldCorners(corners);
+            var a=row.rectTransform.InverseTransformPoint(corners[0]); var b=row.rectTransform.InverseTransformPoint(corners[2]);
+            return Rect.MinMaxRect(a.x,a.y,b.x,b.y);
+        }
+        static bool SameRgb(Color a,Color b)=>Mathf.Abs(a.r-b.r)<.002f&&Mathf.Abs(a.g-b.g)<.002f&&Mathf.Abs(a.b-b.b)<.002f;
+        [Test] public void LeaderboardRowColumnsStayInsideTheRowWithoutOverlap() { CheckColumns(false); }
+        [Test] public void LeaderboardScoreIconSitsBetweenTheNameAndTheRowEdge() { CheckColumns(true); }
+        void CheckColumns(bool withIcon)
+        {
+            var icon=Sprite.Create(Texture2D.whiteTexture,new Rect(0,0,4,4),Vector2.zero);
+            try
+            {
+                if(withIcon) f.Factory.Style.Icons.Add(new ShellStyle.TabIconEntry{Key="scoreIcon",Sprite=icon});
+                var view=OpenBoard(out _); view.Render(Populated(null,new LeaderboardEntry("a",1234567,1),new LeaderboardEntry("b",5,12)),BoardText()); Settle(view);
+                foreach(var row in BoardRows(view))
+                {
+                    var bounds=row.rectTransform.rect; var rank=InRow(row,Column(row,"Rank")); var name=InRow(row,Column(row,"Name")); var score=InRow(row,Column(row,"Score"));
+                    foreach(var column in new[]{rank,name,score})
+                    { Assert.That(column.xMin,Is.GreaterThanOrEqualTo(bounds.xMin-.5f)); Assert.That(column.xMax,Is.LessThanOrEqualTo(bounds.xMax+.5f)); Assert.That(column.yMin,Is.GreaterThanOrEqualTo(bounds.yMin-.5f)); Assert.That(column.yMax,Is.LessThanOrEqualTo(bounds.yMax+.5f)); }
+                    Assert.That(rank.xMax,Is.LessThanOrEqualTo(name.xMin+.5f),"rank left of name"); Assert.That(name.xMax,Is.LessThanOrEqualTo(score.xMin+.5f),"name left of score");
+                    Assert.That(row.rectTransform.Find("Score icon")!=null,Is.EqualTo(withIcon),"icon only when the style provides scoreIcon");
+                    if(!withIcon) continue;
+                    var picture=InRow(row,(RectTransform)row.rectTransform.Find("Score icon"));
+                    Assert.That(picture.xMin,Is.GreaterThanOrEqualTo(name.xMax-.5f),"icon clear of the name"); Assert.That(picture.xMax,Is.LessThanOrEqualTo(score.xMax+.5f));
+                    Assert.That(picture.yMin,Is.GreaterThanOrEqualTo(bounds.yMin-.5f)); Assert.That(picture.yMax,Is.LessThanOrEqualTo(bounds.yMax+.5f));
+                }
+            }
+            finally { Object.DestroyImmediate(icon); }
+        }
+        [Test] public void LeaderboardRankColoursTintOnlyTheTopThree()
+        {
+            var view=OpenBoard(out _); var style=f.Factory.Style;
+            view.Render(Populated(null,Enumerable.Range(1,4).Select(i=>new LeaderboardEntry("p"+i,100-i,i)).ToArray()),BoardText());
+            var colours=BoardRows(view).Select(r=>Column(r,"Rank").GetComponent<TMP_Text>().color).ToArray();
+            Assert.That(SameRgb(colours[0],style.LeaderboardGoldColor),Is.True); Assert.That(SameRgb(colours[1],style.LeaderboardSilverColor),Is.True);
+            Assert.That(SameRgb(colours[2],style.LeaderboardBronzeColor),Is.True); Assert.That(SameRgb(colours[3],style.ListRowTextColor),Is.True,"rank 4 uses the plain row text colour");
+        }
+        [Test] public void LeaderboardOwnRowIsHighlightedInPlaceAndNotRepeated()
+        {
+            var view=OpenBoard(out _); var style=f.Factory.Style; var me=new LeaderboardEntry("me",70,1);
+            view.Render(Populated(me,new LeaderboardEntry("ann",90,2),me,new LeaderboardEntry("bob",50,3)),BoardText());
+            var rows=BoardRows(view); Assert.That(rows.Length,Is.EqualTo(3));
+            Assert.That(rows.Select(r=>SameRgb(r.color,style.LeaderboardOwnRowColor)).ToArray(),Is.EqualTo(new[]{false,true,false}),"pill colour on the player's row only");
+            Assert.That(SameRgb(Column(rows[1],"Rank").GetComponent<TMP_Text>().color,style.LeaderboardOwnRowTextColor),Is.True,"podium tint does not fight the pill");
+            Assert.That(rows.Any(r=>r.transform.parent.name=="Pinned"),Is.False);
+        }
+        [Test] public void LeaderboardUnrankedOwnRowIsPinnedWithADash()
+        {
+            var view=OpenBoard(out var frame); var style=f.Factory.Style;
+            view.Render(Populated(new LeaderboardEntry("you",42,0),new LeaderboardEntry("ann",90,1),new LeaderboardEntry("bob",50,2)),BoardText()); Settle(view);
+            var rows=BoardRows(view); Assert.That(rows.Length,Is.EqualTo(3)); var pinned=rows.Single(r=>r.transform.parent.name=="Pinned");
+            Assert.That(Column(pinned,"Rank").GetComponent<TMP_Text>().text,Is.EqualTo("-")); Assert.That(Column(pinned,"Name").GetComponent<TMP_Text>().text,Is.EqualTo("You"));
+            Assert.That(Column(pinned,"Score").GetComponent<TMP_Text>().text,Is.EqualTo("42")); Assert.That(SameRgb(pinned.color,style.LeaderboardOwnRowColor),Is.True);
+            var panel=frame.Panel.rect; var pinnedRect=InPanel(frame,pinned.rectTransform); var lowestList=rows.Where(r=>r!=pinned).Min(r=>InPanel(frame,r.rectTransform).yMin);
+            Assert.That(pinnedRect.yMax,Is.LessThanOrEqualTo(lowestList+.5f),"pinned below the list rows"); Assert.That(pinnedRect.yMin,Is.GreaterThanOrEqualTo(panel.yMin-.5f)); Assert.That(pinnedRect.height,Is.EqualTo(RowHeight).Within(.5f));
+            Assert.That(InPanel(frame,view.Root.GetComponentInChildren<ScrollRect>(true).GetComponent<RectTransform>()).yMin,Is.GreaterThanOrEqualTo(pinnedRect.yMax-.5f),"scroll area stops above the pinned row");
+        }
+        [Test] public void LeaderboardLongNamesEllipsizeAndNeverWrap()
+        {
+            var view=OpenBoard(out _); view.Render(Populated(null,new LeaderboardEntry("a",1,1,"An extremely long player name that cannot possibly fit in the column")),BoardText()); Settle(view);
+            var row=BoardRows(view).Single(); var rect=Column(row,"Name"); var name=rect.GetComponent<TMP_Text>();
+            Assert.That(name.textWrappingMode,Is.EqualTo(TextWrappingModes.NoWrap)); Assert.That(name.overflowMode,Is.EqualTo(TextOverflowModes.Ellipsis)); Assert.That(name.enableAutoSizing,Is.False);
+            Assert.That(name.GetPreferredValues(name.text,float.PositiveInfinity,float.PositiveInfinity).x,Is.GreaterThan(rect.rect.width),"the name really overflows");
+            Assert.That(name.GetPreferredValues(name.text,rect.rect.width,rect.rect.height).y,Is.LessThanOrEqualTo(rect.rect.height+.5f),"single line");
+            Assert.That(InRow(row,rect).xMax,Is.LessThanOrEqualTo(InRow(row,Column(row,"Score")).xMin+.5f));
+        }
+        [Test] public void LeaderboardNamesFallBackToPlayerPlusLastFourOfAnId()
+        {
+            const string id="abcdefghij1234567890WXYZ";
+            Assert.That(new LeaderboardEntry(id,1,1).DisplayName,Is.EqualTo("PlayerWXYZ")); Assert.That(new LeaderboardEntry(id,1,1,id).DisplayName,Is.EqualTo("PlayerWXYZ"));
+            Assert.That(new LeaderboardEntry(id,1,1,"  ").DisplayName,Is.EqualTo("PlayerWXYZ")); Assert.That(new LeaderboardEntry(id,1,1,"Nora#4821").DisplayName,Is.EqualTo("Nora#4821"));
+            Assert.That(new LeaderboardEntry("River",1,1).DisplayName,Is.EqualTo("River"),"entries built from a name only keep it");
+        }
+        [Test] public void LeaderboardCaptionIsHiddenWhenNull()
+        {
+            var view=OpenBoard(out _); view.Render(Populated(new LeaderboardEntry("you",42,0),new LeaderboardEntry("ann",90,1)),BoardText());
+            Assert.That(view.Root.GetComponentsInChildren<TMP_Text>(false).Any(t=>t.name=="Caption"),Is.False);
+        }
+        [Test] public void LeaderboardCaptionIsOneSmallLineUnderThePinnedRow()
+        {
+            var view=OpenBoard(out var frame,"Score = levels cleared"); view.Render(Populated(new LeaderboardEntry("you",42,0),new LeaderboardEntry("ann",90,1)),BoardText());
+            var caption=view.Root.GetComponentsInChildren<TMP_Text>(false).Single(t=>t.name=="Caption"); Assert.That(caption.text,Is.EqualTo("Score = levels cleared"));
+            Assert.That(caption.textWrappingMode,Is.EqualTo(TextWrappingModes.NoWrap)); Assert.That(caption.fontSize,Is.LessThan(BoardRows(view)[0].GetComponentInChildren<TMP_Text>().fontSize));
+            var pinned=BoardRows(view).Single(r=>r.transform.parent.name=="Pinned");
+            Assert.That(InPanel(frame,caption.rectTransform).yMax,Is.LessThanOrEqualTo(InPanel(frame,pinned.rectTransform).yMin+.5f),"caption under the pinned row");
+            Assert.That(InPanel(frame,caption.rectTransform).yMin,Is.GreaterThanOrEqualTo(frame.Panel.rect.yMin-.5f));
+            Assert.That(BoardText().KeyOrText("shell.leaderboard.title"),Is.EqualTo("Leaderboard"),"a localization key is resolved"); Assert.That(BoardText().KeyOrText("Score = stars"),Is.EqualTo("Score = stars"));
         }
     }
 }

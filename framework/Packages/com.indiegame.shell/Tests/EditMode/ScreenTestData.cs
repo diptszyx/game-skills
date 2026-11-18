@@ -40,8 +40,7 @@ namespace IndieGame.Shell.Tests
             foreach(var error in new[]{"Failed","Unavailable","Skipped","NotReady","Insufficient"}) table["shell.error."+error]=error;
             table["shell.retrySave"]="Retry save"; table["shell.on"]="On"; table["shell.off"]="Off"; table["popup.revive.price"]="Gold {0}";
             table["shell.loading.tip"]="Tip"; table["shell.refresh"]="Refresh"; table["shell.leaderboard.title"]="Leaderboard";
-            table["shell.leaderboard.row"]="{0} {1} {2}"; table["shell.leaderboard.mine"]="My rank {0} {1}";
-            table["shell.leaderboard.loading"]="Loading"; table["shell.leaderboard.mine.unranked"]="Best {0}"; table["shell.leaderboard.offline"]="Offline"; table["shell.leaderboard.empty"]="Empty";
+            table["shell.leaderboard.loading"]="Loading"; table["shell.leaderboard.you"]="You"; table["shell.leaderboard.offline"]="Offline"; table["shell.leaderboard.empty"]="Empty";
             table["shell.home"]="Home"; table["shell.back"]="Back";
             var l=new LocalizationService(new LocalizationConfig("en")); l.LoadLayeredTable("vi",UnityEngine.Resources.Load<UnityEngine.TextAsset>("ShellLocalization/vi").text,"{}"); l.LoadLayeredTable("en",UnityEngine.Resources.Load<UnityEngine.TextAsset>("ShellLocalization/en").text,"{"+string.Join(",",table.Select(p=>"\""+p.Key+"\":\""+p.Value+"\""))+"}"); return l;
         }

@@ -8,6 +8,7 @@ namespace IndieGame.Shell.Unity.Screens
         readonly LocalizationService localization;
         public ScreenText(ShellSession session, LocalizationService localization) { this.session=session; this.localization=localization; }
         public string Get(string key, params object[] args) => localization.Format(session.Settings.Language,key,args).Value;
+        public string KeyOrText(string value) => value.Contains(' ')||!value.Contains('.') ? value : Get(value);
         public string Reward(Reward reward)
         {
             if(reward==null) return Get("shell.reward.unavailable");

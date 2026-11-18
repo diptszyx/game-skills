@@ -1,5 +1,6 @@
 using System.Linq;
 using System;
+using System.Globalization;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -16,13 +17,14 @@ namespace IndieGame.Shell.Unity.Screens
     }
     public sealed class LeaderboardView
     {
-        readonly ListSurface surface; readonly ShellUiFactory factory; readonly UnityEngine.UI.Button refresh;
+        const string UnrankedMark="-";
+        readonly ListSurface surface; readonly ShellUiFactory factory; readonly UnityEngine.UI.Button refresh; readonly string captionKeyOrText;
         public RectTransform Root => surface.Root;
         public LeaderboardSnapshot Snapshot { get; private set; }
         public event Action RefreshRequested;
-        public LeaderboardView(ShellUiFactory factory, Transform parent, PopupView modal=null)
+        public LeaderboardView(ShellUiFactory factory, Transform parent, PopupView modal=null, string captionKeyOrText=null)
         {
-            this.factory=factory; surface=new ListSurface(factory,parent,"Leaderboard",modal);
+            this.factory=factory; this.captionKeyOrText=captionKeyOrText; surface=new ListSurface(factory,parent,"Leaderboard",modal);
             refresh=factory.IconButton(modal!=null?modal.Panel:Root,"refresh","Refresh",()=>RefreshRequested?.Invoke());
             var rect=(RectTransform)refresh.transform;
             if(modal!=null) { rect.anchorMin=rect.anchorMax=new Vector2(0,1); var close=ShellLayout.Standard.CloseHitPosition; rect.anchoredPosition=new Vector2(-close.x,close.y); }
@@ -31,14 +33,23 @@ namespace IndieGame.Shell.Unity.Screens
         }
         public void Render(LeaderboardSnapshot snapshot, ScreenText text)
         {
-            Snapshot=snapshot; var rows=new List<RowDisplay>();
-            foreach(var e in snapshot.Entries)
-                rows.Add(new RowDisplay(e.PlayerId,text.Get("shell.leaderboard.row",e.Rank,e.PlayerId,e.Score),highlight:snapshot.MyRank!=null&&e.PlayerId==snapshot.MyRank.PlayerId));
-            if(snapshot.MyRank!=null&&!snapshot.Entries.Any(e=>e.PlayerId==snapshot.MyRank.PlayerId)) rows.Add(new RowDisplay("my-rank",snapshot.MyRank.Rank<1?text.Get("shell.leaderboard.mine.unranked",snapshot.MyRank.Score):text.Get("shell.leaderboard.mine",snapshot.MyRank.Rank,snapshot.MyRank.Score),highlight:true));
-            surface.Render(new ListDisplay(text.Get("shell.leaderboard.title"),rows,snapshot.MessageKey==null?"":text.Get(snapshot.MessageKey)),_=>{});
-            surface.Error(snapshot.State==LeaderboardState.Error?text.Get(snapshot.MessageKey):"");
+            Snapshot=snapshot; var mine=snapshot.MyRank;
+            bool IsMine(LeaderboardEntry e)=>mine!=null&&e.Rank>0&&e.PlayerId==mine.PlayerId;
+            var rows=new List<RowDisplay>(); var entries=snapshot.Entries;
+            for(int i=0;i<entries.Count;i++)
+            {
+                var e=entries[i]; bool own=IsMine(e);
+                rows.Add(Row(e.PlayerId,e.Rank.ToString(),e.DisplayName,e,own,divider:i<entries.Count-1));
+            }
+            RowDisplay pinned=null;
+            if(mine!=null&&!entries.Any(IsMine))
+                pinned=Row("my-rank",mine.Rank<1?UnrankedMark:mine.Rank.ToString(),string.IsNullOrWhiteSpace(mine.PlayerName)?text.Get("shell.leaderboard.you"):mine.DisplayName,mine,true,false);
+            var caption=string.IsNullOrWhiteSpace(captionKeyOrText)?null:text.KeyOrText(captionKeyOrText);
+            surface.Render(new ListDisplay(text.Get("shell.leaderboard.title"),rows,snapshot.MessageKey==null?"":text.Get(snapshot.MessageKey),pinned,caption),_=>{});
             refresh.GetComponent<ActionAccessibility>().Set("refresh",text.Get("shell.refresh"));
         }
+        static RowDisplay Row(string id,string rank,string name,LeaderboardEntry entry,bool own,bool divider)=>
+            new RowDisplay(id,name,highlight:own,columns:new ScoreColumns(rank,name,entry.Score.ToString(CultureInfo.InvariantCulture),entry.Rank,own,divider));
     }
     // Completes on the Unity main thread; null/blank board or negative score -> InvalidArgument.
     public interface ILeaderboardRequests
