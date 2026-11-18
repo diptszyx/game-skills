@@ -15,9 +15,9 @@ namespace IndieGame.Shell.Unity.Screens
         public ListDisplay Snapshot { get; private set; }
         public string Error { get; private set; }
         public event Action<string> BuyRequested;
-        public ShopView(ShellUiFactory factory, Transform parent, PopupHost popups)
+        public ShopView(ShellUiFactory factory, Transform parent, PopupHost popups, PopupView modal=null)
         {
-            this.popups=popups; surface=new ListSurface(factory,parent,"Shop");
+            this.popups=popups; surface=new ListSurface(factory,parent,"Shop",modal);
             popup=factory.PopupFrame(popups.transform,""); popupTitle=popup.Panel.GetComponentInChildren<TMP_Text>(true); popupBody=factory.Label(popup.Content,"");
         }
         public void SetCloseName(string label)=>popup.CloseButton.GetComponent<ActionAccessibility>().Set("close",label);

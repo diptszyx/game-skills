@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- Bottom-tab screens (Check-in, Quests, Shop, Leaderboard) open as modals over Home through the shared `PopupHost`/`PopupView` (new `TabModals`), matching the original Hole It! UI: dim scrim, centred panel with the popup title zone and close X, tab bar left visible and clickable (the scrim stops above it), active tab highlighted, Home stays behind. Back/Escape closes one layer; a session popup above a tab popup closes first.
+- New `ShellStyle.TabsAsModals` (default true; only effective with `EnableHomeChrome`). Set false to keep flat full-screen pages with a Back button.
+- Swipe now switches the open tab modal to its neighbour (and past the first tab returns Home). Tab popups carry their own `TabSwipeHandler`; `SwipeForwarder` on list scrolls forwards drags the `ScrollRect` would swallow (also fixes swipe over lists in page mode).
+- Home gear accessibility name is Settings (`popup.settings.title`) on Home and Pause only on the game screen.
+- `QuestsView`, `ShopView`, `LeaderboardView`, `CheckInView` take an optional `PopupView modal` argument.
+
 ## 0.2.0 — 2026-11-18
 
 - Add editor texture-import policy (ASTC 6x6 default, 4x4 detail exception, mipmaps a policy field, per-asset opt-out marker), applier, read-only audit and per-screen `SpriteAtlasBuilder` under `Editor/Textures`.

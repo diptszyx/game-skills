@@ -40,7 +40,8 @@ namespace IndieGame.Shell.Unity.Screens
     {
         internal const float RowTitleFont=32, RowTitleMinFont=26, RowDetailFont=26, MinRowOpacity=.92f;
         internal const float EmptyCardBottom=.17f, EmptyCardTop=.29f;
-        const float TopBarHeight=110, TabBarHeight=160, TitledBodyTop=266, UntitledBodyGap=12;
+        const float TopBarHeight=110, TitledBodyTop=266, UntitledBodyGap=12;
+        internal const float TabBarHeight=160;
         internal static bool HidesTitle(ShellStyle style) => style.EnableHomeChrome && !style.ShowScreenTitleWithChrome;
         internal static RectTransform Body(ShellUiFactory f, RectTransform root)
         {
@@ -120,16 +121,26 @@ namespace IndieGame.Shell.Unity.Screens
         readonly ShellUiFactory factory;
         readonly TMP_Text title,empty,error;
         readonly ScrollRect list; readonly RectTransform emptyCard;
-        internal ListSurface(ShellUiFactory factory, Transform parent, string name)
+        internal ListSurface(ShellUiFactory factory, Transform parent, string name, PopupView modal=null)
         {
-            this.factory=factory; Root=factory.ScreenRoot(parent,name); Lifetime=Root.gameObject.AddComponent<ScreenLifetime>();
-            title=ScreenWidgets.Heading(factory,Root); var body=ScreenWidgets.Body(factory,Root);
+            this.factory=factory;
+            RectTransform body;
+            if(modal!=null)
+            {
+                Root=ModalRoot(modal,name); title=modal.Panel.Find("Title").GetComponent<TMP_Text>();
+                body=ShellUiFactory.Node("Body",Root); ShellUiFactory.Stretch(body); body.gameObject.SetActive(true);
+            }
+            else { Root=factory.ScreenRoot(parent,name); title=ScreenWidgets.Heading(factory,Root); body=ScreenWidgets.Body(factory,Root); }
+            Lifetime=Root.gameObject.AddComponent<ScreenLifetime>();
             list=factory.ScrollList(body); list.GetComponent<RectTransform>().offsetMin=new Vector2(0,100);
-            if(factory.Style.EnableHomeChrome) { emptyCard=ScreenWidgets.EmptyCard(factory,Root); empty=emptyCard.GetComponentInChildren<TMP_Text>(true); }
+            list.gameObject.AddComponent<SwipeForwarder>();
+            if(factory.Style.EnableHomeChrome && modal==null) { emptyCard=ScreenWidgets.EmptyCard(factory,Root); empty=emptyCard.GetComponentInChildren<TMP_Text>(true); }
             else empty=factory.Label(body,"");
             error=factory.Label(body,""); error.rectTransform.anchorMin=error.rectTransform.anchorMax=new Vector2(.5f,0);
             error.rectTransform.anchoredPosition=new Vector2(0,45);
         }
+        internal static RectTransform ModalRoot(PopupView modal,string name)
+        { var root=ShellUiFactory.Node(name,modal.Content); ShellUiFactory.Stretch(root); root.gameObject.SetActive(true); return root; }
         internal void Render(ListDisplay display, Action<string> clicked)
         {
             title.text=display.Title; empty.text=display.Empty;

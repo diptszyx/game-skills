@@ -29,6 +29,7 @@ namespace IndieGame.Shell.Unity
         public MainPresenter MainPresenter { get; private set; }
         readonly List<IDisposable> owned = new List<IDisposable>();
         readonly Dictionary<ShellScreen,RectTransform> cached = new Dictionary<ShellScreen,RectTransform>();
+        TabModals tabModals;
         ShellAppConfig config; ShellUiFactory factory; ScreenText screenText;
         GameObject canvas, events; bool booted, loaded, destroyed; float capturedScale;
         SessionResult loadResult;
@@ -76,6 +77,7 @@ namespace IndieGame.Shell.Unity
                 var popupRoot=ShellUiFactory.Node("Safe Popups",canvas.transform); ShellUiFactory.Stretch(popupRoot);
                 popupRoot.gameObject.AddComponent<SafeAreaFitter>(); popupRoot.gameObject.SetActive(true);
                 Popups=popupRoot.gameObject.AddComponent<PopupHost>(); Popups.HandlesOwnBackKey=false;
+                if(config.Style.ModalTabs) tabModals=new TabModals(Popups,factory);
                 var actions=new ActionsBridge(this,config.Actions);
                 Flow=new SessionPopupPresenter(Session,factory,Popups,Text,actions,config.RewardedAds,config.SessionPopups); owned.Add(Flow);
                 GameRoot=config.GameScreenFactory(new ShellGameContext { Factory=factory,Session=Session,Text=Text,Popups=Popups,Flow=Flow,Parent=Screens.SafeRoot,Navigate=Navigate,ShowMain=ShowMain });
@@ -92,7 +94,7 @@ namespace IndieGame.Shell.Unity
                 }
                 Main=new MainView(factory,Screens.SafeRoot);
                 MainPresenter=new MainPresenter(Session,Main,Text,clock,actions,Navigate,config.PlayLabel); owned.Add(MainPresenter);
-                if(config.Style.EnableHomeChrome) owned.Add(new ChromePresenter(Session,Text,clock,factory,Screens,Main.Root,GameRoot,ShowMain,Navigate,()=>{ if(!Ready || Popups.Top!=null) return; if(Screens.Current==GameRoot) Flow.ShowPause(); else Flow.ShowSettings(); },error=>ErrorLabel.text=error));
+                if(config.Style.EnableHomeChrome) owned.Add(new ChromePresenter(Session,Text,clock,factory,Screens,Main.Root,GameRoot,ShowMain,Navigate,()=>{ if(!Ready || Popups.Top!=null) return; if(Screens.Current==GameRoot) Flow.ShowPause(); else Flow.ShowSettings(); },error=>ErrorLabel.text=error,tabModals));
                 Screens.Show(Main.Root);
                 Screens.Loading.gameObject.AddComponent<LoadingContentView>().Initialize(factory,Screens.Loading,screenText,"shell.loading.tip");
                 Screens.Loading.transform.SetAsLastSibling(); Screens.Loading.Show(); Screens.Loading.SetProgress(1); Screens.Loading.Hide();
@@ -107,35 +109,43 @@ namespace IndieGame.Shell.Unity
             if(!destroyed && loaded) Ready=true;
         }
         void RequireReady() { if(!Ready) throw new InvalidOperationException("ShellApp not Ready"); }
-        public void ShowMain() { RequireReady(); Screens.Show(Main.Root); }
-        public void ShowGame() { RequireReady(); Screens.Show(GameRoot); }
+        public void ShowMain() { RequireReady(); tabModals?.CloseActive(); Screens.Show(Main.Root); }
+        public void ShowGame() { RequireReady(); tabModals?.CloseActive(); Screens.Show(GameRoot); }
         public void Navigate(ShellScreen screen)
         {
             if(!Enum.IsDefined(typeof(ShellScreen),screen)) throw new InvalidOperationException("Unavailable ShellScreen: "+screen);
             if(screen==ShellScreen.Shop && config?.ShopFactory==null && config?.ShopCatalog==null) throw new InvalidOperationException("Unavailable ShellScreen Shop: Shop service");
             if(screen==ShellScreen.Leaderboard && config?.Leaderboard==null) throw new InvalidOperationException("Unavailable ShellScreen Leaderboard: Leaderboard service");
             RequireReady();
-            if(!cached.TryGetValue(screen,out var root))
+            bool modal=tabModals!=null;
+            RectTransform root=null;
+            if(modal ? !tabModals.HasFrame(screen) : !cached.TryGetValue(screen,out root))
             {
+                var frame=modal?tabModals.CreateFrame(screen,screenText.Get("shell.close")):null;
+                Transform parent=modal?Popups.transform:Screens.SafeRoot; var clock=config.Clock??new SystemClock();
                 switch(screen)
                 {
                     case ShellScreen.CheckIn:
-                        var check=new CheckInView(factory,Screens.SafeRoot); owned.Add(new CheckInPresenter(Session,check,Text,config.Clock??new SystemClock())); root=check.Root; break;
+                        var check=new CheckInView(factory,parent,frame); owned.Add(new CheckInPresenter(Session,check,Text,clock)); root=check.Root; break;
                     case ShellScreen.Quests:
-                        var quests=new QuestsView(factory,Screens.SafeRoot); owned.Add(new QuestsPresenter(Session,quests,Text,config.Clock??new SystemClock())); root=quests.Root; break;
+                        var quests=new QuestsView(factory,parent,frame); owned.Add(new QuestsPresenter(Session,quests,Text,clock)); root=quests.Root; break;
                     case ShellScreen.Shop:
-                        var shop=new ShopView(factory,Screens.SafeRoot,Popups);
+                        var shop=new ShopView(factory,parent,Popups,frame);
                         var service=config.ShopFactory!=null?config.ShopFactory(Session):new ShopService(config.ShopCatalog,Session,config.Purchases);
                         if(service==null) throw new InvalidOperationException("Unavailable ShellScreen Shop: ShopFactory returned null");
                         owned.Add(new ShopPresenter(Session,service,shop,Text)); root=shop.Root; break;
                     case ShellScreen.Leaderboard:
-                        var board=new LeaderboardView(factory,Screens.SafeRoot); owned.Add(new LeaderboardPresenter(Session,board,Text,config.Leaderboard,config.BoardId,config.LeaderboardRows)); root=board.Root; break;
+                        var board=new LeaderboardView(factory,parent,frame); owned.Add(new LeaderboardPresenter(Session,board,Text,config.Leaderboard,config.BoardId,config.LeaderboardRows)); root=board.Root; break;
                     default: throw new InvalidOperationException("Unavailable ShellScreen: "+screen);
                 }
-                var back=factory.IconButton(root,"back",screenText.Get("shell.back"),Back);
-                var rect=(RectTransform)back.transform; rect.anchorMin=rect.anchorMax=new Vector2(0,1); rect.pivot=new Vector2(0,1); rect.anchoredPosition=ShellLayout.Standard.BackPosition;
-                cached.Add(screen,root);
+                if(!modal)
+                {
+                    var back=factory.IconButton(root,"back",screenText.Get("shell.back"),Back);
+                    var rect=(RectTransform)back.transform; rect.anchorMin=rect.anchorMax=new Vector2(0,1); rect.pivot=new Vector2(0,1); rect.anchoredPosition=ShellLayout.Standard.BackPosition;
+                    cached.Add(screen,root);
+                }
             }
+            if(modal) { if(Screens.Current!=Main.Root) Screens.Show(Main.Root); tabModals.Open(screen); return; }
             foreach(var a in root.GetComponentsInChildren<ActionAccessibility>(true)) if(a.Key=="back") a.Set("back",screenText.Get("shell.back")); Screens.Show(root);
         }
         public SessionResult Commit()
@@ -170,7 +180,7 @@ namespace IndieGame.Shell.Unity
         {
             Ready=false; if(this!=null) StopAllCoroutines();
             for(int i=owned.Count-1;i>=0;i--) { try { owned[i].Dispose(); } catch(Exception) { /* continue releasing owned objects */ } }
-            owned.Clear(); cached.Clear(); loaded=false;
+            owned.Clear(); cached.Clear(); tabModals=null; loaded=false;
             if(GameRoot!=null && (canvas==null || !GameRoot.IsChildOf(canvas.transform))) Release(GameRoot.gameObject);
             Release(canvas); Release(events); canvas=events=null;
             if(booted) Time.timeScale=capturedScale;

@@ -10,6 +10,9 @@ namespace IndieGame.Shell.Unity.UI
     {
         public bool EnableHomeChrome;
         public bool ShowScreenTitleWithChrome=true;
+        // Bottom-tab screens open as popups over Home (default); false keeps flat full-screen pages with a Back button.
+        public bool TabsAsModals=true;
+        public bool ModalTabs=>EnableHomeChrome&&TabsAsModals;
         public bool EnableTabSwipe = true;
         // Mandatory popups disable close input even when the optional no-badge art is absent.
         public bool PanelHasBakedCloseIcon, ShowCloseHotspot=true;

@@ -19,11 +19,12 @@ namespace IndieGame.Shell.Unity.Screens
         public RectTransform Root => surface.Root;
         public LeaderboardSnapshot Snapshot { get; private set; }
         public event Action RefreshRequested;
-        public LeaderboardView(ShellUiFactory factory, Transform parent)
+        public LeaderboardView(ShellUiFactory factory, Transform parent, PopupView modal=null)
         {
-            this.factory=factory; surface=new ListSurface(factory,parent,"Leaderboard");
+            this.factory=factory; surface=new ListSurface(factory,parent,"Leaderboard",modal);
             refresh=factory.IconButton(Root,"refresh","Refresh",()=>RefreshRequested?.Invoke());
-            var rect=(RectTransform)refresh.transform; if(ScreenWidgets.HidesTitle(factory.Style)) { rect.anchorMin=rect.anchorMax=new Vector2(1,0); rect.pivot=new Vector2(1,0); rect.anchoredPosition=new Vector2(-16,180); }
+            var rect=(RectTransform)refresh.transform; if(modal!=null) { rect.anchorMin=rect.anchorMax=new Vector2(1,0); rect.pivot=new Vector2(1,0); rect.anchoredPosition=new Vector2(-8,16); }
+            else if(ScreenWidgets.HidesTitle(factory.Style)) { rect.anchorMin=rect.anchorMax=new Vector2(1,0); rect.pivot=new Vector2(1,0); rect.anchoredPosition=new Vector2(-16,180); }
             else { rect.anchorMin=rect.anchorMax=new Vector2(1,1); rect.pivot=new Vector2(1,1); rect.anchoredPosition=ShellLayout.Standard.HeaderRightPosition; }
         }
         public void Render(LeaderboardSnapshot snapshot, ScreenText text)

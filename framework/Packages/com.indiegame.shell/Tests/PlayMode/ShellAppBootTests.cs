@@ -212,20 +212,65 @@ namespace IndieGame.Shell.Tests
             Assert.That(app.GetComponentInChildren<GraphicRaycaster>(),Is.Not.Null);
             var chrome=app.Screens.ChromeRoot;
             Button Tab(string key)=>chrome.GetComponentsInChildren<ActionAccessibility>(true).Single(a=>a.Key==key).GetComponent<Button>();
-            yield return new RealPointer(mouse).Click(Tab("quests")); Assert.That(app.Screens.Current.name,Is.EqualTo("Quests")); Assert.That(chrome.gameObject.activeInHierarchy,Is.True);
-            app.Navigate(ShellScreen.CheckIn);
+            yield return new RealPointer(mouse).Click(Tab("quests")); Assert.That(app.Screens.Current,Is.SameAs(app.Main.Root)); Assert.That(app.Popups.Top.name,Is.EqualTo("Tab Quests")); Assert.That(chrome.gameObject.activeInHierarchy,Is.True);
+            app.Navigate(ShellScreen.CheckIn); yield return null;
             Assert.That(Tab("checkin").transform.Find("Cell").GetComponent<ShellAppearance>().Selected,Is.True);
             yield return new RealPointer(mouse).Click(Tab("home")); Assert.That(app.Screens.Current,Is.SameAs(app.Main.Root));
-            yield return new RealPointer(mouse).Click(Tab("checkin")); var claim=app.Screens.Current.GetComponentsInChildren<Button>().Single(b=>b.GetComponent<ActionAccessibility>()?.Key!="back");
+            yield return Until(()=>app.Popups.Top==null,"tab popup closed by Home tab");
+            yield return new RealPointer(mouse).Click(Tab("checkin")); var claim=app.Popups.Top.Content.GetComponentsInChildren<Button>().Single();
             var gold=app.Session.Economy.Gold; yield return new RealPointer(mouse).Click(claim);
             Assert.That(claim.IsInteractable(),Is.False,"Claim must disable after collection");
             claim.onClick.Invoke(); // Also exercise the presenter guard against a duplicate callback.
             Assert.That(app.Session.Economy.Gold,Is.EqualTo(gold+1));
             Assert.That(Tab("checkin").transform.Find("Icon/Badge").gameObject.activeSelf,Is.False);
-            app.Back(); yield return new RealPointer(mouse).Click(MainButton("shell.play")); Assert.That(game.Plays,Is.EqualTo(1));
+            app.Back(); yield return Until(()=>app.Popups.Top==null,"tab popup closed by Back");
+            yield return new RealPointer(mouse).Click(MainButton("shell.play")); Assert.That(game.Plays,Is.EqualTo(1));
             Assert.That(chrome.Find("TabBar").gameObject.activeSelf,Is.False); Assert.That(chrome.Find("TopBar").gameObject.activeSelf,Is.True);
             Assert.That(app.GameHud,Is.Not.Null); Assert.That(app.Audio,Is.Not.Null); Assert.That(app.Haptics,Is.Not.Null); yield return new RealPointer(mouse).Click(chrome.GetComponentsInChildren<Button>().Single(b=>b.GetComponent<ActionAccessibility>()?.Key=="pause")); Assert.That(app.Popups.Top,Is.Not.Null); app.Back(); yield return Settled();
             app.ShowMain(); Assert.That(chrome.Find("TabBar").gameObject.activeSelf,Is.True);
+        }
+        Button TabButton(string key)=>app.Screens.ChromeRoot.GetComponentsInChildren<ActionAccessibility>(true).Single(a=>a.Key==key).GetComponent<Button>();
+        void Swipe(TabSwipeHandler handler,float fromX,float toX)
+        {
+            float now=0; handler.Clock=()=>now; handler.Width=()=>720;
+            var begin=new PointerEventData(EventSystem.current){position=new Vector2(fromX,800),pressPosition=new Vector2(fromX,800)}; handler.OnBeginDrag(begin);
+            now=.4f; handler.OnEndDrag(new PointerEventData(EventSystem.current){position=new Vector2(toX,800),pressPosition=new Vector2(fromX,800)});
+        }
+        [UnityTest] public IEnumerator TabOpensAsPopupOverHomeHighlightsTabAndCloseReturnsHome()
+        {
+            config.Style=demos.MakeChunky(); yield return Boot();
+            var gear=app.Screens.ChromeRoot.Find("TopBar").GetComponentsInChildren<ActionAccessibility>(true); Assert.That(gear.Any(a=>a.Key=="settings"),Is.True,"gear is Settings on Home"); Assert.That(gear.Any(a=>a.Key=="pause"),Is.False);
+            yield return new RealPointer(mouse).Click(TabButton("quests"));
+            Assert.That(app.Popups.Top.name,Is.EqualTo("Tab Quests")); Assert.That(app.Popups.Stack.Count,Is.EqualTo(1));
+            Assert.That(app.Screens.Current,Is.SameAs(app.Main.Root)); Assert.That(app.Main.Root.gameObject.activeInHierarchy,Is.True,"Home stays behind the modal");
+            Assert.That(app.Screens.ChromeRoot.Find("TabBar").gameObject.activeSelf,Is.True);
+            Assert.That(TabButton("quests").transform.Find("Cell").GetComponent<ShellAppearance>().Selected,Is.True);
+            app.Back(); yield return Until(()=>app.Popups.Top==null,"Back closes the tab popup"); yield return null;
+            Assert.That(app.Screens.Current,Is.SameAs(app.Main.Root));
+            Assert.That(TabButton("home").transform.Find("Cell").GetComponent<ShellAppearance>().Selected,Is.True,"closing returns the highlight to Home");
+        }
+        [UnityTest] public IEnumerator SwipeSwitchesTheOpenModalToTheNeighbouringTab()
+        {
+            config.Style=demos.MakeChunky(); yield return Boot();
+            app.Navigate(ShellScreen.CheckIn); var handler=app.Popups.Top.GetComponent<TabSwipeHandler>();
+            Swipe(handler,500,300);
+            yield return Until(()=>app.Popups.Top!=null && app.Popups.Top.name=="Tab Quests","swipe opens the neighbouring tab");
+            Assert.That(TabButton("quests").transform.Find("Cell").GetComponent<ShellAppearance>().Selected,Is.True);
+            Swipe(app.Popups.Top.GetComponent<TabSwipeHandler>(),300,500); Swipe(app.Popups.Top.GetComponent<TabSwipeHandler>(),300,500);
+            yield return Until(()=>app.Popups.Top==null,"swiping right past the first tab returns Home");
+        }
+        [UnityTest] public IEnumerator EscapeClosesOnlyTheLayerAboveATabPopup()
+        {
+            config.Style=demos.MakeChunky(); yield return Boot();
+            app.Navigate(ShellScreen.CheckIn); var tab=app.Popups.Top; app.Flow.ShowSettings(); var settings=app.Popups.Top; Assert.That(settings,Is.Not.SameAs(tab));
+            app.Back(); yield return Until(()=>app.Popups.Top==tab,"Settings closed, tab popup remains");
+            Assert.That(app.Popups.Stack.Count,Is.EqualTo(1)); app.Back(); yield return Until(()=>app.Popups.Top==null,"second Back closes the tab popup");
+        }
+        [UnityTest] public IEnumerator TabsAsModalsFalseKeepsFlatScreensWithBack()
+        {
+            config.Style=demos.MakeChunky(); config.Style.TabsAsModals=false; yield return Boot();
+            app.Navigate(ShellScreen.Quests); Assert.That(app.Screens.Current.name,Is.EqualTo("Quests")); Assert.That(app.Popups.Top,Is.Null);
+            app.Back(); Assert.That(app.Screens.Current,Is.SameAs(app.Main.Root));
         }
         [UnityTest] public IEnumerator GameViewportMapsScreenPointsToWorldAndFollowsGameScreen()
         {

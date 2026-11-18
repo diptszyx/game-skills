@@ -20,10 +20,13 @@ namespace IndieGame.Shell.Unity.UI
     public sealed class TabSwipeHandler : MonoBehaviour, IBeginDragHandler, IDragHandler, IEndDragHandler
     {
         public static TabSwipeHandler Attach(ShellStyle style, ScreenHost host, TabBarView tabBar)
+            => AttachTo(style, host.SafeRoot.gameObject, tabBar, () => tabBar.Root.gameObject.activeInHierarchy && host.SafeRoot.GetComponentInChildren<PopupView>() == null);
+        // Tab popups carry their own handler: their scrim would otherwise swallow the drag before it reaches the screens.
+        public static TabSwipeHandler AttachTo(ShellStyle style, GameObject target, TabBarView tabBar, Func<bool> canSwipe)
         {
             if (!style.EnableTabSwipe) return null;
-            var swipe = host.SafeRoot.gameObject.AddComponent<TabSwipeHandler>();
-            swipe.CanSwipe = () => tabBar.Root.gameObject.activeInHierarchy && host.SafeRoot.GetComponentInChildren<PopupView>() == null;
+            var swipe = target.AddComponent<TabSwipeHandler>();
+            swipe.CanSwipe = canSwipe;
             swipe.Swiped += step => tabBar.Step(step);
             return swipe;
         }
@@ -42,5 +45,12 @@ namespace IndieGame.Shell.Unity.UI
             int step = TabSwipeRule.Decide(e.position - start, Clock() - startTime, width);
             if (step != 0) Swiped?.Invoke(step);
         }
+    }
+    // A ScrollRect consumes every drag; forward them so horizontal swipes over a list still reach the tab swipe handler.
+    public sealed class SwipeForwarder : MonoBehaviour, IBeginDragHandler, IEndDragHandler
+    {
+        TabSwipeHandler Target => GetComponentInParent<TabSwipeHandler>();
+        public void OnBeginDrag(PointerEventData e) { var t = Target; if (t != null) t.OnBeginDrag(e); }
+        public void OnEndDrag(PointerEventData e) { var t = Target; if (t != null) t.OnEndDrag(e); }
     }
 }

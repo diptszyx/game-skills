@@ -13,6 +13,8 @@ namespace IndieGame.Shell.Unity.UI
         public RectTransform Panel { get; private set; }
         public RectTransform Content { get; private set; }
         internal bool FitContent;
+        internal bool ManagedContent;
+        const float ManagedSideInset=24, ManagedBottomInset=24;
         public Button CloseButton { get; internal set; }
         public Selectable InitialFocus;
         [SerializeField, UnityEngine.Serialization.FormerlySerializedAs("Policy")] DismissalPolicy policy;
@@ -46,9 +48,16 @@ namespace IndieGame.Shell.Unity.UI
         bool DrawsOwnClose=>style!=null&&!style.PanelHasBakedCloseIcon&&style.CloseVisibleSize>0;
         float LayoutHeading(RectTransform heading,bool closeVisible)
         {
-            if(style==null) return LocalizedLayout.Popup(Panel,heading,Content);
-            float clear=closeVisible&&DrawsOwnClose?style.CloseVisibleSize+ShellLayout.Standard.TitleInset*2:0;
-            return LocalizedLayout.Popup(Panel,heading,Content,style.PopupHeaderRows(policy==DismissalPolicy.Mandatory),clear);
+            float band;
+            if(style==null) band=LocalizedLayout.Popup(Panel,heading,Content);
+            else
+            {
+                float clear=closeVisible&&DrawsOwnClose?style.CloseVisibleSize+ShellLayout.Standard.TitleInset*2:0;
+                band=LocalizedLayout.Popup(Panel,heading,Content,style.PopupHeaderRows(policy==DismissalPolicy.Mandatory),clear);
+            }
+            if(ManagedContent&&Content!=null)
+            { Content.offsetMin=new Vector2(ManagedSideInset,ManagedBottomInset); Content.offsetMax=new Vector2(-ManagedSideInset,Content.offsetMax.y); }
+            return band;
         }
         void PlaceClose(RectTransform close,bool baked)
         {
@@ -66,6 +75,7 @@ namespace IndieGame.Shell.Unity.UI
         RectTransform actionRow;
         void LateUpdate()
         {
+            if(ManagedContent) return;
             int signature=LayoutSignature();
             if(signature==layoutSignature) return;
             Reflow();
@@ -90,6 +100,7 @@ namespace IndieGame.Shell.Unity.UI
             if(style==null||Content==null) return;
             const float padding=48;
             float headingBand=LayoutHeading((RectTransform)Panel.Find("Title"),CloseButton!=null&&CloseButton.gameObject.activeSelf);
+            if(ManagedContent) return;
             float width=Mathf.Max(1,Panel.rect.width-2*padding);
             var layout=Content.GetComponent<VerticalLayoutGroup>();
             if(layout==null) layout=Content.gameObject.AddComponent<VerticalLayoutGroup>();

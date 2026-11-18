@@ -11,7 +11,7 @@ namespace IndieGame.Shell.Unity.Screens
         public ListDisplay Snapshot { get; private set; }
         public string Error { get; private set; }
         public event Action<string> ClaimRequested;
-        public QuestsView(ShellUiFactory factory, Transform parent) { surface=new ListSurface(factory,parent,"Quests"); }
+        public QuestsView(ShellUiFactory factory, Transform parent, PopupView modal=null) { surface=new ListSurface(factory,parent,"Quests",modal); }
         public void Render(ListDisplay display) { Snapshot=display; surface.Render(display,RequestClaim); }
         public void RequestClaim(string id) { if(Snapshot!=null) foreach(var r in Snapshot.Rows) if(r.Id==id && r.Enabled) { ClaimRequested?.Invoke(id); break; } }
         public void ShowError(string error) { Error=error; surface.Error(error); }
