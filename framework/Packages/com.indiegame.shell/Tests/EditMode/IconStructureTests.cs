@@ -46,7 +46,7 @@ namespace IndieGame.Shell.Tests
                     Assert.That(b.GetComponentsInChildren<ShellAppearance>(true).Any(a=>a.Role=="actionIcon"),Is.True,b.name);
                     Assert.That(b.GetComponentsInChildren<TMP_Text>(true).All(t=>t.text=="x2"||t.text=="20"),Is.True,b.name);
                     var category=b.GetComponent<LayoutCategory>().Category.ToString();
-                    var expected=category=="IconButton"?new Vector2(64,64):new Vector2(popup.Buttons.Values.Where(action=>action.gameObject.activeSelf && action.GetComponent<LayoutCategory>().Category!=ShellLayoutCategory.IconButton).Max(action=>ShellUiFactory.IconSize(action.GetComponent<LayoutCategory>().Category).x),72);
+                    var expected=category=="IconButton"?new Vector2(64,64):new Vector2(popup.Buttons.Values.Where(action=>action.gameObject.activeSelf && action.GetComponent<LayoutCategory>().Category!=ShellLayoutCategory.IconButton).Max(action=>ShellUiFactory.IconSize(action.GetComponent<LayoutCategory>().Category).x),ShellLayout.Standard.IconAction.y);
                     if(!b.gameObject.activeSelf) expected=ShellUiFactory.IconSize(b.GetComponent<LayoutCategory>().Category);
                     Assert.That(((RectTransform)b.transform).rect.size,Is.EqualTo(expected),b.name);
                 } }

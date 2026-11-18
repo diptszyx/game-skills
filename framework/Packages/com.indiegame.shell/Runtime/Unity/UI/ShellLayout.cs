@@ -9,8 +9,8 @@ namespace IndieGame.Shell.Unity.UI
         public float SessionPopupMinHeight => 240;
         public float SessionPopupMaxHeight => 1200;
         public Vector2 IconButton => new Vector2(64,64);
-        public Vector2 IconAction => new Vector2(140,72);
-        public Vector2 IconAmount => new Vector2(160,72);
+        public Vector2 IconAction => new Vector2(176,88);
+        public Vector2 IconAmount => new Vector2(200,88);
         public Vector2 BackPosition => new Vector2(16,-16);
         public Vector2 HeaderRightPosition => new Vector2(-16,-16);
         public float IconHitSize => 96;
