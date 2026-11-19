@@ -26,6 +26,7 @@ namespace IndieGame.Shell
         readonly string path;
         SaveDocument document;
         public LivesService Lives { get; }
+        public AttemptHearts Attempt { get; }
         public EconomyService Economy { get; }
         public DailyCheckInService DailyCheckIn { get; }
         public DailyQuestsService DailyQuests { get; }
@@ -41,6 +42,7 @@ namespace IndieGame.Shell
             this.path = path;
             document = new SaveDocument(store.CurrentVersion);
             Lives = new LivesService(lives, clock);
+            Attempt = new AttemptHearts(Lives);
             Economy = new EconomyService(economy, Lives);
             DailyCheckIn = new DailyCheckInService(checkIn, clock, Economy);
             DailyQuests = new DailyQuestsService(quests, clock, Economy);

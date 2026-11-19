@@ -53,7 +53,7 @@ namespace IndieGame.Shell.Unity.Screens
         public void ShowWin(string roundId)
         {
             if(string.IsNullOrWhiteSpace(roundId)) throw new ArgumentException("Stable round ID required");
-            round=roundId;
+            round=roundId; session.Attempt.Won();
             var p=Open(SessionPopupKind.Win);
             if(recordedRounds.Add(roundId)) { RecordQuest(p,QuestEvents.Win); RecordQuest(p,QuestEvents.Play); }
             var grant=session.Economy.GrantReward("session:win:"+round,config.WinReward);
@@ -61,7 +61,7 @@ namespace IndieGame.Shell.Unity.Screens
             if(grant.Success||grant.Error==ModuleError.AlreadyClaimed) Save(p); else Error(p,grant.Error.ToString());
         }
         void FlyWinReward(SessionPopupContent p) { if(fly!=null) fly.Fly(p.RewardStrip,text.RewardParts(config.WinReward)); }
-        public void ShowLose() { var p=Open(SessionPopupKind.Lose); RecordQuest(p,QuestEvents.Play); Save(p); }
+        public void ShowLose() { session.Attempt.Lost(); var p=Open(SessionPopupKind.Lose); RecordQuest(p,QuestEvents.Play); Save(p); }
         void RecordQuest(SessionPopupContent p,string key)
         { var r=session.DailyQuests.RecordEvent(key,1); if(!r.Success) Error(p,r.Error.ToString()); }
         public void ShowRevive()=>Open(SessionPopupKind.Revive);

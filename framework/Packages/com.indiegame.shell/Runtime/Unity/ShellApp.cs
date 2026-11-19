@@ -173,13 +173,35 @@ namespace IndieGame.Shell.Unity
             if(Screens.Current==GameRoot) { Flow.ShowPause(); return; }
             if(Screens.Current!=Main.Root) ShowMain();
         }
+        void OfferHearts()
+        {
+            if(config.ShopFactory!=null||config.ShopCatalog!=null) Navigate(ShellScreen.Shop);
+        }
         sealed class ActionsBridge : IGameSessionActions
         {
             readonly ShellApp app; readonly IGameSessionActions game;
             internal ActionsBridge(ShellApp app,IGameSessionActions game) { this.app=app; this.game=game; }
-            public bool Play() { app.RequireReady(); if(!game.Play()) return false; app.ShowGame(); return true; }
-            public void Retry()=>game.Retry(); public void Revive()=>game.Revive(); public void NextLevel()=>game.NextLevel();
-            public void Leave() { game.Leave(); app.ShowMain(); }
+            public bool Play()
+            {
+                app.RequireReady();
+                if(!app.Session.Attempt.CanStart()) { app.OfferHearts(); return false; }
+                if(!game.Play()) return false;
+                app.Session.Attempt.Begin(); app.ShowGame(); return true;
+            }
+            public void Retry() { if(CanStartOrOffer()) { game.Retry(); app.Session.Attempt.Begin(); } }
+            public void NextLevel() { if(CanStartOrOffer()) { game.NextLevel(); app.Session.Attempt.Begin(); } }
+            public void Revive()=>game.Revive();
+            public void Leave()
+            {
+                bool spent=app.Session.Attempt.Left();
+                game.Leave(); app.ShowMain();
+                if(spent) app.Commit();
+            }
+            bool CanStartOrOffer()
+            {
+                if(app.Session.Attempt.CanStart()) return true;
+                Leave(); app.OfferHearts(); return false;
+            }
             public void Pause()=>game.Pause(); public void Resume()=>game.Resume();
         }
         void OnDestroy() { destroyed=true; Cleanup(); }
