@@ -69,6 +69,11 @@ namespace IndieGame.Shell.Unity.UI
         public Sprite ScreenBackground, CurrencyIcon, HeartIcon, BoosterIcon, ListRowSprite, LockedButtonSprite;
         public Color ScreenColor, TitleColor, ListRowColor, ListRowTextColor, ProgressTrackColor, ProgressFillColor;
         public Color SurfaceColor = Color.white;
+        // Optional skinned progress bar: a sliced frame with an empty channel plus a sliced fill; both or neither. Inset is channel margin inside the frame in UI units (left, bottom, right, top).
+        public Sprite ProgressFrameSprite, ProgressFillSprite;
+        public Vector4 ProgressChannelInset;
+        public float ProgressRowBarHeight=12;
+        public bool HasProgressSkin=>ProgressFrameSprite!=null&&ProgressFillSprite!=null;
         public const float MinTextContrast = 4.5f;
         public const float LargeTextContrast=3f;
         public Color PanelColor = Color.clear, PanelTextColor = Color.clear, BackdropColor = Color.clear, BackdropTextColor = Color.clear;
@@ -198,7 +203,21 @@ namespace IndieGame.Shell.Unity.UI
                 if(sprite!=null && (sprite.texture==null || sprite.rect.width<=0 || sprite.rect.height<=0 || sprite.vertices.Length<3))
                     throw new InvalidOperationException("Invalid icon button sprite: "+sprite.name);
             if(PillButtonSprite!=null) RequireButtonBorderFit(PillButtonSprite,ShellLayout.Standard.IconAction,"PillButtonSprite");
+            ValidateProgressSkin();
             ValidateRenderedContrast();
+        }
+        void ValidateProgressSkin()
+        {
+            if(ProgressRowBarHeight<=0) throw new InvalidOperationException("Invalid progress bar: ProgressRowBarHeight must be > 0");
+            if((ProgressFrameSprite==null)!=(ProgressFillSprite==null))
+                throw new InvalidOperationException("Progress skin needs both ProgressFrameSprite and ProgressFillSprite");
+            var inset=ProgressChannelInset;
+            if(!(inset.x>=0&&inset.y>=0&&inset.z>=0&&inset.w>=0))
+                throw new InvalidOperationException("Invalid ProgressChannelInset: every side must be >= 0");
+            if(!HasProgressSkin) return;
+            var frame=ProgressFrameSprite.rect.size/ProgressFrameSprite.pixelsPerUnit;
+            if(inset.x+inset.z>=frame.x||inset.y+inset.w>=frame.y)
+                throw new InvalidOperationException("Invalid ProgressChannelInset: leaves no channel inside the frame sprite");
         }
     }
 }

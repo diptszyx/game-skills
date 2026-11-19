@@ -8,7 +8,8 @@ namespace IndieGame.Shell.Leaderboards.Tests
 {
     sealed class FakeLeaderboardBackend : ILeaderboardBackend
     {
-        public int SignIns, Tops, Mines, Submits;
+        public int SignIns, Tops, Mines, Submits, Renames;
+        public string RenamedTo;
         public string Board;
         public int Count;
         public long Score;
@@ -33,6 +34,12 @@ namespace IndieGame.Shell.Leaderboards.Tests
             Mines++; Board = board;
             if (RequestError != null) throw RequestError;
             return Task.FromResult(Player);
+        }
+        public Task<string> UpdatePlayerName(string name)
+        {
+            Renames++; RenamedTo = name;
+            if (RequestError != null) throw RequestError;
+            return Task.FromResult(name + "#1234");
         }
         public Task Submit(string board, long score)
         {

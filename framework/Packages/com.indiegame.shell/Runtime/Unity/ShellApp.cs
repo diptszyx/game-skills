@@ -81,7 +81,7 @@ namespace IndieGame.Shell.Unity
                 if(config.Style.ModalTabs) tabModals=new TabModals(Popups,factory);
                 var actions=new ActionsBridge(this,config.Actions);
                 rewardFly=RewardFlyLayer.Create(factory,canvas.transform);
-                Flow=new SessionPopupPresenter(Session,factory,Popups,Text,actions,config.RewardedAds,config.SessionPopups,rewardFly); owned.Add(Flow);
+                Flow=new SessionPopupPresenter(Session,factory,Popups,Text,actions,config.RewardedAds,config.SessionPopups,rewardFly,config.WinCelebration,config.LoseCelebration); owned.Add(Flow);
                 GameRoot=config.GameScreenFactory(new ShellGameContext { Factory=factory,Session=Session,Text=Text,Popups=Popups,Flow=Flow,Parent=Screens.SafeRoot,Navigate=Navigate,ShowMain=ShowMain });
                 if(destroyed || this==null) throw new InvalidOperationException("ShellApp destroyed during Boot");
                 if(GameRoot==null) throw new InvalidOperationException("GameScreenFactory returned null");
@@ -142,7 +142,7 @@ namespace IndieGame.Shell.Unity
                         if(service==null) throw new InvalidOperationException("Unavailable ShellScreen Shop: ShopFactory returned null");
                         owned.Add(new ShopPresenter(Session,service,shop,Text)); root=shop.Root; break;
                     case ShellScreen.Leaderboard:
-                        var board=new LeaderboardView(factory,parent,frame,config.LeaderboardCaption); owned.Add(new LeaderboardPresenter(Session,board,Text,config.Leaderboard,config.BoardId,config.LeaderboardRows,config.LeaderboardLocalBest)); root=board.Root; break;
+                        var board=new LeaderboardView(factory,parent,frame,config.LeaderboardCaption); owned.Add(new LeaderboardPresenter(Session,board,Text,config.Leaderboard,config.BoardId,config.LeaderboardRows,config.LeaderboardLocalBest,config.Leaderboard as ILeaderboardRename)); root=board.Root; break;
                     default: throw new InvalidOperationException("Unavailable ShellScreen: "+screen);
                 }
                 if(!modal)

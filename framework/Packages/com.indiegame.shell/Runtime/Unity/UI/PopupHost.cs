@@ -10,6 +10,7 @@ namespace IndieGame.Shell.Unity.UI
     {
         public bool HandlesOwnBackKey = true;
         readonly List<PopupView> stack = new List<PopupView>();
+        readonly PopupKeyboardShift keyboardShift = new PopupKeyboardShift();
         public IReadOnlyList<PopupView> Stack => stack;
         public bool IsTransitioning
         {
@@ -50,6 +51,7 @@ namespace IndieGame.Shell.Unity.UI
         {
             var keyboard = Keyboard.current;
             if (HandlesOwnBackKey && keyboard != null && (keyboard.escapeKey.wasPressedThisFrame || keyboard.backspaceKey.wasPressedThisFrame)) Back();
+            keyboardShift.Tick(Top);
             for (int i = stack.Count - 1; i >= 0; i--)
             {
                 var view = stack[i]; view.Progress += Time.unscaledDeltaTime;
@@ -99,6 +101,7 @@ namespace IndieGame.Shell.Unity.UI
         }
         void OnDisable()
         {
+            keyboardShift.Restore();
             while (stack.Count > 0) { var view = Top; Forget(view); if (view != null) view.gameObject.SetActive(false); }
         }
     }

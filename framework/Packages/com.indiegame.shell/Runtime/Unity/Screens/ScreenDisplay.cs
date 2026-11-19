@@ -109,7 +109,7 @@ namespace IndieGame.Shell.Unity.Screens
             label.enableAutoSizing=true; label.fontSizeMax=34; label.fontSizeMin=RowTitleMinFont; label.fontSize=34;
             card.gameObject.SetActive(false); return card;
         }
-        const float ProgressInset=16,ProgressBottom=12,ProgressHeight=12;
+        const float ProgressInset=16,ProgressBottom=12;
         // Falls back to a blend towards the row text colour when the style's bar colours are too faint on the row.
         internal static void ProgressColors(ShellStyle style,out Color track,out Color fill)
         {
@@ -140,11 +140,9 @@ namespace IndieGame.Shell.Unity.Screens
             OpaqueCard(r.GetComponent<Image>()); LayoutRowText(r,text,f,row);
             if(row.Progress>=0)
             {
-                ProgressColors(f.Style,out var trackColor,out var fillColor);
-                var track=ShellUiFactory.Node("Progress",r); track.anchorMin=Vector2.zero; track.anchorMax=new Vector2(.64f,0); track.pivot=Vector2.zero; track.offsetMin=new Vector2(ProgressInset,ProgressBottom); track.offsetMax=new Vector2(-8,ProgressBottom+ProgressHeight);
-                track.gameObject.AddComponent<Image>().color=trackColor;
-                var fill=ShellUiFactory.Node("Fill",track); fill.anchorMin=Vector2.zero; fill.anchorMax=new Vector2(Mathf.Clamp01(row.Progress),1); fill.offsetMin=fill.offsetMax=Vector2.zero;
-                fill.gameObject.AddComponent<Image>().color=fillColor; fill.gameObject.SetActive(true); track.gameObject.SetActive(true);
+                var bar=f.ProgressBar(r,"Progress",ProgressColors); var track=bar.Root;
+                track.anchorMin=Vector2.zero; track.anchorMax=new Vector2(.64f,0); track.pivot=Vector2.zero; track.offsetMin=new Vector2(ProgressInset,ProgressBottom); track.offsetMax=new Vector2(-8,ProgressBottom+f.Style.ProgressRowBarHeight);
+                bar.SetRatio(row.Progress);
             }
             if(row.Highlight) text.fontStyle=FontStyles.Bold;
             if(!string.IsNullOrEmpty(row.Action))

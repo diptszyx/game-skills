@@ -33,21 +33,22 @@ namespace IndieGame.Shell.Unity.Screens
         public TMP_Text ErrorLabel { get; internal set; }
         internal TMP_Text Title, Body;
         public RectTransform RewardStrip { get; internal set; }
+        public ResultCelebrationDriver Celebration { get; internal set; }
         public string Error { get; internal set; }
         internal bool AdPending, Exited;
     }
     public sealed class SessionPopupPresenter : IDisposable
     {
         readonly ShellSession session; readonly ShellUiFactory factory; readonly PopupHost host; readonly ScreenText text;
-        readonly IGameSessionActions game; readonly IRewardedAdService ads; readonly SessionPopupConfig config; readonly RewardFlyLayer fly;
+        readonly IGameSessionActions game; readonly IRewardedAdService ads; readonly SessionPopupConfig config; readonly RewardFlyLayer fly; readonly IResultCelebration winCelebration, loseCelebration;
         readonly Dictionary<SessionPopupKind,SessionPopupContent> popups=new Dictionary<SessionPopupKind,SessionPopupContent>();
         readonly HashSet<SessionPopupKind> consumed=new HashSet<SessionPopupKind>();
         readonly HashSet<string> recordedRounds=new HashSet<string>();
         readonly TMP_Text errorBanner;
         string round; bool busy,paused,disposed; float priorScale;
         public IReadOnlyDictionary<SessionPopupKind,SessionPopupContent> Popups=>popups;
-        public SessionPopupPresenter(ShellSession session,ShellUiFactory factory,PopupHost host,LocalizationService localization,IGameSessionActions game,IRewardedAdService ads,SessionPopupConfig config,RewardFlyLayer fly=null)
-        { this.fly=fly; this.session=session; this.factory=factory; this.host=host; text=new ScreenText(session,localization); this.game=game; this.ads=ads; this.config=config;
+        public SessionPopupPresenter(ShellSession session,ShellUiFactory factory,PopupHost host,LocalizationService localization,IGameSessionActions game,IRewardedAdService ads,SessionPopupConfig config,RewardFlyLayer fly=null,IResultCelebration winCelebration=null,IResultCelebration loseCelebration=null)
+        { this.fly=fly; this.winCelebration=winCelebration; this.loseCelebration=loseCelebration; this.session=session; this.factory=factory; this.host=host; text=new ScreenText(session,localization); this.game=game; this.ads=ads; this.config=config;
           errorBanner=factory.Label(host.transform,""); errorBanner.rectTransform.anchorMin=errorBanner.rectTransform.anchorMax=new Vector2(.5f,0); errorBanner.rectTransform.anchoredPosition=new Vector2(0,60); }
         public void ShowWin(string roundId)
         {
@@ -112,6 +113,8 @@ namespace IndieGame.Shell.Unity.Screens
             p.Buttons.Add("save",retry); retry.gameObject.SetActive(false);
             p.ErrorLabel=factory.Label(p.View.Content,"");
             p.View.gameObject.AddComponent<PopupExit>().Exited=()=>Exited(kind,p);
+            if(kind==SessionPopupKind.Win) p.Celebration=ResultCelebrationDriver.Attach(p.View,winCelebration,true);
+            else if(kind==SessionPopupKind.Lose&&loseCelebration!=null) p.Celebration=ResultCelebrationDriver.Attach(p.View,loseCelebration,false);
             host.Open(p.View); RenderSettings(); return p;
         }
         public void Act(SessionPopupKind kind,string action)
@@ -133,8 +136,8 @@ namespace IndieGame.Shell.Unity.Screens
                 }
                 if(kind==SessionPopupKind.Lose)
                 {
-                    if(action=="revive") { Complete(kind); ShowRevive(); return; }
-                    if(action=="retry") { consumed.Add(kind); game.Retry(); if(Save(p)) host.Close(p.View); } return;
+                    if(action=="revive") { p.Celebration?.Stop(); Complete(kind); ShowRevive(); return; }
+                    if(action=="retry") { p.Celebration?.Stop(); consumed.Add(kind); game.Retry(); if(Save(p)) host.Close(p.View); } return;
                 }
                 if(kind==SessionPopupKind.Revive)
                 {
@@ -155,6 +158,7 @@ namespace IndieGame.Shell.Unity.Screens
                     {
                         if(session.Economy.Claims.Contains("session:double:"+round)) return;
                         if(ads==null) { Error(p,"Unavailable"); return; }
+                        p.Celebration?.Stop();
                         var claim="session:double:"+round;
                         ShowAd(kind,p,config.DoublePlacement,()=>
                         {
@@ -164,7 +168,7 @@ namespace IndieGame.Shell.Unity.Screens
                         });
                         return;
                     }
-                    if(action=="next") { consumed.Add(kind); game.NextLevel(); if(Save(p)) host.Close(p.View); }
+                    if(action=="next") { p.Celebration?.Stop(); consumed.Add(kind); game.NextLevel(); if(Save(p)) host.Close(p.View); }
                 }
             }
             catch(Exception) { Error(p,"Failed"); }
@@ -257,7 +261,7 @@ namespace IndieGame.Shell.Unity.Screens
             if(disposed) return; disposed=true;
             if(popups.TryGetValue(SessionPopupKind.Pause,out var pause)) RestorePause(pause);
             if(errorBanner!=null) { if(Application.isPlaying) UnityEngine.Object.Destroy(errorBanner.gameObject); else UnityEngine.Object.DestroyImmediate(errorBanner.gameObject); }
-            foreach(var p in popups.Values) if(p.View!=null) { p.View.gameObject.GetComponent<PopupExit>().Exited=null; p.View.gameObject.SetActive(false); DestroyView(p.View); }
+            foreach(var p in popups.Values) if(p.View!=null) { p.Celebration?.Stop(); p.View.gameObject.GetComponent<PopupExit>().Exited=null; p.View.gameObject.SetActive(false); DestroyView(p.View); }
         }
     }
     internal static class PopupStackLookup

@@ -40,6 +40,7 @@ namespace IndieGame.Shell.Unity.UI
                 case "screen": image.sprite = s.ScreenBackground; image.color = s.ScreenColor; break;
                 case "row": image.sprite = s.ListRowSprite; image.color = s.ListRowColor; break;
                 case "ownRow": image.sprite = s.ListRowSprite; image.color = s.LeaderboardOwnRowColor; break;
+                case "progressBar": GetComponent<ProgressBarView>().Apply(s); break;
                 case "scoreIcon": image.sprite = s.StyleIcon("scoreIcon"); image.color = Color.white; break;
                 case "panel": image.sprite = s.Theme.PanelSprite; image.color = s.SurfaceColor; image.pixelsPerUnitMultiplier = s.Theme.PanelPixelsPerUnitMultiplier; break;
                 case "scrim": image.sprite = s.ScreenBackground; image.color = s.Theme.ScrimColor; break;
@@ -85,6 +86,14 @@ namespace IndieGame.Shell.Unity.UI
             image.preserveAspect = !sliced; image.raycastTarget = false;
             var binding = r.gameObject.AddComponent<ShellAppearance>(); binding.Role = role; binding.IconKey = iconKey; binding.Apply(Style);
             r.gameObject.SetActive(true); return image;
+        }
+        // The one progress bar builder; callers place the returned Root and drive SetRatio.
+        public ProgressBarView ProgressBar(Transform parent,string name,BarColorSource colors)
+        {
+            var r=Node(name,parent); r.gameObject.AddComponent<Image>();
+            var bar=r.gameObject.AddComponent<ProgressBarView>(); bar.Build(colors);
+            var binding=r.gameObject.AddComponent<ShellAppearance>(); binding.Role="progressBar"; binding.Apply(Style);
+            r.gameObject.SetActive(true); return bar;
         }
         public RectTransform ScreenRoot(Transform parent, string name = "Screen")
         { var r = Node(name, parent); Stretch(r); Image(r, "screen"); r.gameObject.SetActive(true); return r; }

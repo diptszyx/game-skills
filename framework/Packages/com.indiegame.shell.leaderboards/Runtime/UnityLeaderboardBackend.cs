@@ -59,6 +59,13 @@ namespace IndieGame.Shell.Leaderboards
             { return null; }
         }
 
+        public Task<string> UpdatePlayerName(string name) => Request(async () =>
+        {
+            try { return await AuthenticationService.Instance.UpdatePlayerNameAsync(name); }
+            catch (AuthenticationException e) when (e.ErrorCode == AuthenticationErrorCodes.InvalidParameters)
+            { throw new ArgumentException(e.Message, nameof(name), e); }
+        });
+
         public async Task Submit(string board, long score)
         { await Request(() => LeaderboardsService.Instance.AddPlayerScoreAsync(board, (double)score)); }
     }

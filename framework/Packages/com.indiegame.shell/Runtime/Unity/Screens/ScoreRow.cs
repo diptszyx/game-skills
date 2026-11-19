@@ -1,3 +1,4 @@
+using System;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -12,13 +13,15 @@ namespace IndieGame.Shell.Unity.Screens
         public int Place { get; }
         public bool Own { get; }
         public bool Divider { get; }
-        public ScoreColumns(string rank,string name,string score,int place,bool own=false,bool divider=false)
-        { Rank=rank; Name=name; Score=score; Place=place; Own=own; Divider=divider; }
+        public Action<TMP_Text> Tap { get; }
+        public string TapLabel { get; }
+        public ScoreColumns(string rank,string name,string score,int place,bool own=false,bool divider=false,Action<TMP_Text> tap=null,string tapLabel=null)
+        { Rank=rank; Name=name; Score=score; Place=place; Own=own; Divider=divider; Tap=tap; TapLabel=tapLabel; }
     }
     internal static class ScoreRow
     {
         internal const float Inset=16, RankWidth=72, ColumnGap=8, ScoreWidth=200, IconSize=36, IconGap=8, FontSize=32, DividerHeight=2, DividerAlpha=.25f;
-        internal const string ScoreIconKey="scoreIcon";
+        internal const string ScoreIconKey="scoreIcon", EditIconKey="edit";
         internal static void Fill(ShellUiFactory f,RectTransform row,TMP_Text name,ScoreColumns c)
         {
             var style=f.Style;
@@ -31,8 +34,10 @@ namespace IndieGame.Shell.Unity.Screens
             PinColumn(rank.rectTransform,0,Inset,Inset+RankWidth);
             name.gameObject.name="Name"; name.text=c.Name; Style(name,TextAlignmentOptions.MidlineLeft,ink,c.Own);
             var nameRect=name.rectTransform; nameRect.anchorMin=Vector2.zero; nameRect.anchorMax=Vector2.one;
-            nameRect.offsetMin=new Vector2(Inset+RankWidth+ColumnGap,0); nameRect.offsetMax=new Vector2(-(Inset+ScoreWidth+ColumnGap),0);
+            float editReserve=c.Tap!=null?IconSize+IconGap:0;
+            nameRect.offsetMin=new Vector2(Inset+RankWidth+ColumnGap,0); nameRect.offsetMax=new Vector2(-(Inset+ScoreWidth+ColumnGap+editReserve),0);
             AddScore(f,row,c,ink);
+            if(c.Tap!=null) AddRename(f,row,name,c);
             if(c.Divider&&!c.Own) AddDivider(row,ink);
         }
         static Color PodiumColor(ShellStyle style,int place) =>
@@ -60,6 +65,15 @@ namespace IndieGame.Shell.Unity.Screens
             float textWidth=Mathf.Min(score.GetPreferredValues(c.Score).x,numberWidth);
             var rect=icon.rectTransform; rect.anchorMin=rect.anchorMax=new Vector2(1,.5f); rect.pivot=new Vector2(1,.5f);
             rect.sizeDelta=new Vector2(IconSize,IconSize); rect.anchoredPosition=new Vector2(-(Inset+textWidth+IconGap),0);
+        }
+        static void AddRename(ShellUiFactory f,RectTransform row,TMP_Text name,ScoreColumns c)
+        {
+            var button=row.gameObject.AddComponent<Button>(); button.targetGraphic=row.GetComponent<Image>(); button.transition=Selectable.Transition.None;
+            f.WithPressFeedback(button); button.onClick.AddListener(()=>c.Tap(name));
+            row.gameObject.AddComponent<ActionAccessibility>().Set("rename",c.TapLabel);
+            var icon=f.AppearanceImage(row,"Edit icon","actionIcon",iconKey:EditIconKey);
+            var rect=icon.rectTransform; rect.anchorMin=rect.anchorMax=new Vector2(1,.5f); rect.pivot=new Vector2(1,.5f);
+            rect.sizeDelta=new Vector2(IconSize,IconSize); rect.anchoredPosition=new Vector2(-(Inset+ScoreWidth+ColumnGap),0);
         }
         static void AddDivider(RectTransform row,Color ink)
         {

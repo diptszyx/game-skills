@@ -58,6 +58,10 @@ namespace IndieGame.Shell.Unity
         public string LeaderboardCaption;
         public IDictionary<string,AudioClip> Sounds;
         public Func<ShellGameContext,RectTransform> GameScreenFactory;
+        // Optional. Game extra on the win popup (e.g. a mascot); the shell always adds confetti.
+        public IResultCelebration WinCelebration;
+        // Optional. Game extra on the lose popup (e.g. a sad mascot); no confetti.
+        public IResultCelebration LoseCelebration;
         // Optional. Builds game decoration for Home; see HomeStageBuilder for the placement and fit contract.
         public Func<HomeStageContext,RectTransform> HomeStageFactory;
         const int StandardFakePurchases=50;

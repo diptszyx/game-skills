@@ -3,6 +3,7 @@ using System;
 using System.Globalization;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using TMPro;
 using UnityEngine;
 using IndieGame.Shell.Unity.UI;
 namespace IndieGame.Shell.Unity.Screens
@@ -20,8 +21,11 @@ namespace IndieGame.Shell.Unity.Screens
         const string UnrankedMark="-";
         readonly ListSurface surface; readonly ShellUiFactory factory; readonly UnityEngine.UI.Button refresh; readonly string captionKeyOrText;
         public RectTransform Root => surface.Root;
+        public ShellUiFactory Factory => factory;
         public LeaderboardSnapshot Snapshot { get; private set; }
         public event Action RefreshRequested;
+        public event Action<TMP_Text> RenameRequested;
+        public bool RenameEnabled;
         public LeaderboardView(ShellUiFactory factory, Transform parent, PopupView modal=null, string captionKeyOrText=null)
         {
             this.factory=factory; this.captionKeyOrText=captionKeyOrText; surface=new ListSurface(factory,parent,"Leaderboard",modal);
@@ -35,21 +39,23 @@ namespace IndieGame.Shell.Unity.Screens
         {
             Snapshot=snapshot; var mine=snapshot.MyRank;
             bool IsMine(LeaderboardEntry e)=>mine!=null&&e.Rank>0&&e.PlayerId==mine.PlayerId;
+            string RenameLabel()=>RenameEnabled?text.Get("shell.leaderboard.rename"):null;
             var rows=new List<RowDisplay>(); var entries=snapshot.Entries;
             for(int i=0;i<entries.Count;i++)
             {
                 var e=entries[i]; bool own=IsMine(e);
-                rows.Add(Row(e.PlayerId,e.Rank.ToString(),e.DisplayName,e,own,divider:i<entries.Count-1));
+                rows.Add(Row(e.PlayerId,e.Rank.ToString(),e.DisplayName,e,own,divider:i<entries.Count-1,own?RenameTap():null,own?RenameLabel():null));
             }
             RowDisplay pinned=null;
             if(mine!=null&&!entries.Any(IsMine))
-                pinned=Row("my-rank",mine.Rank<1?UnrankedMark:mine.Rank.ToString(),string.IsNullOrWhiteSpace(mine.PlayerName)?text.Get("shell.leaderboard.you"):mine.DisplayName,mine,true,false);
+                pinned=Row("my-rank",mine.Rank<1?UnrankedMark:mine.Rank.ToString(),string.IsNullOrWhiteSpace(mine.PlayerName)?text.Get("shell.leaderboard.you"):mine.DisplayName,mine,true,false,RenameTap(),RenameLabel());
             var caption=string.IsNullOrWhiteSpace(captionKeyOrText)?null:text.KeyOrText(captionKeyOrText);
             surface.Render(new ListDisplay(text.Get("shell.leaderboard.title"),rows,snapshot.MessageKey==null?"":text.Get(snapshot.MessageKey),pinned,caption),_=>{});
             refresh.GetComponent<ActionAccessibility>().Set("refresh",text.Get("shell.refresh"));
         }
-        static RowDisplay Row(string id,string rank,string name,LeaderboardEntry entry,bool own,bool divider)=>
-            new RowDisplay(id,name,highlight:own,columns:new ScoreColumns(rank,name,entry.Score.ToString(CultureInfo.InvariantCulture),entry.Rank,own,divider));
+        Action<TMP_Text> RenameTap() { if(!RenameEnabled) return null; return label=>RenameRequested?.Invoke(label); }
+        static RowDisplay Row(string id,string rank,string name,LeaderboardEntry entry,bool own,bool divider,Action<TMP_Text> tap=null,string tapLabel=null)=>
+            new RowDisplay(id,name,highlight:own,columns:new ScoreColumns(rank,name,entry.Score.ToString(CultureInfo.InvariantCulture),entry.Rank,own,divider,tap,tapLabel));
     }
     // Completes on the Unity main thread; null/blank board or negative score -> InvalidArgument.
     public interface ILeaderboardRequests
@@ -68,13 +74,15 @@ namespace IndieGame.Shell.Unity.Screens
     }
     public sealed class LeaderboardPresenter : IDisposable
     {
-        readonly LeaderboardView view; readonly ScreenText text; readonly ILeaderboardRequests requests; readonly string board; readonly int count; readonly Func<long> localBest;
+        readonly LeaderboardView view; readonly ScreenText text; readonly ILeaderboardRequests requests; readonly string board; readonly int count; readonly Func<long> localBest; readonly InlineNameEditor nameEditor;
         int requestId; bool disposed;
         public Task Pending { get; private set; }
-        public LeaderboardPresenter(ShellSession session,LeaderboardView view,LocalizationService localization,ILeaderboardRequests requests,string board,int count,Func<long> localBest=null)
+        public LeaderboardPresenter(ShellSession session,LeaderboardView view,LocalizationService localization,ILeaderboardRequests requests,string board,int count,Func<long> localBest=null,ILeaderboardRename rename=null)
         {
             if(string.IsNullOrWhiteSpace(board)||count<1) throw new ArgumentException("Invalid leaderboard configuration");
             this.view=view; text=new ScreenText(session,localization); this.requests=requests; this.board=board; this.count=count; this.localBest=localBest;
+            if(rename!=null)
+            { nameEditor=new InlineNameEditor(view.Factory,text,rename,Refresh); view.RenameEnabled=true; view.RenameRequested+=nameEditor.Begin; }
             view.RefreshRequested+=Refresh; view.Root.GetComponent<ScreenLifetime>().Entered+=Refresh; view.Root.GetComponent<ScreenLifetime>().Resumed+=Refresh; Refresh();
         }
         public void Refresh() { Pending=RefreshAsync(); }
@@ -98,6 +106,7 @@ namespace IndieGame.Shell.Unity.Screens
             catch(Exception) { if(!disposed&&id==requestId) view.Render(new LeaderboardSnapshot { State=LeaderboardState.Error,MyRank=LocalRow(),MessageKey="shell.error.Failed" },text); }
         }
         LeaderboardEntry LocalRow()=>localBest==null?null:new LeaderboardEntry("you",localBest(),0);
-        public void Dispose() { disposed=true; requestId++; view.RefreshRequested-=Refresh; view.Root.GetComponent<ScreenLifetime>().Entered-=Refresh; view.Root.GetComponent<ScreenLifetime>().Resumed-=Refresh; }
+        public InlineNameEditor Rename=>nameEditor;
+        public void Dispose() { disposed=true; requestId++; if(nameEditor!=null) view.RenameRequested-=nameEditor.Begin; view.RefreshRequested-=Refresh; view.Root.GetComponent<ScreenLifetime>().Entered-=Refresh; view.Root.GetComponent<ScreenLifetime>().Resumed-=Refresh; }
     }
 }

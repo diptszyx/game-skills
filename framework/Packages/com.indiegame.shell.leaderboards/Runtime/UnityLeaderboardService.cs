@@ -9,7 +9,7 @@ using IndieGame.Shell.Unity.Screens;
 namespace IndieGame.Shell.Leaderboards
 {
     // Call on the Unity main thread; awaits retain its synchronization context.
-    public sealed class UnityLeaderboardService : ILeaderboardRequests
+    public sealed class UnityLeaderboardService : ILeaderboardRequests, ILeaderboardRename
     {
         readonly ILeaderboardBackend backend;
         Task signIn;
@@ -40,6 +40,7 @@ namespace IndieGame.Shell.Leaderboards
                 error is HttpRequestException || error is WebException ||
                 error is SocketException || error is UnauthorizedAccessException)
                 return ServiceError.Unavailable;
+            if (error is ArgumentException) return ServiceError.InvalidArgument;
             return ServiceError.Failed;
         }
 
@@ -65,6 +66,15 @@ namespace IndieGame.Shell.Leaderboards
                 return new ServiceResult<LeaderboardEntry>(entry, entry == null ? ServiceError.NotFound : ServiceError.None);
             }
             catch (Exception e) { return new ServiceResult<LeaderboardEntry>(null, Error(e)); }
+        }
+
+        public async Task<ServiceResult<string>> UpdatePlayerName(string name)
+        {
+            if (!PlayerNameRules.TryNormalize(name, out var clean)) return new ServiceResult<string>(null, ServiceError.InvalidArgument);
+            var auth = await EnsureSignedIn();
+            if (auth != ServiceError.None) return new ServiceResult<string>(null, auth);
+            try { return new ServiceResult<string>(await backend.UpdatePlayerName(clean)); }
+            catch (Exception e) { return new ServiceResult<string>(null, Error(e)); }
         }
 
         public async Task<ServiceResult<bool>> SubmitScore(string board, long score)
