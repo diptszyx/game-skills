@@ -119,7 +119,15 @@ namespace IndieGame.Shell.Unity
         void RequireReady() { if(!Ready) throw new InvalidOperationException("ShellApp not Ready"); }
         public void ShowMain() { RequireReady(); tabModals?.CloseActive(); Screens.Show(Main.Root); }
         public void ShowGame() { RequireReady(); tabModals?.CloseActive(); Screens.Show(GameRoot); }
-        public void Navigate(ShellScreen screen)
+        public void OpenShopOverGame()
+        {
+            RequireReady();
+            if(tabModals==null) throw new InvalidOperationException("OpenShopOverGame needs ShellStyle.ModalTabs");
+            if(Screens.Current==GameRoot) Flow.ShowPause();
+            OpenScreen(ShellScreen.Shop,true);
+        }
+        public void Navigate(ShellScreen screen)=>OpenScreen(screen,false);
+        void OpenScreen(ShellScreen screen,bool keepScreen)
         {
             if(!Enum.IsDefined(typeof(ShellScreen),screen)) throw new InvalidOperationException("Unavailable ShellScreen: "+screen);
             if(screen==ShellScreen.Shop && config?.ShopFactory==null && config?.ShopCatalog==null) throw new InvalidOperationException("Unavailable ShellScreen Shop: Shop service");
@@ -153,7 +161,7 @@ namespace IndieGame.Shell.Unity
                     cached.Add(screen,root);
                 }
             }
-            if(modal) { if(Screens.Current!=Main.Root) Screens.Show(Main.Root); tabModals.Open(screen); return; }
+            if(modal) { if(!keepScreen && Screens.Current!=Main.Root) Screens.Show(Main.Root); tabModals.Open(screen); return; }
             foreach(var a in root.GetComponentsInChildren<ActionAccessibility>(true)) if(a.Key=="back") a.Set("back",screenText.Get("shell.back")); Screens.Show(root);
         }
         public SessionResult Commit()
