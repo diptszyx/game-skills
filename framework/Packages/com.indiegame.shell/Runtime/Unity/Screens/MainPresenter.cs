@@ -26,8 +26,15 @@ namespace IndieGame.Shell.Unity.Screens
         }
         internal static string FormatCountdown(ShellSession session,ScreenText text,IClock clock)
         {
-            var full=session.Lives.FullAtUtc;
-            return full.HasValue?text.Get("shell.lives.countdown",Math.Max(0,(long)Math.Ceiling((full.Value-clock.UtcNow).TotalSeconds))):text.Get("shell.lives.full");
+            var next=session.Lives.NextHeartAtUtc;
+            return next.HasValue?text.Get("shell.lives.countdown",FormatDuration(next.Value-clock.UtcNow)):"";
+        }
+        public static string FormatDuration(TimeSpan span)
+        {
+            long seconds=Math.Max(0,(long)Math.Ceiling(span.TotalSeconds));
+            if(seconds>=3600) return $"{seconds/3600}h {seconds%3600/60:00}m";
+            if(seconds>=60) return $"{seconds/60}m {seconds%60:00}s";
+            return seconds+"s";
         }
         void Play() { game.Play(); RetrySave(); Refresh(); }
         void Open(ShellScreen screen) { open(screen); Refresh(); }

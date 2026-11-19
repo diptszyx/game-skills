@@ -91,6 +91,7 @@ namespace IndieGame.Shell
                 return anchor.AddTicks(remaining * config.RegenInterval.Ticks);
             }
         }
+        public DateTime? NextHeartAtUtc => hearts == config.MaxHearts ? (DateTime?)null : anchor.AddTicks(config.RegenInterval.Ticks);
         public sealed class State
         {
             [JsonProperty(Required = Required.Always)] public int Version { get; set; }

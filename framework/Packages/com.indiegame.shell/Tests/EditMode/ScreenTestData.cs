@@ -30,7 +30,7 @@ namespace IndieGame.Shell.Tests
                 {"shell.checkin.title","Check in"},{"shell.checkin.slot","Slot {0}: {1}"},{"shell.checkin.other","Upcoming"},
                 {"shell.claim","Claim"},{"shell.gold","Gold {0}"},{"shell.hearts","Hearts {0}"},{"shell.reward","{0}"},{"shell.separator",", "},
                 {"shell.reward.unavailable","Unavailable"},{"shell.quests.title","Quests"},{"shell.quests.empty","No quests"},{"shell.quest.q","Quest"},{"shell.quest.win1","Win 1"},{"shell.quest.win3","Win 3"},{"shell.quest.win5","Win 5"},{"shell.quest.play3","Play 3"},{"shell.quest.play5","Play 5"},{"shell.quest.row","{0} {1}/{2} {3}"},
-                {"shell.main.title","Main"},{"shell.play","Play"},{"shell.lives.full","Full"},{"shell.lives.countdown","Full in {0}s"},
+                {"shell.main.title","Main"},{"shell.play","Play"},{"shell.lives.countdown","+1 {0}"},
                 {"shell.shop.title","Shop"},{"shell.shop.empty","No products"},{"shell.product.p","Product"},{"shell.product.hearts","Hearts"},{"shell.product.gold_s","Small"},{"shell.product.gold_m","Medium"},{"shell.product.gold_l","Large"},{"shell.shop.row","{0} {1} {2}"},{"shell.price.iap","${0}"},{"shell.buy","Buy"},
                 {"shell.error.title","Error"},{"shell.error.commit","Save failed: {0} {1}"},{"shell.error.None",""},{"shell.error.Io","Storage error"},
                 {"shell.error.PurchaseFailed","Purchase failed"},{"shell.error.Cancelled","Cancelled"},{"shell.error.Incomplete","Incomplete"} };

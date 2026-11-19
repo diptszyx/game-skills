@@ -84,7 +84,6 @@ namespace IndieGame.Shell.Unity.Localization
             "shell.leaderboard.title",
             "shell.leaderboard.you",
             "shell.lives.countdown",
-            "shell.lives.full",
             "shell.loading.tip",
             "shell.loading.title",
             "shell.main.title",

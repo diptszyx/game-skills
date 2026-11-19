@@ -52,8 +52,8 @@ namespace IndieGame.Shell.Tests
         [Test] public void MainRefreshesLivesOnResume()
         {
             var v=new MainView(f,root.transform); var game=new Game(); ShellScreen? opened=null; var p=new MainPresenter(session,v,text,clock,game,s=>opened=s); owned.Add(p);
-            Assert.That(v.Snapshot.Hearts,Is.EqualTo("Hearts 1")); Assert.That(v.Snapshot.Countdown,Is.EqualTo("Full in 120s"));
-            clock.UtcNow=clock.UtcNow.AddSeconds(60); p.Resume(); Assert.That(v.Snapshot.Hearts,Is.EqualTo("Hearts 3")); Assert.That(v.Snapshot.Countdown,Is.EqualTo("Full in 60s"));
+            Assert.That(v.Snapshot.Hearts,Is.EqualTo("Hearts 1")); Assert.That(v.Snapshot.Countdown,Is.EqualTo("+1 30s"));
+            clock.UtcNow=clock.UtcNow.AddSeconds(60); p.Resume(); Assert.That(v.Snapshot.Hearts,Is.EqualTo("Hearts 3")); Assert.That(v.Snapshot.Countdown,Is.EqualTo("+1 30s"));
             v.RequestPlay(); v.RequestOpen(ShellScreen.Shop); Assert.That(game.Plays,Is.EqualTo(1)); Assert.That(opened,Is.EqualTo(ShellScreen.Shop));
         }
         [Test] public void SaveFailureIsSurfacedToView()
@@ -67,6 +67,13 @@ namespace IndieGame.Shell.Tests
             var host=root.AddComponent<PopupHost>(); var v=new ShopView(f,root.transform,host); var fake=new FakePurchaseService(); fake.Enqueue(PurchaseOutcome.Failed);
             var p=new ShopPresenter(session,new ShopService(ScreenTestData.Catalog(),session,fake),v,text); owned.Add(p); v.RequestBuy("p");
             Assert.That(v.Error,Is.EqualTo("Purchase failed")); Assert.That(host.Top,Is.Not.Null); Assert.That(host.Top.gameObject.activeSelf,Is.True); Assert.That(session.Economy.Gold,Is.EqualTo(100));
+        }
+        [Test] public void DurationShowsHoursMinutesAndSeconds()
+        {
+            Assert.That(MainPresenter.FormatDuration(System.TimeSpan.FromSeconds(1753)),Is.EqualTo("29m 13s"));
+            Assert.That(MainPresenter.FormatDuration(System.TimeSpan.FromSeconds(120)),Is.EqualTo("2m 00s"));
+            Assert.That(MainPresenter.FormatDuration(System.TimeSpan.FromSeconds(45)),Is.EqualTo("45s"));
+            Assert.That(MainPresenter.FormatDuration(System.TimeSpan.FromSeconds(3900)),Is.EqualTo("1h 05m"));
         }
     }
 }
