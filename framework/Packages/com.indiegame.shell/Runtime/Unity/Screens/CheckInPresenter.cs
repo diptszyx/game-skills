@@ -32,7 +32,7 @@ namespace IndieGame.Shell.Unity.Screens
                 labels[i]=text.Get("shell.checkin.day",i+1);
                 var slotReward=session.DailyCheckIn.RewardAtSlot(i);
                 goldOnly[i]=slotReward!=null && slotReward.Gold>0;
-                rewards[i]=slotReward==null?"":goldOnly[i]?slotReward.Gold.ToString(System.Globalization.CultureInfo.InvariantCulture):text.Reward(slotReward);
+                rewards[i]=slotReward==null?"":goldOnly[i]?slotReward.Gold.ToString(System.Globalization.CultureInfo.InvariantCulture)+(HasExtras(slotReward)?"+":""):text.Reward(slotReward);
                 states[i]=i<collected?DayState.Collected:i==p.NextSlot&&p.CanClaimNow?DayState.Today:DayState.Locked;
             }
             view.RenderDays(labels,rewards,states,goldOnly,text.Get("shell.claim"));
@@ -52,6 +52,7 @@ namespace IndieGame.Shell.Unity.Screens
             }
             finally { busy=false; }
         }
+        static bool HasExtras(Reward reward) => reward.Hearts>0 || reward.Boosters.Count>0;
         public void RetrySave() => text.Commit(view.ShowError);
         public void Dispose() { view.ClaimRequested-=Claim; view.Lifetime.Entered-=Enter; view.Lifetime.Resumed-=Resume; view.Lifetime.Ticked-=Tick; }
     }
