@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using IndieGame.Shell.Unity.Localization;
 using TMPro;
 using UnityEngine;
@@ -159,6 +160,30 @@ namespace IndieGame.Shell.Unity.UI
             var icon=AppearanceImage(button.transform,"Icon play","actionIcon",iconKey:"play");
             icon.rectTransform.anchorMin=icon.rectTransform.anchorMax=new Vector2(.18f,.5f); icon.rectTransform.sizeDelta=new Vector2(44,44);
             var label=button.GetComponentInChildren<TMP_Text>(); label.rectTransform.offsetMin=new Vector2(64,6);
+        }
+        // Icon + amount pieces in one line, sized to its content; callers place it.
+        public RectTransform RewardStrip(Transform parent,IReadOnlyList<RewardPart> parts,string role,float fontSize=0,string lead=null)
+        {
+            var strip=Node("Reward strip",parent);
+            var layout=strip.gameObject.AddComponent<HorizontalLayoutGroup>(); layout.spacing=Style.RewardGap; layout.childAlignment=TextAnchor.MiddleCenter;
+            layout.childControlWidth=layout.childControlHeight=true; layout.childForceExpandWidth=layout.childForceExpandHeight=false;
+            var fitter=strip.gameObject.AddComponent<ContentSizeFitter>(); fitter.horizontalFit=fitter.verticalFit=ContentSizeFitter.FitMode.PreferredSize;
+            if(!string.IsNullOrEmpty(lead)) StripLabel(strip,lead,role,fontSize);
+            foreach(var part in parts)
+            {
+                if(part.Icon!=null)
+                {
+                    var icon=AppearanceImage(strip,part.Icon,part.Icon); var size=icon.gameObject.AddComponent<LayoutElement>();
+                    size.preferredWidth=size.preferredHeight=Style.RewardIconSize;
+                }
+                StripLabel(strip,part.Text,role,fontSize);
+            }
+            strip.gameObject.SetActive(true); return strip;
+        }
+        void StripLabel(RectTransform strip,string value,string role,float fontSize)
+        {
+            var label=Label(strip,value,role:role); label.enableAutoSizing=false; label.textWrappingMode=TextWrappingModes.NoWrap;
+            if(fontSize>0) label.fontSize=fontSize;
         }
         public RectTransform ListRow(Transform parent, string text)
         {

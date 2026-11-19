@@ -15,6 +15,8 @@ namespace IndieGame.Shell.Unity.UI
         public RectTransform Root { get; }
         readonly TMP_Text gold, hearts, countdown;
         readonly RectTransform currency, lives;
+        public RectTransform GoldIcon { get; }
+        public RectTransform HeartIcon { get; }
         public Button Settings { get; }
         public TopBarView(ShellUiFactory factory, Transform parent)
         {
@@ -27,8 +29,8 @@ namespace IndieGame.Shell.Unity.UI
             lives=factory.AppearanceImage(Root,"Lives pill","livesPill",true).rectTransform;
             Place(lives,new Vector2(.42f,0),new Vector2(.80f,1));
             lives.offsetMin=new Vector2(0,15); lives.offsetMax=new Vector2(0,-15);
-            Place(factory.AppearanceImage(currency,"Currency icon","currencyIcon").rectTransform,new Vector2(.02f,.1f),new Vector2(.25f,.9f));
-            Place(factory.AppearanceImage(lives,"Heart icon","heartIcon").rectTransform,new Vector2(.02f,.1f),new Vector2(.25f,.9f));
+            GoldIcon=factory.AppearanceImage(currency,"Currency icon","currencyIcon").rectTransform; Place(GoldIcon,new Vector2(.02f,.1f),new Vector2(.25f,.9f));
+            HeartIcon=factory.AppearanceImage(lives,"Heart icon","heartIcon").rectTransform; Place(HeartIcon,new Vector2(.02f,.1f),new Vector2(.25f,.9f));
             gold=factory.Label(currency,"",role:"chromeText"); Place(gold.rectTransform,new Vector2(.28f,.1f),new Vector2(.95f,.9f));
             hearts=factory.Label(lives,"",role:"chromeText"); Place(hearts.rectTransform,new Vector2(.28f,.18f),new Vector2(.43f,.82f));
             countdown=factory.Label(lives,"",role:"chromeText"); Place(countdown.rectTransform,new Vector2(.45f,.18f),new Vector2(.90f,.82f));

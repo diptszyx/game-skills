@@ -166,6 +166,6 @@ namespace IndieGame.Shell.Tests
             }
         }
         sealed class ShotGame : IGameSessionActions
-        { public void Play() {} public void Retry() {} public void Revive() {} public void NextLevel() {} public void Leave() {} public void Pause() {} public void Resume() {} }
+        { public bool Play() => true; public void Retry() {} public void Revive() {} public void NextLevel() {} public void Leave() {} public void Pause() {} public void Resume() {} }
     }
 }

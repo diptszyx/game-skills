@@ -32,21 +32,22 @@ namespace IndieGame.Shell.Unity.Screens
         public readonly Dictionary<string,Button> Buttons=new Dictionary<string,Button>();
         public TMP_Text ErrorLabel { get; internal set; }
         internal TMP_Text Title, Body;
+        public RectTransform RewardStrip { get; internal set; }
         public string Error { get; internal set; }
         internal bool AdPending, Exited;
     }
     public sealed class SessionPopupPresenter : IDisposable
     {
         readonly ShellSession session; readonly ShellUiFactory factory; readonly PopupHost host; readonly ScreenText text;
-        readonly IGameSessionActions game; readonly IRewardedAdService ads; readonly SessionPopupConfig config;
+        readonly IGameSessionActions game; readonly IRewardedAdService ads; readonly SessionPopupConfig config; readonly RewardFlyLayer fly;
         readonly Dictionary<SessionPopupKind,SessionPopupContent> popups=new Dictionary<SessionPopupKind,SessionPopupContent>();
         readonly HashSet<SessionPopupKind> consumed=new HashSet<SessionPopupKind>();
         readonly HashSet<string> recordedRounds=new HashSet<string>();
         readonly TMP_Text errorBanner;
         string round; bool busy,paused,disposed; float priorScale;
         public IReadOnlyDictionary<SessionPopupKind,SessionPopupContent> Popups=>popups;
-        public SessionPopupPresenter(ShellSession session,ShellUiFactory factory,PopupHost host,LocalizationService localization,IGameSessionActions game,IRewardedAdService ads,SessionPopupConfig config)
-        { this.session=session; this.factory=factory; this.host=host; text=new ScreenText(session,localization); this.game=game; this.ads=ads; this.config=config;
+        public SessionPopupPresenter(ShellSession session,ShellUiFactory factory,PopupHost host,LocalizationService localization,IGameSessionActions game,IRewardedAdService ads,SessionPopupConfig config,RewardFlyLayer fly=null)
+        { this.fly=fly; this.session=session; this.factory=factory; this.host=host; text=new ScreenText(session,localization); this.game=game; this.ads=ads; this.config=config;
           errorBanner=factory.Label(host.transform,""); errorBanner.rectTransform.anchorMin=errorBanner.rectTransform.anchorMax=new Vector2(.5f,0); errorBanner.rectTransform.anchoredPosition=new Vector2(0,60); }
         public void ShowWin(string roundId)
         {
@@ -55,8 +56,10 @@ namespace IndieGame.Shell.Unity.Screens
             var p=Open(SessionPopupKind.Win);
             if(recordedRounds.Add(roundId)) { RecordQuest(p,QuestEvents.Win); RecordQuest(p,QuestEvents.Play); }
             var grant=session.Economy.GrantReward("session:win:"+round,config.WinReward);
+            if(grant.Success) FlyWinReward(p);
             if(grant.Success||grant.Error==ModuleError.AlreadyClaimed) Save(p); else Error(p,grant.Error.ToString());
         }
+        void FlyWinReward(SessionPopupContent p) { if(fly!=null) fly.Fly(p.RewardStrip,text.RewardParts(config.WinReward)); }
         public void ShowLose() { var p=Open(SessionPopupKind.Lose); RecordQuest(p,QuestEvents.Play); Save(p); }
         void RecordQuest(SessionPopupContent p,string key)
         { var r=session.DailyQuests.RecordEvent(key,1); if(!r.Success) Error(p,r.Error.ToString()); }
@@ -83,7 +86,7 @@ namespace IndieGame.Shell.Unity.Screens
             var layout=p.View.Content.gameObject.AddComponent<VerticalLayoutGroup>(); layout.childControlHeight=false; layout.childForceExpandHeight=false; layout.childControlWidth=false; layout.childForceExpandWidth=false; layout.childAlignment=TextAnchor.MiddleCenter; layout.spacing=factory.Style.Spacing;
             p.Body=factory.Label(p.View.Content,text.Get("popup."+kind.ToString().ToLowerInvariant()+".body"),role:"popupText");
             p.Title=p.View.Panel.Find("Title").GetComponent<TMP_Text>();
-            if(kind==SessionPopupKind.Win) factory.Label(p.View.Content,text.Reward(config.WinReward),role:"popupText");
+            if(kind==SessionPopupKind.Win) p.RewardStrip=factory.RewardStrip(p.View.Content,text.RewardParts(config.WinReward),"popupText");
             if(kind==SessionPopupKind.Revive) factory.Label(p.View.Content,text.Get("popup.revive.price",config.ReviveGold),role:"popupText");
             Transform toggleRow=null;
             if(HasSettingsControls(kind)) {
@@ -157,7 +160,7 @@ namespace IndieGame.Shell.Unity.Screens
                         {
                             var grant=session.Economy.GrantReward(claim,config.WinReward);
                             if(!grant.Success) { Error(p,grant.Error.ToString()); return; }
-                            Save(p); p.Buttons["double"].interactable=false;
+                            FlyWinReward(p); Save(p); p.Buttons["double"].interactable=false;
                         });
                         return;
                     }

@@ -23,7 +23,7 @@ namespace IndieGame.Shell.Tests
         sealed class Game : IGameSessionActions
         {
             public int Plays,Pauses,Resumes,Leaves;
-            public void Play()=>Plays++; public void Pause()=>Pauses++; public void Resume()=>Resumes++; public void Leave()=>Leaves++;
+            public bool Play() { Plays++; return true; } public void Pause()=>Pauses++; public void Resume()=>Resumes++; public void Leave()=>Leaves++;
             public void Retry() {} public void Revive() {} public void NextLevel() {}
         }
         DemoStyles demos; ShellApp app; Game game; ShellAppConfig config; Mouse mouse; Keyboard keyboard; string path; float priorScale; GameObject external;

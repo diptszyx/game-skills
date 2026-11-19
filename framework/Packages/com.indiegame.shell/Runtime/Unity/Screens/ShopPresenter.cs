@@ -23,7 +23,7 @@ namespace IndieGame.Shell.Unity.Screens
         RowDisplay Row(Product p)
         {
             bool gold=p.PriceKind==PriceKind.Gold;
-            return new RowDisplay(p.Id,text.Get(p.TitleKey),text.Get("shell.buy"),!busy,icon:gold?"coin":"",amount:gold?p.Price.ToString(Invariant):text.Get("shell.price.iap",(p.Price/100m).ToString("0.00",Invariant)),detail:text.RewardShort(p.Reward));
+            return new RowDisplay(p.Id,text.Get(p.TitleKey),text.Get("shell.buy"),!busy,icon:gold?"coin":"",amount:gold?p.Price.ToString(Invariant):text.Get("shell.price.iap",(p.Price/100m).ToString("0.00",Invariant)),rewards:text.RewardParts(p.Reward));
         }
         static readonly System.Globalization.CultureInfo Invariant=System.Globalization.CultureInfo.InvariantCulture;
         void Buy(string id)

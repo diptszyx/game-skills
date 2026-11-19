@@ -13,7 +13,7 @@ namespace IndieGame.Shell.Tests
         DemoStyles demos; GameObject root; IDisposable presenter;
         [SetUp] public void Setup() { demos=new DemoStyles(); root=new GameObject("Canvas",typeof(RectTransform),typeof(Canvas)); root.GetComponent<Canvas>().renderMode=RenderMode.ScreenSpaceOverlay; }
         [TearDown] public void Cleanup() { presenter?.Dispose(); presenter=null; UnityEngine.Object.DestroyImmediate(root); demos.Dispose(); }
-        sealed class Game : IGameSessionActions { public void Retry() {} public void Revive() {} public void NextLevel() {} public void Leave() {} public void Pause() {} public void Resume() {} public void Play() {} }
+        sealed class Game : IGameSessionActions { public void Retry() {} public void Revive() {} public void NextLevel() {} public void Leave() {} public void Pause() {} public void Resume() {} public bool Play() => true; }
         IEnumerator Build(string screen,bool bright)
         {
             var factory=new ShellUiFactory(demos.Make(bright)); var clock=new ScreenClock(); var session=ScreenTestData.Session(clock,new ScreenFiles()); session.LoadAll(); var text=ScreenTestData.Text();

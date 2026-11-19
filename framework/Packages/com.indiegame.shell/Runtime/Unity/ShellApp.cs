@@ -32,7 +32,7 @@ namespace IndieGame.Shell.Unity
         readonly Dictionary<ShellScreen,RectTransform> cached = new Dictionary<ShellScreen,RectTransform>();
         TabModals tabModals;
         ShellAppConfig config; ShellUiFactory factory; ScreenText screenText;
-        GameObject canvas, events; bool booted, loaded, destroyed; float capturedScale;
+        GameObject canvas, events; RewardFlyLayer rewardFly; bool booted, loaded, destroyed; float capturedScale;
         SessionResult loadResult;
         public BootResult Boot(ShellAppConfig configuration)
         {
@@ -80,7 +80,8 @@ namespace IndieGame.Shell.Unity
                 Popups=popupRoot.gameObject.AddComponent<PopupHost>(); Popups.HandlesOwnBackKey=false;
                 if(config.Style.ModalTabs) tabModals=new TabModals(Popups,factory);
                 var actions=new ActionsBridge(this,config.Actions);
-                Flow=new SessionPopupPresenter(Session,factory,Popups,Text,actions,config.RewardedAds,config.SessionPopups); owned.Add(Flow);
+                rewardFly=RewardFlyLayer.Create(factory,canvas.transform);
+                Flow=new SessionPopupPresenter(Session,factory,Popups,Text,actions,config.RewardedAds,config.SessionPopups,rewardFly); owned.Add(Flow);
                 GameRoot=config.GameScreenFactory(new ShellGameContext { Factory=factory,Session=Session,Text=Text,Popups=Popups,Flow=Flow,Parent=Screens.SafeRoot,Navigate=Navigate,ShowMain=ShowMain });
                 if(destroyed || this==null) throw new InvalidOperationException("ShellApp destroyed during Boot");
                 if(GameRoot==null) throw new InvalidOperationException("GameScreenFactory returned null");
@@ -96,7 +97,11 @@ namespace IndieGame.Shell.Unity
                 Main=new MainView(factory,Screens.SafeRoot);
                 if(config.HomeStageFactory!=null) HomeStage=HomeStageBuilder.Create(Main.Root,factory,config.HomeStageFactory);
                 MainPresenter=new MainPresenter(Session,Main,Text,clock,actions,Navigate,config.PlayLabel); owned.Add(MainPresenter);
-                if(config.Style.EnableHomeChrome) owned.Add(new ChromePresenter(Session,Text,clock,factory,Screens,Main.Root,GameRoot,ShowMain,Navigate,()=>{ if(!Ready || Popups.Top!=null) return; if(Screens.Current==GameRoot) Flow.ShowPause(); else Flow.ShowSettings(); },error=>ErrorLabel.text=error,tabModals));
+                if(config.Style.EnableHomeChrome)
+                {
+                    var chrome=new ChromePresenter(Session,Text,clock,factory,Screens,Main.Root,GameRoot,ShowMain,Navigate,()=>{ if(!Ready || Popups.Top!=null) return; if(Screens.Current==GameRoot) Flow.ShowPause(); else Flow.ShowSettings(); },error=>ErrorLabel.text=error,tabModals);
+                    owned.Add(chrome); rewardFly.SetTarget(RewardPart.GoldIcon,chrome.TopBar.GoldIcon); rewardFly.SetTarget(RewardPart.HeartIcon,chrome.TopBar.HeartIcon);
+                }
                 Screens.Show(Main.Root);
                 Screens.Loading.gameObject.AddComponent<LoadingContentView>().Initialize(factory,Screens.Loading,screenText,"shell.loading.tip");
                 Screens.Loading.transform.SetAsLastSibling(); Screens.Loading.Show(); Screens.Loading.SetProgress(1); Screens.Loading.Hide();
@@ -128,9 +133,9 @@ namespace IndieGame.Shell.Unity
                 switch(screen)
                 {
                     case ShellScreen.CheckIn:
-                        var check=new CheckInView(factory,parent,frame); owned.Add(new CheckInPresenter(Session,check,Text,clock)); root=check.Root; break;
+                        var check=new CheckInView(factory,parent,frame); owned.Add(new CheckInPresenter(Session,check,Text,clock,rewardFly)); root=check.Root; break;
                     case ShellScreen.Quests:
-                        var quests=new QuestsView(factory,parent,frame); owned.Add(new QuestsPresenter(Session,quests,Text,clock)); root=quests.Root; break;
+                        var quests=new QuestsView(factory,parent,frame); owned.Add(new QuestsPresenter(Session,quests,Text,clock,rewardFly)); root=quests.Root; break;
                     case ShellScreen.Shop:
                         var shop=new ShopView(factory,parent,Popups,frame);
                         var service=config.ShopFactory!=null?config.ShopFactory(Session):new ShopService(config.ShopCatalog,Session,config.Purchases);
@@ -172,7 +177,7 @@ namespace IndieGame.Shell.Unity
         {
             readonly ShellApp app; readonly IGameSessionActions game;
             internal ActionsBridge(ShellApp app,IGameSessionActions game) { this.app=app; this.game=game; }
-            public void Play() { app.RequireReady(); game.Play(); app.ShowGame(); }
+            public bool Play() { app.RequireReady(); if(!game.Play()) return false; app.ShowGame(); return true; }
             public void Retry()=>game.Retry(); public void Revive()=>game.Revive(); public void NextLevel()=>game.NextLevel();
             public void Leave() { game.Leave(); app.ShowMain(); }
             public void Pause()=>game.Pause(); public void Resume()=>game.Resume();

@@ -7,7 +7,7 @@ namespace IndieGame.Shell.Tests
     public sealed class PopupGame : IGameSessionActions
     {
         public int Revives,Retries,Nexts,Leaves,Pauses,Resumes;
-        public void Play() {} public void Retry()=>Retries++; public void Revive()=>Revives++; public void NextLevel()=>Nexts++;
+        public bool Play() => true; public void Retry()=>Retries++; public void Revive()=>Revives++; public void NextLevel()=>Nexts++;
         public void Leave()=>Leaves++; public void Pause()=>Pauses++; public void Resume()=>Resumes++;
     }
     public sealed class PopupFixture : IDisposable

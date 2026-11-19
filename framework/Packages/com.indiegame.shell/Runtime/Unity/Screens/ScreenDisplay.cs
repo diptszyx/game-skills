@@ -20,8 +20,9 @@ namespace IndieGame.Shell.Unity.Screens
         public string Detail { get; }
         public bool Highlight { get; }
         public ScoreColumns Columns { get; }
-        public RowDisplay(string id, string text, string action = "", bool enabled = false, float progress = -1,string icon="check",string amount=null,string detail=null,bool highlight=false,ScoreColumns columns=null)
-        { Id=id; Text=text; Action=action; Enabled=enabled; Progress=progress; Icon=icon; Amount=amount; Detail=detail; Highlight=highlight; Columns=columns; }
+        public IReadOnlyList<RewardPart> Rewards { get; }
+        public RowDisplay(string id, string text, string action = "", bool enabled = false, float progress = -1,string icon="check",string amount=null,string detail=null,bool highlight=false,ScoreColumns columns=null,IReadOnlyList<RewardPart> rewards=null)
+        { Id=id; Text=text; Action=action; Enabled=enabled; Progress=progress; Icon=icon; Amount=amount; Detail=detail; Highlight=highlight; Columns=columns; Rewards=rewards; }
     }
     public sealed class ListDisplay
     {
@@ -76,15 +77,22 @@ namespace IndieGame.Shell.Unity.Screens
         static void LayoutRowText(RectTransform row,TMP_Text title,ShellUiFactory f,RowDisplay data)
         {
             float xMax=string.IsNullOrEmpty(data.Action)?1:.64f;
-            if(data.Detail==null)
+            if(data.Detail==null && data.Rewards==null)
             {
                 LocalizedLayout.Row(row,title,!string.IsNullOrEmpty(data.Action)); title.alignment=TextAlignmentOptions.Left;
                 title.fontSizeMin=RowTitleMinFont; title.fontSizeMax=Mathf.Max(title.fontSizeMax,RowTitleMinFont); return;
             }
             bool bar=data.Progress>=0;
             StyleRowLabel(title,RowTitleFont,RowTitleMinFont,bar?.56f:.5f,.96f,xMax);
+            float detailMin=bar?.27f:.1f, detailMax=bar?.56f:.52f;
+            if(data.Rewards!=null)
+            {
+                var strip=f.RewardStrip(row,data.Rewards,"rowText",RowDetailFont,data.Detail); strip.name="Detail";
+                strip.anchorMin=strip.anchorMax=new Vector2(0,(detailMin+detailMax)/2); strip.pivot=new Vector2(0,.5f); strip.anchoredPosition=new Vector2(16,0);
+                return;
+            }
             var detail=f.Label(row,data.Detail,role:"rowText"); detail.gameObject.name="Detail";
-            StyleRowLabel(detail,RowDetailFont,RowDetailFont,bar?.27f:.1f,bar?.56f:.52f,xMax);
+            StyleRowLabel(detail,RowDetailFont,RowDetailFont,detailMin,detailMax,xMax);
         }
         internal static RectTransform EmptyCard(ShellUiFactory f, RectTransform root, bool topAnchored=false)
         {
@@ -118,10 +126,12 @@ namespace IndieGame.Shell.Unity.Screens
         {
             for(int i=parent.childCount-1;i>=0;i--) { var child=parent.GetChild(i); child.gameObject.SetActive(false); if(Application.isPlaying) UnityEngine.Object.Destroy(child.gameObject); else UnityEngine.Object.DestroyImmediate(child.gameObject); }
         }
-        internal static void Rows(ShellUiFactory f, RectTransform content, IReadOnlyList<RowDisplay> rows, Action<string> clicked)
+        internal static Dictionary<string,RectTransform> Rows(ShellUiFactory f, RectTransform content, IReadOnlyList<RowDisplay> rows, Action<string> clicked)
         {
             Clear(content);
-            foreach(var row in rows) AddRow(f,content,row,clicked);
+            var byId=new Dictionary<string,RectTransform>();
+            foreach(var row in rows) byId[row.Id]=AddRow(f,content,row,clicked);
+            return byId;
         }
         internal static RectTransform AddRow(ShellUiFactory f, RectTransform content, RowDisplay row, Action<string> clicked)
         {
@@ -153,6 +163,8 @@ namespace IndieGame.Shell.Unity.Screens
         readonly ScrollRect list; readonly RectTransform emptyCard; readonly PopupView modal;
         const float CaptionHeight=40,CaptionFont=24,CaptionInset=16;
         RectTransform pinnedHost; TMP_Text caption;
+        Dictionary<string,RectTransform> rowRects=new Dictionary<string,RectTransform>();
+        internal RectTransform RowRect(string id)=>rowRects.TryGetValue(id,out var rect)?rect:null;
         int rowCount; float footerHeight,errorHeight;
         internal ListSurface(ShellUiFactory factory, Transform parent, string name, PopupView modal=null)
         {
@@ -185,7 +197,7 @@ namespace IndieGame.Shell.Unity.Screens
         {
             title.text=display.Title; empty.text=display.Empty;
             bool showEmpty=display.Rows.Count==0; (emptyCard!=null?emptyCard.gameObject:empty.gameObject).SetActive(showEmpty);
-            ScreenWidgets.Rows(factory,list.content,display.Rows,clicked);
+            rowRects=ScreenWidgets.Rows(factory,list.content,display.Rows,clicked);
             rowCount=display.Rows.Count; ShowFooter(display.Pinned,display.Caption); FitModal();
         }
         void ShowFooter(RowDisplay pinned,string captionText)

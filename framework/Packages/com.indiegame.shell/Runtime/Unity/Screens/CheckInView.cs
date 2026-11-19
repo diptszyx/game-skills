@@ -61,6 +61,7 @@ namespace IndieGame.Shell.Unity.Screens
         public void RenderDays(string[] labels,string[] rewards,DayState[] states,bool[] goldOnly=null,string claimLabel=null)
         { if(cells!=null) for(int i=0;i<cells.Length;i++) cells[i].Render(labels[i],rewards[i],states[i],goldOnly!=null && goldOnly[i],claimLabel); }
         public void RequestClaim() { if(Snapshot!=null) foreach(var r in Snapshot.Rows) if(r.Enabled) { ClaimRequested?.Invoke(); break; } }
+        public RectTransform SlotRect(int slot)=>cells!=null?cells[slot].Root:surface.RowRect(slot.ToString());
         public void ShowError(string error) { Error=error; if(surface!=null) surface.Error(error); else this.error.text=error; }
     }
 }

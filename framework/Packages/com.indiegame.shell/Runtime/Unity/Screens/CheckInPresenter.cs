@@ -5,11 +5,11 @@ namespace IndieGame.Shell.Unity.Screens
 {
     public sealed class CheckInPresenter : IDisposable
     {
-        readonly ShellSession session; readonly CheckInView view; readonly ScreenText text; readonly IClock clock;
+        readonly ShellSession session; readonly CheckInView view; readonly ScreenText text; readonly IClock clock; readonly RewardFlyLayer fly;
         DateTime day; bool busy; string language;
-        public CheckInPresenter(ShellSession session, CheckInView view, LocalizationService localization, IClock clock)
+        public CheckInPresenter(ShellSession session, CheckInView view, LocalizationService localization, IClock clock, RewardFlyLayer fly=null)
         {
-            this.session=session; this.view=view; this.clock=clock; text=new ScreenText(session,localization);
+            this.session=session; this.view=view; this.clock=clock; this.fly=fly; text=new ScreenText(session,localization);
             view.ClaimRequested+=Claim; view.Lifetime.Entered+=Enter; view.Lifetime.Resumed+=Resume; view.Lifetime.Ticked+=Tick; Enter();
         }
         public void Enter() => Refresh();
@@ -43,7 +43,13 @@ namespace IndieGame.Shell.Unity.Screens
         {
             if(busy || !session.DailyCheckIn.Preview().CanClaimNow) return;
             busy=true;
-            try { var result=session.DailyCheckIn.Claim(); if(result.Success || result.Error==DailyError.AlreadyClaimed) RetrySave(); else view.ShowError(text.Get("shell.error."+result.Error)); Refresh(); }
+            try
+            {
+                var preview=session.DailyCheckIn.Preview(); var origin=view.SlotRect(preview.NextSlot);
+                var result=session.DailyCheckIn.Claim();
+                if(result.Success && fly!=null) fly.Fly(origin,text.RewardParts(preview.Reward));
+                if(result.Success || result.Error==DailyError.AlreadyClaimed) RetrySave(); else view.ShowError(text.Get("shell.error."+result.Error)); Refresh();
+            }
             finally { busy=false; }
         }
         public void RetrySave() => text.Commit(view.ShowError);

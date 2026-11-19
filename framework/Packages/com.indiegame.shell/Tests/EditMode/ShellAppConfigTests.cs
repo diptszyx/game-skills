@@ -10,7 +10,7 @@ namespace IndieGame.Shell.Tests
     public sealed class ShellAppConfigTests
     {
         DemoStyles demos;
-        sealed class Game : IGameSessionActions { public void Play() {} public void Retry() {} public void Revive() {} public void NextLevel() {} public void Leave() {} public void Pause() {} public void Resume() {} }
+        sealed class Game : IGameSessionActions { public bool Play() => true; public void Retry() {} public void Revive() {} public void NextLevel() {} public void Leave() {} public void Pause() {} public void Resume() {} }
         ShellAppConfig Config()=>new ShellAppConfig {
             Style=demos.Make(false), SavePath="test.json", Lives=new LivesConfig(5,2,TimeSpan.FromSeconds(60)), Economy=new EconomyConfig(100),
             CheckIn=new DailyCheckInConfig(new[]{Enumerable.Repeat(new Reward(1),CheckInPack.Days).ToArray(),Enumerable.Repeat(new Reward(1),CheckInPack.Days).ToArray()}), Quests=new DailyQuestsConfig(Array.Empty<QuestTemplate>(),0),

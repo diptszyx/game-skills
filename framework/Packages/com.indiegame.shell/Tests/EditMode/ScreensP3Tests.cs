@@ -118,19 +118,19 @@ namespace IndieGame.Shell.Tests
             var cell=new DayCellView(f,screen); cell.Render("Day 3","100",DayState.Locked,true);
             Assert.That(cell.Root.Find("Reward card").gameObject.activeSelf,Is.True); Assert.That(cell.Root.Find("Reward card/Reward text").GetComponent<TMP_Text>().text,Is.EqualTo("100"));
         }
-        [Test] public void QuestRowHasTwoLinesWithoutDuplicatedAmounts()
+        [Test] public void QuestRowShowsTitleProgressAndRewardAmountOnce()
         {
             f.Style.ListRowColor=new Color(1,1,1,.4f);
             var v=new QuestsView(f,screen); var p=new QuestsPresenter(session,v,text,clock); owned.Add(p);
-            var row=RowLabels(v.Root); Assert.That(row.Select(t=>t.text).ToArray(),Is.EqualTo(new[]{"Quest","0/2 · +7"}));
+            var row=RowLabels(v.Root); Assert.That(row.Select(t=>t.text).ToArray(),Is.EqualTo(new[]{"Quest","0/2","7"}));
             AssertRowReadable(v.Root);
         }
-        [Test] public void ShopRowShowsTitleAndRewardOnly()
+        [Test] public void ShopRowShowsTitleAndRewardAmountOnly()
         {
             f.Style.ListRowColor=new Color(1,1,1,.4f);
             var v=new ShopView(f,screen,root.AddComponent<PopupHost>());
             var p=new ShopPresenter(session,new ShopService(ScreenTestData.Catalog(),session,new FakePurchaseService()),v,text); owned.Add(p);
-            var labels=RowLabels(v.Root); Assert.That(labels.Length,Is.EqualTo(2)); Assert.That(labels[0].text,Does.Not.Contain("10")); Assert.That(labels[1].text,Does.StartWith("+10"));
+            var labels=RowLabels(v.Root); Assert.That(labels.Length,Is.EqualTo(2)); Assert.That(labels[0].text,Does.Not.Contain("10")); Assert.That(labels[1].text,Is.EqualTo("10"));
             AssertRowReadable(v.Root);
         }
         static TMP_Text[] RowLabels(RectTransform view)

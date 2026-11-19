@@ -30,6 +30,10 @@ namespace IndieGame.Shell.Unity.UI
         public ModalLayoutTheme Modal=new ModalLayoutTheme();
         // Button press feedback: scale and colour multiplier while held, seconds to return.
         public float PressScale=.94f, PressDarken=.88f, PressSeconds=.12f;
+        // Reward strip: icon edge and gap between pieces.
+        public float RewardIconSize=36, RewardGap=8;
+        // Reward fly to the top bar: icons per reward, seconds in flight, delay between icons, icon edge, bow height as a fraction of the distance.
+        public int RewardFlyCount=6; public float RewardFlySeconds=.6f, RewardFlyStagger=.06f, RewardFlyIconSize=48, RewardFlyArc=.2f;
         // Sprite pixel rows [top,bottom) of the visible header band; zero keeps the full top border as the title area.
         public Vector2 PanelHeaderRows, MandatoryPanelHeaderRows;
         public Vector2 PopupHeaderRows(bool mandatory)=>mandatory&&MandatoryPanelSprite!=null?MandatoryPanelHeaderRows:PanelHeaderRows;
@@ -174,6 +178,8 @@ namespace IndieGame.Shell.Unity.UI
                 throw new InvalidOperationException("Invalid Modal layout: width (0,1], 0 < min <= max <= 1");
             if(PressScale<=0||PressScale>1||PressDarken<=0||PressDarken>1||PressSeconds<=0)
                 throw new InvalidOperationException("Invalid press feedback: PressScale and PressDarken in (0,1], PressSeconds > 0");
+            if(RewardIconSize<=0||RewardGap<0||RewardFlyCount<=0||RewardFlySeconds<=0||RewardFlyStagger<0||RewardFlyIconSize<=0||RewardFlyArc<0)
+                throw new InvalidOperationException("Invalid reward display: sizes, count and seconds > 0, gap, stagger and arc >= 0");
             Require(Theme, "Theme"); Require(Theme.Font, "Theme.Font");
             Require(ScreenBackground, "ScreenBackground"); Require(CurrencyIcon, "CurrencyIcon");
             Require(HeartIcon, "HeartIcon"); Require(BoosterIcon, "BoosterIcon");

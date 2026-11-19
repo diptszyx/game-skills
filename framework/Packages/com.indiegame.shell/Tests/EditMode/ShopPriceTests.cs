@@ -37,7 +37,8 @@ namespace IndieGame.Shell.Tests
         }
         [Test] public void IapDetailLineDropsThePurchaseFiller()
         {
-            Assert.That(view.Snapshot.Rows.First(r=>r.Id==ShopPack.GoldSmall).Detail,Is.EqualTo("+50"));
+            var row=view.Snapshot.Rows.First(r=>r.Id==ShopPack.GoldSmall);
+            Assert.That(row.Detail,Is.Null); Assert.That(row.Rewards.Select(r=>r.Text),Is.EqualTo(new[]{"50"}));
         }
         [Test] public void PriceFormatKeyExistsInBothLanguagesWithAPlaceholder()
         {

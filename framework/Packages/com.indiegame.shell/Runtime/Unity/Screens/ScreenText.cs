@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using IndieGame.Shell.Unity.UI;
 namespace IndieGame.Shell.Unity.Screens
 {
     public sealed class ScreenText
@@ -18,10 +19,14 @@ namespace IndieGame.Shell.Unity.Screens
             foreach(var item in reward.Boosters) items.Add(Get("shell.booster",Get("shell.booster."+item.Key),item.Value));
             return Get("shell.reward",string.Join(Get("shell.separator"),items));
         }
-        public string RewardShort(Reward reward)
+        public IReadOnlyList<RewardPart> RewardParts(Reward reward)
         {
-            if(reward==null || reward.Gold<=0 || reward.Hearts>0 || reward.Boosters.Count>0) return Reward(reward);
-            return "+"+reward.Gold.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            if(reward==null) return new[]{RewardPart.Plain(Get("shell.reward.unavailable"))};
+            var parts=new List<RewardPart>();
+            if(reward.Gold>0) parts.Add(RewardPart.Gold(reward.Gold));
+            if(reward.Hearts>0) parts.Add(RewardPart.Hearts(reward.Hearts));
+            foreach(var item in reward.Boosters) parts.Add(RewardPart.Plain(Get("shell.booster",Get("shell.booster."+item.Key),item.Value)));
+            return parts;
         }
         internal string CommitError(SessionResult result)
         {
