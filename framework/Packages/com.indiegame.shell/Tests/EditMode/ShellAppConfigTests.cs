@@ -46,6 +46,12 @@ namespace IndieGame.Shell.Tests
             c.RewardedAds=new FakeRewardedAdService(); c.Leaderboard=new AsyncLeaderboard();
             Assert.DoesNotThrow(c.Validate);
         }
+        [Test] public void StandardConfigPassesInitialBoostersToTheEconomy()
+        {
+            var g=ShellGameConfig.Parse("{\"gameId\":\"t\",\"initialBoosters\":[{\"id\":\"hint\",\"count\":3}]}");
+            Assert.That(Standard(g).Economy.InitialBoosters["hint"],Is.EqualTo(3));
+            Assert.That(Standard().Economy.InitialBoosters,Is.Empty);
+        }
         [Test] public void StandardConfigAcceptsACheckInOverride()
         {
             var own=CheckInPack.Standard(3); Assert.That(Standard(null,own).CheckIn,Is.SameAs(own));

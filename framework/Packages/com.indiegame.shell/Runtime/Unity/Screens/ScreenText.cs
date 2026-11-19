@@ -25,7 +25,7 @@ namespace IndieGame.Shell.Unity.Screens
             var parts=new List<RewardPart>();
             if(reward.Gold>0) parts.Add(RewardPart.Gold(reward.Gold));
             if(reward.Hearts>0) parts.Add(RewardPart.Hearts(reward.Hearts));
-            foreach(var item in reward.Boosters) parts.Add(RewardPart.Plain(Get("shell.booster",Get("shell.booster."+item.Key),item.Value)));
+            foreach(var item in reward.Boosters) parts.Add(RewardPart.Booster(item.Key,item.Value,Get("shell.booster",Get("shell.booster."+item.Key),item.Value)));
             return parts;
         }
         internal string CommitError(SessionResult result)

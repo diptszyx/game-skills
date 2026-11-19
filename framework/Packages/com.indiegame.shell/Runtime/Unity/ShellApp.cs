@@ -27,6 +27,7 @@ namespace IndieGame.Shell.Unity
         public IAudioService Audio { get; private set; }
         public IHapticsPlayer Haptics { get; private set; }
         public TMP_Text ErrorLabel { get; private set; }
+        public IBoosterInventory Boosters { get; private set; }
         public MainPresenter MainPresenter { get; private set; }
         readonly List<IDisposable> owned = new List<IDisposable>();
         readonly Dictionary<ShellScreen,RectTransform> cached = new Dictionary<ShellScreen,RectTransform>();
@@ -50,13 +51,13 @@ namespace IndieGame.Shell.Unity
                     var result=Text.LoadLayeredTable(table.Key,shellDefaults!=null?shellDefaults.text:null,table.Value.text);
                     if(!result.Success) throw new InvalidOperationException("Invalid language table: "+table.Key+": "+result.Error);
                 }
-                factory=new ShellUiFactory(config.Style);
+                factory=new ShellUiFactory(config.Style){ BoosterIcons=config.BoosterIcons??new Dictionary<string,Sprite>() };
                 canvas=new GameObject("Shell Canvas",typeof(RectTransform),typeof(Canvas),typeof(CanvasScaler),typeof(GraphicRaycaster));
                 canvas.transform.SetParent(transform,false); canvas.GetComponent<Canvas>().renderMode=RenderMode.ScreenSpaceOverlay;
                 var scaler=canvas.GetComponent<CanvasScaler>(); scaler.uiScaleMode=CanvasScaler.ScaleMode.ScaleWithScreenSize;
                 scaler.referenceResolution=new Vector2(720,1600); scaler.matchWidthOrHeight=0;
                 Session=new ShellSession(config.SaveStore??new SaveStore(),config.SavePath,clock,config.Lives,config.Economy,config.CheckIn,config.Quests,config.Settings,config.RemoteConfig);
-                screenText=new ScreenText(Session,Text); loadResult=Session.LoadAll();
+                Boosters=new CommittingBoosters(Session.Economy,this); screenText=new ScreenText(Session,Text); loadResult=Session.LoadAll();
                 if(FindFirstObjectByType<AudioListener>()==null) gameObject.AddComponent<AudioListener>();
                 var audioPool=new UnityAudioSourcePool(transform,config.Sounds??new Dictionary<string,AudioClip>()); owned.Add(audioPool);
                 Audio=new AudioService(Session.Settings,audioPool); Haptics=new HapticsGate(Session.Settings,new UnityHapticsPlayer());
@@ -176,6 +177,18 @@ namespace IndieGame.Shell.Unity
         void OfferHearts()
         {
             if(config.ShopFactory!=null||config.ShopCatalog!=null) Navigate(ShellScreen.Shop);
+        }
+        sealed class CommittingBoosters : IBoosterInventory
+        {
+            readonly IBoosterInventory inner; readonly ShellApp app;
+            internal CommittingBoosters(IBoosterInventory inner,ShellApp app) { this.inner=inner; this.app=app; }
+            public int Count(string id)=>inner.Count(id);
+            public event Action Changed { add { inner.Changed+=value; } remove { inner.Changed-=value; } }
+            public bool Use(string id)
+            {
+                if(!inner.Use(id)) return false;
+                app.Commit(); return true;
+            }
         }
         sealed class ActionsBridge : IGameSessionActions
         {

@@ -56,6 +56,8 @@ namespace IndieGame.Shell.Unity
         public int LeaderboardRows = 10;
         // Optional. Localization key or plain text for the one-line caption under the leaderboard (e.g. what the score counts); null hides it.
         public string LeaderboardCaption;
+        // Optional. Sprite per booster id for reward strips; ids without a sprite show plain text.
+        public IReadOnlyDictionary<string,Sprite> BoosterIcons = new Dictionary<string,Sprite>();
         public IDictionary<string,AudioClip> Sounds;
         public Func<ShellGameContext,RectTransform> GameScreenFactory;
         // Optional. Game extra on the win popup (e.g. a mascot); the shell always adds confetti.
@@ -83,7 +85,7 @@ namespace IndieGame.Shell.Unity
             var config = new ShellAppConfig {
                 Style=style, SavePath=savePath, LanguageTables=tables,
                 Lives=new LivesConfig(game.maxHearts,game.initialHearts,TimeSpan.FromSeconds(game.heartSeconds)),
-                Economy=new EconomyConfig(game.initialGold),
+                Economy=new EconomyConfig(game.initialGold,game.InitialBoosterCounts()),
                 CheckIn=checkIn??CheckInPack.Standard(game.checkInGold),
                 Quests=quests??QuestPack.Standard(game.questGold),
                 Settings=new SettingsConfig(true,true,true,game.languages[0],game.languages),

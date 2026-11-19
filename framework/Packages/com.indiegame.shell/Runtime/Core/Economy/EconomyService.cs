@@ -20,8 +20,15 @@ namespace IndieGame.Shell
         internal void Record(string id) => ids.Add(id);
         internal List<string> Snapshot() => new List<string>(ids);
     }
-    public sealed class EconomyService : IRewardGrantor
+    public interface IBoosterInventory
     {
+        int Count(string id);
+        bool Use(string id);
+        event Action Changed;
+    }
+    public sealed class EconomyService : IRewardGrantor, IBoosterInventory
+    {
+        public event Action? Changed;
         readonly long initialGold;
         readonly Dictionary<string, int> initialBoosters;
         readonly LivesService lives;
@@ -31,6 +38,8 @@ namespace IndieGame.Shell
         public int Hearts => lives.Hearts;
         public IReadOnlyDictionary<string, int> Boosters => new ReadOnlyDictionary<string, int>(boosters);
         public ClaimLedger Claims => ledger;
+        public int Count(string id) => id != null && boosters.TryGetValue(id, out var count) ? count : 0;
+        public bool Use(string id) => SpendBooster(id, 1).Success;
         static bool Valid(IReadOnlyDictionary<string, int> values)
         { foreach (var pair in values) if (string.IsNullOrWhiteSpace(pair.Key) || pair.Value < 0) return false; return true; }
         public EconomyService(EconomyConfig config, LivesService lives)
@@ -58,7 +67,9 @@ namespace IndieGame.Shell
                 var check = lives.AddHearts(reward.Hearts);
                 if (!check.Success) return check;
             }
-            Gold += reward.Gold; boosters = next; ledger.Record(claimId); return new ModuleResult();
+            Gold += reward.Gold; boosters = next; ledger.Record(claimId);
+            if (reward.Boosters.Count > 0) Changed?.Invoke();
+            return new ModuleResult();
         }
         GrantOutcome IRewardGrantor.Grant(string claimId, Reward reward)
         {
@@ -80,7 +91,14 @@ namespace IndieGame.Shell
                 if (!boosters.TryGetValue(item.Key, out var count) || count < item.Value) return new ModuleResult(ModuleError.Insufficient);
             Gold -= gold;
             foreach (var item in items) boosters[item.Key] -= item.Value;
+            if (items.Count > 0) Changed?.Invoke();
             return new ModuleResult();
+        }
+        static bool SameCounts(Dictionary<string, int> a, Dictionary<string, int> b)
+        {
+            if (a.Count != b.Count) return false;
+            foreach (var pair in a) if (!b.TryGetValue(pair.Key, out var other) || other != pair.Value) return false;
+            return true;
         }
         public sealed class State
         {
@@ -108,8 +126,11 @@ namespace IndieGame.Shell
                 foreach (var id in s!.Claims!) if (string.IsNullOrWhiteSpace(id) || !unique.Add(id)) { valid = false; break; }
             }
             Gold = valid ? s!.Gold : initialGold;
-            boosters = new Dictionary<string, int>(valid ? s!.Boosters : initialBoosters);
+            var loaded = new Dictionary<string, int>(valid ? s!.Boosters : initialBoosters);
+            bool inventoryChanged = !SameCounts(boosters, loaded);
+            boosters = loaded;
             ledger = new ClaimLedger(valid ? s!.Claims! : new List<string>());
+            if (inventoryChanged) Changed?.Invoke();
             return new ModuleResult(valid ? ModuleError.None : ModuleError.CorruptSection);
         }
     }

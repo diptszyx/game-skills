@@ -5,6 +5,13 @@ using UnityEngine;
 namespace IndieGame.Shell.Unity
 {
     [Serializable]
+    public sealed class BoosterCount
+    {
+        public string id = "";
+        public int count;
+    }
+
+    [Serializable]
     public sealed class ShellGameConfig
     {
         public string gameId = "";
@@ -18,6 +25,7 @@ namespace IndieGame.Shell.Unity
         public int reviveGold = 50;
         public int shopGold = 50;
         public int shopPrice = 30;
+        public List<BoosterCount> initialBoosters = new List<BoosterCount>();
         public string[] languages = { "en", "vi" };
 
         public static ShellGameConfig Parse(string json)
@@ -30,6 +38,13 @@ namespace IndieGame.Shell.Unity
             catch(ArgumentException ex) { throw new InvalidOperationException("Invalid ShellGameConfig json: " + ex.Message, ex); }
             game.Validate();
             return game;
+        }
+
+        internal IReadOnlyDictionary<string,int> InitialBoosterCounts()
+        {
+            var counts = new Dictionary<string,int>(StringComparer.Ordinal);
+            foreach(var entry in initialBoosters) counts[entry.id] = entry.count;
+            return counts;
         }
 
         internal void Validate()
@@ -46,6 +61,13 @@ namespace IndieGame.Shell.Unity
             if(reviveGold < 1) bad.Add(nameof(reviveGold));
             if(shopGold < 0) bad.Add(nameof(shopGold));
             if(shopPrice < 1) bad.Add(nameof(shopPrice));
+            if(initialBoosters == null) bad.Add(nameof(initialBoosters));
+            else
+            {
+                var seen = new HashSet<string>(StringComparer.Ordinal);
+                foreach(var entry in initialBoosters)
+                    if(entry == null || string.IsNullOrWhiteSpace(entry.id) || entry.count < 0 || !seen.Add(entry.id)) { bad.Add(nameof(initialBoosters)); break; }
+            }
             if(languages == null || languages.Length == 0) bad.Add(nameof(languages));
             else foreach(var language in languages)
                 if(string.IsNullOrWhiteSpace(language)) { bad.Add(nameof(languages)); break; }

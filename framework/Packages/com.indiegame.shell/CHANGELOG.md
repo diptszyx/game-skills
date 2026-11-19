@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- `IBoosterInventory` (`Count`/`Use`/`Changed`) implemented by `EconomyService`, exposed as `ShellApp.Boosters` (`Use` commits the save); `initialBoosters` in `ShellGameConfig`; booster rewards render icon + amount via `ShellAppConfig.BoosterIcons`, plain text when no icon is set.
 - Hearts are spent per failed attempt, owned by the shell (`AttemptHearts`, `session.Attempt`): one heart when the lose popup shows or when an unwon attempt is left, never twice in one attempt, never on win, revive or retry. Play, Retry and Next require at least 1 heart (unlimited counts) and open the Shop when refused. Games need no heart code.
 - Leaderboard rename is inline: tapping your own row turns the name into an input in place (`InlineNameEditor`, transparent, same rect as the label); Done submits, losing focus or Escape cancels, errors show on the row. The rename popup is gone; `LeaderboardPresenter` no longer takes a `PopupHost`. Optional `ILeaderboardRename` / `ILeaderboardBackend.UpdatePlayerName` back it.
 - `PopupHost` lifts the top popup above the soft keyboard while a TMP input inside it is focused (`KeyboardAvoidance`, `SoftKeyboard`; Android reads the visible display frame because `TouchScreenKeyboard.area` is empty there).

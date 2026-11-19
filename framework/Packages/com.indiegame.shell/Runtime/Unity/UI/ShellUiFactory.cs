@@ -67,6 +67,7 @@ namespace IndieGame.Shell.Unity.UI
     public sealed class ShellUiFactory
     {
         public ShellStyle Style { get; private set; }
+        public IReadOnlyDictionary<string,Sprite> BoosterIcons { get; set; } = new Dictionary<string,Sprite>();
         public ShellUiFactory(ShellStyle style) { if (style == null) throw new InvalidOperationException("Missing style role: ShellStyle"); style.Validate(); Style = style; }
         public static RectTransform Node(string name, Transform parent)
         {
@@ -180,6 +181,10 @@ namespace IndieGame.Shell.Unity.UI
             if(!string.IsNullOrEmpty(lead)) StripLabel(strip,lead,role,fontSize);
             foreach(var part in parts)
             {
+                if(part.BoosterId!=null && BoosterIcons.TryGetValue(part.BoosterId,out var sprite) && sprite!=null)
+                {
+                    BoosterIconImage(strip,sprite); StripLabel(strip,part.AmountText,role,fontSize); continue;
+                }
                 if(part.Icon!=null)
                 {
                     var icon=AppearanceImage(strip,part.Icon,part.Icon); var size=icon.gameObject.AddComponent<LayoutElement>();
@@ -188,6 +193,13 @@ namespace IndieGame.Shell.Unity.UI
                 StripLabel(strip,part.Text,role,fontSize);
             }
             strip.gameObject.SetActive(true); return strip;
+        }
+        void BoosterIconImage(RectTransform strip,Sprite sprite)
+        {
+            var node=Node("Booster icon",strip); var image=node.gameObject.AddComponent<Image>();
+            image.sprite=sprite; image.preserveAspect=true; image.raycastTarget=false;
+            var size=node.gameObject.AddComponent<LayoutElement>(); size.preferredWidth=size.preferredHeight=Style.RewardIconSize;
+            node.gameObject.SetActive(true);
         }
         void StripLabel(RectTransform strip,string value,string role,float fontSize)
         {
