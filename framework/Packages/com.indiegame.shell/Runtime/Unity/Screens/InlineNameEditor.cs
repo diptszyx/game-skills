@@ -48,6 +48,7 @@ namespace IndieGame.Shell.Unity.Screens
             input.onValueChanged.AddListener(_=>{ if(ErrorKey!=null) SetError(null); });
             input.onSubmit.AddListener(_=>submitRequested=true);
             input.onEndEdit.AddListener(Resolve);
+            field.gameObject.SetActive(true);
         }
         TMP_Text InputText(RectTransform parent,string value,TMP_Text like)
         {

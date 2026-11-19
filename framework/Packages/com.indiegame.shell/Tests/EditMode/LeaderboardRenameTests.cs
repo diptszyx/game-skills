@@ -72,6 +72,19 @@ namespace IndieGame.Shell.Tests
                 }
             }
         }
+        [Test] public void InlineInputIsActiveWhileEditing()
+        {
+            using(var f=new PopupFixture())
+            {
+                var board=new FakeBoard();
+                using(var p=Make(f,board,out var view))
+                {
+                    RenameButton(view).onClick.Invoke();
+                    Assert.That(p.Rename.Input.gameObject.activeInHierarchy,Is.True);
+                    Assert.That(p.Rename.Input.textComponent.gameObject.activeInHierarchy,Is.True);
+                }
+            }
+        }
         [Test] public async Task ValidRenameTrimsRefreshesBoardAndClosesField()
         {
             using(var f=new PopupFixture())

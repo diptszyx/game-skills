@@ -104,6 +104,7 @@ IndieGame.Shell.Tests.KitChunkyTests.SourcePngsAreKeptByteForByte
 IndieGame.Shell.Tests.LeaderboardRenameTests.BackendErrorIsShownInlineAndFieldStaysOpen(Failed,"shell.error.Failed")
 IndieGame.Shell.Tests.LeaderboardRenameTests.BackendErrorIsShownInlineAndFieldStaysOpen(InvalidArgument,"shell.leaderboard.rename.invalid")
 IndieGame.Shell.Tests.LeaderboardRenameTests.BackendErrorIsShownInlineAndFieldStaysOpen(Unavailable,"shell.leaderboard.offline")
+IndieGame.Shell.Tests.LeaderboardRenameTests.InlineInputIsActiveWhileEditing
 IndieGame.Shell.Tests.LeaderboardRenameTests.InlineInputIsTransparentAndOccupiesTheNameLabelRect
 IndieGame.Shell.Tests.LeaderboardRenameTests.InvalidNameIsRejectedWithoutCallingBackend("")
 IndieGame.Shell.Tests.LeaderboardRenameTests.InvalidNameIsRejectedWithoutCallingBackend_InnerSpace
