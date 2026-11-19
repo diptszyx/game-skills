@@ -70,5 +70,12 @@ namespace IndieGame.Shell.Tests
             Assert.That(service.Load(DocumentWithSlot(CheckInPack.Days + 2)).Success, Is.True);
             Assert.That(service.NextSlot, Is.EqualTo(0)); Assert.That(service.Preview().CanClaimNow, Is.True);
         }
+        [Test] public void BoosterIdsAddBoostersOnDaysThreeFiveAndSeven()
+        {
+            var row = CheckInPack.Standard(10, new[] { "a", "b" }).RewardTables[0];
+            Assert.That(row[2].Boosters["a"], Is.EqualTo(1)); Assert.That(row[4].Boosters["b"], Is.EqualTo(1));
+            Assert.That(row[6].Boosters.Keys, Is.EquivalentTo(new[] { "a", "b" }));
+            Assert.That(row[0].Boosters, Is.Empty); Assert.That(row[2].Gold, Is.EqualTo(30));
+        }
     }
 }

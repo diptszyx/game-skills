@@ -25,6 +25,8 @@ namespace IndieGame.Shell.Unity
         public int reviveGold = 50;
         public int shopGold = 50;
         public int shopPrice = 30;
+        public int boosterPrice = 100;
+        public string[] rewardBoosters = new string[0];
         public List<BoosterCount> initialBoosters = new List<BoosterCount>();
         public string[] languages = { "en", "vi" };
 
@@ -58,6 +60,7 @@ namespace IndieGame.Shell.Unity
             if(checkInGold < 0) bad.Add(nameof(checkInGold));
             if(questGold < 0) bad.Add(nameof(questGold));
             if(winGold < 0) bad.Add(nameof(winGold));
+            if(boosterPrice < 1) bad.Add(nameof(boosterPrice));
             if(reviveGold < 1) bad.Add(nameof(reviveGold));
             if(shopGold < 0) bad.Add(nameof(shopGold));
             if(shopPrice < 1) bad.Add(nameof(shopPrice));

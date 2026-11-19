@@ -46,5 +46,12 @@ namespace IndieGame.Shell.Tests
             Assert.That(current.Refresh().Success, Is.True);
             Assert.That(current.Quests.Count, Is.EqualTo(QuestPack.DailyPicked));
         }
+        [Test] public void BiggerWinQuestsAlsoGrantABoosterWhenAskedTo()
+        {
+            var pack = QuestPack.Standard(10, new[] { "a", "b" });
+            Assert.That(pack.Daily.Single(q => q.Id == "win3").Reward.Boosters["a"], Is.EqualTo(1));
+            Assert.That(pack.Daily.Single(q => q.Id == "win5").Reward.Boosters["b"], Is.EqualTo(1));
+            Assert.That(pack.Daily.Single(q => q.Id == "win1").Reward.Boosters, Is.Empty);
+        }
     }
 }

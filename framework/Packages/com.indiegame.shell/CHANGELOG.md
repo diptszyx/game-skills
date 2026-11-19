@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Booster rewards from `ShellGameConfig.rewardBoosters` + `boosterPrice`: Quests win3/win5 grant one booster, Check-in days 3/5/7 grant boosters (day 7 all), Shop sells each booster for gold (`booster_<id>` product, title key `shell.product.booster_<id>`). Packs take the ids as an optional argument.
 - Hearts countdown shows the time to the next heart as `+1 29m 13s` (`LivesService.NextHeartAtUtc`, `MainPresenter.FormatDuration`) and nothing when full; `shell.lives.full` removed. Quest titles use digits (`Win 3 rounds`).
 - `ShellStyle.HideResourcePillsInGame`: gold and hearts pills fade (`TopBarView.ShowPills`, CanvasGroup) instead of deactivating, so reward flights keep a target; the gold pill reappears while a popup is open.
 - Top bar gold and hearts lag a claimed reward until its fly icons land: `RewardFlyLayer.Held(icon)` holds each flight's share (`RewardPart.Amount`), `ChromePresenter` shows balance minus held.

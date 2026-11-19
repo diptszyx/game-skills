@@ -63,5 +63,13 @@ namespace IndieGame.Shell.Tests
             Assert.Throws<System.ArgumentOutOfRangeException>(() => ShopPack.Standard(50, 0, 5));
             Assert.Throws<System.ArgumentOutOfRangeException>(() => ShopPack.Standard(50, 30, 0));
         }
+        [Test] public void EachBoosterIdBecomesAGoldProductAtTheBoosterPrice()
+        {
+            var catalog = ShopPack.Standard(50, 30, 5, new[] { "a", "b" }, 100);
+            var product = catalog.Products.Single(p => p.Id == "booster_a");
+            Assert.That(product.PriceKind, Is.EqualTo(PriceKind.Gold)); Assert.That(product.Price, Is.EqualTo(100));
+            Assert.That(product.Reward.Boosters["a"], Is.EqualTo(1));
+            Assert.Throws<System.ArgumentOutOfRangeException>(() => ShopPack.Standard(50, 30, 5, new[] { "a" }, 0));
+        }
     }
 }
