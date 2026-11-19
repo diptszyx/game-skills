@@ -11,13 +11,14 @@ namespace IndieGame.Shell.Unity.Screens
         readonly ScreenHost host; readonly RectTransform main,game;
         readonly Action<string> showError; readonly TabModals modals;
         readonly Action home; readonly Action<ShellScreen> navigate;
-        readonly ScreenLifetime lifetime;
+        readonly ScreenLifetime lifetime; readonly RewardFlyLayer fly;
         public TopBarView TopBar { get; }
         public TabBarView TabBar { get; }
         string language; DateTime day; long second=-1;
         static readonly string[] Keys={"home","checkin","quests","shop","leaderboard"};
-        public ChromePresenter(ShellSession session,LocalizationService localization,IClock clock,ShellUiFactory factory,ScreenHost host,RectTransform main,RectTransform game,Action home,Action<ShellScreen> navigate,Action settings,Action<string> showError = null,TabModals modals = null)
+        public ChromePresenter(ShellSession session,LocalizationService localization,IClock clock,ShellUiFactory factory,ScreenHost host,RectTransform main,RectTransform game,Action home,Action<ShellScreen> navigate,Action settings,Action<string> showError = null,TabModals modals = null,RewardFlyLayer fly = null)
         {
+            this.fly=fly;
             this.showError=showError??(_=>{}); this.modals=modals; this.session=session; text=new ScreenText(session,localization); this.clock=clock; this.host=host; this.main=main; this.game=game; this.home=home; this.navigate=navigate;
             TopBar=new TopBarView(factory,host.ChromeRoot);
             TabBar=new TabBarView(factory,host.ChromeRoot,Keys.Select(k=>new TabDefinition(k,Label(k),k)).ToArray());
@@ -27,6 +28,7 @@ namespace IndieGame.Shell.Unity.Screens
             lifetime=host.ChromeRoot.gameObject.AddComponent<ScreenLifetime>(); lifetime.Ticked+=Refresh; lifetime.Resumed+=Refresh;
             Refresh();
         }
+        long Held(string icon)=>fly==null?0:fly.Held(icon);
         string Label(string key)=>text.Get("shell.tab."+key);
         public static bool CheckInBadge(ShellSession session)=>session.DailyCheckIn.Preview().CanClaimNow;
         public static bool QuestsBadge(ShellSession session)=>session.DailyQuests.Quests.Any(QuestsPresenter.CanClaim);
@@ -38,7 +40,7 @@ namespace IndieGame.Shell.Unity.Screens
             if(language!=session.Settings.Language)
             { language=session.Settings.Language; foreach(var key in Keys) TabBar.SetLabel(key,Label(key)); if(modals!=null) modals.SetCloseLabel(text.Get("shell.close")); }
             RefreshGearLabel();
-            TopBar.Render(new TopBarDisplay(session.Economy.Gold,session.Lives.Hearts,MainPresenter.FormatCountdown(session,text,clock)));
+            TopBar.Render(new TopBarDisplay(session.Economy.Gold-Held(RewardPart.GoldIcon),session.Lives.Hearts-(int)Held(RewardPart.HeartIcon),MainPresenter.FormatCountdown(session,text,clock)));
             TabBar.SetBadge("checkin",CheckInBadge(session)); TabBar.SetBadge("quests",QuestsBadge(session));
             SyncSelection();
         }

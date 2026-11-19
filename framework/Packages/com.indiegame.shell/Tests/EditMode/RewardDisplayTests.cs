@@ -134,5 +134,13 @@ namespace IndieGame.Shell.Tests
             var layer=FlyLayerWithGoldTarget(); var view=new CheckInView(factory,root.transform); var presenter=new CheckInPresenter(session,view,text,clock,layer); owned.Add(presenter);
             view.RequestClaim(); Assert.That(layer.ActiveFlights,Is.EqualTo(factory.Style.RewardFlyCount));
         }
+        [Test] public void FlyHoldsBackTheRewardUntilItsIconsLand()
+        {
+            var layer=FlyLayerWithGoldTarget(); layer.Fly(Source(),new[]{RewardPart.Gold(100)});
+            Assert.That(layer.Held(RewardPart.GoldIcon),Is.EqualTo(100));
+            Object.DestroyImmediate(root.transform.Find("Target").gameObject);
+            typeof(RewardFlyLayer).GetMethod("Update",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance).Invoke(layer,null);
+            Assert.That(layer.Held(RewardPart.GoldIcon),Is.Zero);
+        }
     }
 }

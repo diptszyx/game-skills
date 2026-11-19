@@ -100,7 +100,7 @@ namespace IndieGame.Shell.Unity
                 MainPresenter=new MainPresenter(Session,Main,Text,clock,actions,Navigate,config.PlayLabel); owned.Add(MainPresenter);
                 if(config.Style.EnableHomeChrome)
                 {
-                    var chrome=new ChromePresenter(Session,Text,clock,factory,Screens,Main.Root,GameRoot,ShowMain,Navigate,()=>{ if(!Ready || Popups.Top!=null) return; if(Screens.Current==GameRoot) Flow.ShowPause(); else Flow.ShowSettings(); },error=>ErrorLabel.text=error,tabModals);
+                    var chrome=new ChromePresenter(Session,Text,clock,factory,Screens,Main.Root,GameRoot,ShowMain,Navigate,()=>{ if(!Ready || Popups.Top!=null) return; if(Screens.Current==GameRoot) Flow.ShowPause(); else Flow.ShowSettings(); },error=>ErrorLabel.text=error,tabModals,rewardFly);
                     owned.Add(chrome); rewardFly.SetTarget(RewardPart.GoldIcon,chrome.TopBar.GoldIcon); rewardFly.SetTarget(RewardPart.HeartIcon,chrome.TopBar.HeartIcon);
                 }
                 Screens.Show(Main.Root);

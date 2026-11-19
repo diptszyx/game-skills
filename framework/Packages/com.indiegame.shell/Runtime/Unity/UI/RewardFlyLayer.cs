@@ -8,15 +8,17 @@ namespace IndieGame.Shell.Unity.UI
     {
         sealed class Flight
         {
-            public readonly Image Icon; public readonly RectTransform Source, Target; public readonly float Delay;
+            public readonly Image Icon; public readonly RectTransform Source, Target; public readonly float Delay; public readonly string Currency; public readonly long Share;
             public Vector3 Origin; public float Elapsed;
-            public Flight(Image icon,RectTransform source,RectTransform target,float delay)
-            { Icon=icon; Source=source; Target=target; Delay=delay; Origin=source.position; }
+            public Flight(Image icon,RectTransform source,RectTransform target,float delay,string currency,long share)
+            { Icon=icon; Source=source; Target=target; Delay=delay; Currency=currency; Share=share; Origin=source.position; }
         }
         readonly Dictionary<string,RectTransform> targets=new Dictionary<string,RectTransform>();
         readonly List<Flight> flights=new List<Flight>();
+        readonly Dictionary<string,long> held=new Dictionary<string,long>();
         ShellUiFactory factory; RectTransform root;
         public int ActiveFlights=>flights.Count;
+        public long Held(string icon)=>held.TryGetValue(icon,out var amount)?amount:0;
         public static RewardFlyLayer Create(ShellUiFactory factory,Transform parent)
         {
             var node=ShellUiFactory.Node("Reward fly",parent); ShellUiFactory.Stretch(node);
@@ -31,14 +33,18 @@ namespace IndieGame.Shell.Unity.UI
             foreach(var part in parts)
             {
                 if(part.Icon==null || !targets.TryGetValue(part.Icon,out var target) || target==null || !target.gameObject.activeInHierarchy) continue;
-                for(int i=0;i<style.RewardFlyCount;i++)
+                int count=style.RewardFlyCount; long share=part.Amount/count;
+                for(int i=0;i<count;i++)
                 {
+                    long portion=i==count-1?part.Amount-share*(count-1):share; held[part.Icon]=Held(part.Icon)+portion;
                     var icon=factory.AppearanceImage(root,"Fly "+part.Icon,part.Icon);
                     icon.rectTransform.sizeDelta=Vector2.one*style.RewardFlyIconSize; icon.canvasRenderer.SetAlpha(0);
-                    flights.Add(new Flight(icon,source,target,RewardFlyCurve.LaunchDelay+i*style.RewardFlyStagger));
+                    flights.Add(new Flight(icon,source,target,RewardFlyCurve.LaunchDelay+i*style.RewardFlyStagger,part.Icon,portion));
                 }
             }
         }
+        static void Discard(GameObject go)
+        { if(Application.isPlaying) Destroy(go); else DestroyImmediate(go); }
         void Update()
         {
             var style=factory.Style; float dt=Time.unscaledDeltaTime;
@@ -46,7 +52,7 @@ namespace IndieGame.Shell.Unity.UI
             {
                 var flight=flights[i]; flight.Elapsed+=dt;
                 float t=RewardFlyCurve.Progress(flight.Elapsed,flight.Delay,style.RewardFlySeconds);
-                if(flight.Target==null || t>=1) { Destroy(flight.Icon.gameObject); flights.RemoveAt(i); continue; }
+                if(flight.Target==null || t>=1) { held[flight.Currency]=Held(flight.Currency)-flight.Share; Discard(flight.Icon.gameObject); flights.RemoveAt(i); continue; }
                 if(t<=0 && flight.Source!=null && flight.Source.gameObject.activeInHierarchy) flight.Origin=flight.Source.position;
                 var target=flight.Target.position;
                 var position=RewardFlyCurve.Position(flight.Origin,target,style.RewardFlyArc,t);
