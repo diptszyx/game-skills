@@ -142,5 +142,14 @@ namespace IndieGame.Shell.Tests
             typeof(RewardFlyLayer).GetMethod("Update",System.Reflection.BindingFlags.NonPublic|System.Reflection.BindingFlags.Instance).Invoke(layer,null);
             Assert.That(layer.Held(RewardPart.GoldIcon),Is.Zero);
         }
+        [Test] public void TopBarPillsFadeWithoutBeingDeactivatedSoRewardsStillHaveATarget()
+        {
+            var top=new TopBarView(factory,root.transform); top.ShowPills(false,false);
+            var gold=top.Root.Find("Currency pill"); var lives=top.Root.Find("Lives pill");
+            Assert.That(gold.GetComponent<CanvasGroup>().alpha,Is.Zero); Assert.That(lives.GetComponent<CanvasGroup>().alpha,Is.Zero);
+            Assert.That(top.GoldIcon.gameObject.activeInHierarchy,Is.True);
+            top.ShowPills(true,false);
+            Assert.That(gold.GetComponent<CanvasGroup>().alpha,Is.EqualTo(1f)); Assert.That(lives.GetComponent<CanvasGroup>().alpha,Is.Zero);
+        }
     }
 }

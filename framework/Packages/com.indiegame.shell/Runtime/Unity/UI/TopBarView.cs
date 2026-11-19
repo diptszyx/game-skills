@@ -15,6 +15,7 @@ namespace IndieGame.Shell.Unity.UI
         public RectTransform Root { get; }
         readonly TMP_Text gold, hearts, countdown;
         readonly RectTransform currency, lives;
+        readonly CanvasGroup currencyGroup, livesGroup;
         public RectTransform GoldIcon { get; }
         public RectTransform HeartIcon { get; }
         public Button Settings { get; }
@@ -29,6 +30,7 @@ namespace IndieGame.Shell.Unity.UI
             lives=factory.AppearanceImage(Root,"Lives pill","livesPill",true).rectTransform;
             Place(lives,new Vector2(.42f,0),new Vector2(.80f,1));
             lives.offsetMin=new Vector2(0,15); lives.offsetMax=new Vector2(0,-15);
+            currencyGroup=currency.gameObject.AddComponent<CanvasGroup>(); livesGroup=lives.gameObject.AddComponent<CanvasGroup>();
             GoldIcon=factory.AppearanceImage(currency,"Currency icon","currencyIcon").rectTransform; Place(GoldIcon,new Vector2(.02f,.1f),new Vector2(.25f,.9f));
             HeartIcon=factory.AppearanceImage(lives,"Heart icon","heartIcon").rectTransform; Place(HeartIcon,new Vector2(.02f,.1f),new Vector2(.25f,.9f));
             gold=factory.Label(currency,"",role:"chromeText"); Place(gold.rectTransform,new Vector2(.28f,.1f),new Vector2(.95f,.9f));
@@ -47,6 +49,8 @@ namespace IndieGame.Shell.Unity.UI
         }
         internal static void Place(RectTransform r, Vector2 min, Vector2 max)
         { r.anchorMin=min; r.anchorMax=max; r.offsetMin=r.offsetMax=Vector2.zero; }
+        public void ShowPills(bool showGold, bool showLives)
+        { currencyGroup.alpha=showGold?1:0; livesGroup.alpha=showLives?1:0; }
         public void Render(TopBarDisplay display)
         { gold.text=display.Gold.ToString(System.Globalization.CultureInfo.InvariantCulture); hearts.text=display.Hearts.ToString(); countdown.text=display.Countdown ?? ""; }
     }
