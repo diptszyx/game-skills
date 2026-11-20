@@ -1,0 +1,22 @@
+{
+    "name": "GameKit.UI.Tests.PlayMode",
+    "rootNamespace": "GameKit.UI.Tests.PlayMode",
+    "references": [
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner",
+        "Unity.InputSystem",
+        "Unity.InputSystem.TestFramework",
+        "GameKit.UI",
+        "Unity.TextMeshPro",
+        "UnityEngine.UI",
+        "GameKit.UI.Editor"
+    ],
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ]
+}

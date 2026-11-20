@@ -48,7 +48,7 @@
       }
     },
     "com.indiegame.ui": {
-      "version": "file:../../../../game-kit/Packages/com.indiegame.ui",
+      "version": "file:../../Packages/com.indiegame.ui",
       "depth": 0,
       "source": "local",
       "dependencies": {

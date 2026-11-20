@@ -1,0 +1,10 @@
+{
+    "name": "GameKit.UI",
+    "rootNamespace": "GameKit.UI",
+    "references": [
+        "UnityEngine.UI",
+        "Unity.TextMeshPro",
+        "Unity.InputSystem"
+    ],
+    "autoReferenced": false
+}

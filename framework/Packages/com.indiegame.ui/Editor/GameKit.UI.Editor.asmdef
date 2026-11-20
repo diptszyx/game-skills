@@ -1,0 +1,13 @@
+{
+    "name": "GameKit.UI.Editor",
+    "rootNamespace": "GameKit.UI.Editor",
+    "references": [
+        "GameKit.UI",
+        "UnityEngine.UI",
+        "Unity.TextMeshPro"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "autoReferenced": false
+}

@@ -1,0 +1,23 @@
+{
+    "name": "GameKit.UI.Tests.EditMode",
+    "rootNamespace": "GameKit.UI.Tests",
+    "references": [
+        "GameKit.UI",
+        "GameKit.UI.Editor",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner",
+        "UnityEngine.UI",
+        "Unity.TextMeshPro"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ]
+}
