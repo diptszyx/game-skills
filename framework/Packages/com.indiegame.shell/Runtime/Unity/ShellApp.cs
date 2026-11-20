@@ -118,6 +118,13 @@ namespace IndieGame.Shell.Unity
         }
         void RequireReady() { if(!Ready) throw new InvalidOperationException("ShellApp not Ready"); }
         public void ShowMain() { RequireReady(); tabModals?.CloseActive(); Screens.Show(Main.Root); }
+        public bool StartAttempt(Func<bool> startGame)
+        {
+            RequireReady();
+            if(!Session.Attempt.CanStart()) { OfferHearts(); return false; }
+            if(!startGame()) return false;
+            Session.Attempt.Begin(); return true;
+        }
         public void ShowGame() { RequireReady(); tabModals?.CloseActive(); Screens.Show(GameRoot); }
         public void OpenShopOverGame()
         {
@@ -209,10 +216,8 @@ namespace IndieGame.Shell.Unity
             internal ActionsBridge(ShellApp app,IGameSessionActions game) { this.app=app; this.game=game; }
             public bool Play()
             {
-                app.RequireReady();
-                if(!app.Session.Attempt.CanStart()) { app.OfferHearts(); return false; }
-                if(!game.Play()) return false;
-                app.Session.Attempt.Begin(); app.ShowGame(); return true;
+                if(!app.StartAttempt(game.Play)) return false;
+                app.ShowGame(); return true;
             }
             public void Retry() { if(CanStartOrOffer()) { game.Retry(); app.Session.Attempt.Begin(); } }
             public void NextLevel() { if(CanStartOrOffer()) { game.NextLevel(); app.Session.Attempt.Begin(); } }

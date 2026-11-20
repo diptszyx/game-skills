@@ -29,14 +29,14 @@ namespace IndieGame.Shell.Unity.UI
             Place(currency,new Vector2(.02f,0),new Vector2(compact?.30f:.40f,1));
             currency.offsetMin=new Vector2(0,15); currency.offsetMax=new Vector2(0,-15);
             lives=factory.AppearanceImage(Root,"Lives pill","livesPill",true).rectTransform;
-            Place(lives,new Vector2(compact?.32f:.42f,0),new Vector2(compact?.66f:.80f,1));
+            Place(lives,new Vector2(compact?.32f:.42f,0),new Vector2(compact?.70f:.80f,1));
             lives.offsetMin=new Vector2(0,15); lives.offsetMax=new Vector2(0,-15);
             currencyGroup=currency.gameObject.AddComponent<CanvasGroup>(); livesGroup=lives.gameObject.AddComponent<CanvasGroup>();
             GoldIcon=factory.AppearanceImage(currency,"Currency icon","currencyIcon").rectTransform; Place(GoldIcon,new Vector2(.02f,.1f),new Vector2(.25f,.9f));
             HeartIcon=factory.AppearanceImage(lives,"Heart icon","heartIcon").rectTransform; Place(HeartIcon,new Vector2(.02f,.1f),new Vector2(.25f,.9f));
             gold=factory.Label(currency,"",role:"chromeText"); Place(gold.rectTransform,new Vector2(.28f,.1f),new Vector2(.95f,.9f));
-            hearts=factory.Label(lives,"",role:"chromeText"); Place(hearts.rectTransform,new Vector2(.28f,.18f),new Vector2(.43f,.82f));
-            countdown=factory.Label(lives,"",role:"chromeText"); Place(countdown.rectTransform,new Vector2(.45f,.18f),new Vector2(.90f,.82f));
+            hearts=factory.Label(lives,"",role:"chromeText"); Place(hearts.rectTransform,new Vector2(.27f,.18f),new Vector2(.42f,.82f));
+            countdown=factory.Label(lives,"",role:"chromeText"); Place(countdown.rectTransform,new Vector2(.45f,.18f),new Vector2(.97f,.82f));
             foreach(var text in new[]{gold,hearts,countdown})
             {
                 text.fontSize=28; text.fontSizeMin=24; text.fontSizeMax=28;

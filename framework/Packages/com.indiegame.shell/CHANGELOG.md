@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- `ShellApp.StartAttempt(start)`: one gate for starting a run outside the Play button (checks hearts, offers a refill, begins the heart-costing attempt). `Play` now uses it.
+- `CompactResourcePills` also shows the heart refill countdown as a clock (`29:20`, no "+1" or unit letters) and widens the lives pill.
 - `ShellAppConfig.CurrentLevel`: when set (and no `PlayLabel`), the Home play button reads "Level N" (`shell.play.level`, en and vi) instead of "Play"; without it the label stays "Play".
 - `ShellStyle.HideGoldPillOverGamePopups` (the gold pill no longer appears over the game HUD while a popup is open) and `ShellStyle.CompactResourcePills` (gold and hearts pills 28% / 34% wide instead of 38% each); both default off.
 - `ShellApp.OpenShopOverGame()`: pauses the game and opens the Shop popup above the game screen (needs `ShellStyle.ModalTabs`); for out-of-stock skill buttons.

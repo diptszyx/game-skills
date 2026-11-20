@@ -24,10 +24,17 @@ namespace IndieGame.Shell.Unity.Screens
                 Countdown=FormatCountdown(session,text,clock),
                 Play=playLabel?.Invoke()??text.Get("shell.play"),CheckIn=text.Get("shell.checkin.title"),Quests=text.Get("shell.quests.title"),Shop=text.Get("shell.shop.title") });
         }
-        internal static string FormatCountdown(ShellSession session,ScreenText text,IClock clock)
+        internal static string FormatCountdown(ShellSession session,ScreenText text,IClock clock,bool clockStyle=false)
         {
             var next=session.Lives.NextHeartAtUtc;
-            return next.HasValue?text.Get("shell.lives.countdown",FormatDuration(next.Value-clock.UtcNow)):"";
+            if(!next.HasValue) return "";
+            var left=next.Value-clock.UtcNow;
+            return clockStyle?FormatClock(left):text.Get("shell.lives.countdown",FormatDuration(left));
+        }
+        public static string FormatClock(TimeSpan span)
+        {
+            long seconds=Math.Max(0,(long)Math.Ceiling(span.TotalSeconds));
+            return seconds>=3600?$"{seconds/3600}:{seconds%3600/60:00}:{seconds%60:00}":$"{seconds/60}:{seconds%60:00}";
         }
         public static string FormatDuration(TimeSpan span)
         {
