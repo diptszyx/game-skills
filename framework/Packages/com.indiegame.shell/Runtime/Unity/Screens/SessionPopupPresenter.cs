@@ -87,6 +87,7 @@ namespace IndieGame.Shell.Unity.Screens
             var layout=p.View.Content.gameObject.AddComponent<VerticalLayoutGroup>(); layout.childControlHeight=false; layout.childForceExpandHeight=false; layout.childControlWidth=false; layout.childForceExpandWidth=false; layout.childAlignment=TextAnchor.MiddleCenter; layout.spacing=factory.Style.Spacing;
             p.Body=factory.Label(p.View.Content,text.Get("popup."+kind.ToString().ToLowerInvariant()+".body"),role:"popupText");
             p.Title=p.View.Panel.Find("Title").GetComponent<TMP_Text>();
+            if(kind==SessionPopupKind.Leave) factory.RewardStrip(p.View.Content,new[]{RewardPart.HeartLoss(1)},"popupText");
             if(kind==SessionPopupKind.Win) p.RewardStrip=factory.RewardStrip(p.View.Content,text.RewardParts(config.WinReward),"popupText");
             if(kind==SessionPopupKind.Revive) factory.Label(p.View.Content,text.Get("popup.revive.price",config.ReviveGold),role:"popupText");
             Transform toggleRow=null;
