@@ -10,6 +10,8 @@ namespace IndieGame.Shell.Unity.UI
     {
         public bool EnableHomeChrome;
         public bool HideResourcePillsInGame;
+        public bool HideGoldPillOverGamePopups;
+        public bool CompactResourcePills;
         public bool ShowScreenTitleWithChrome=true;
         // Bottom-tab screens open as popups over Home (default); false keeps flat full-screen pages with a Back button.
         public bool TabsAsModals=true;

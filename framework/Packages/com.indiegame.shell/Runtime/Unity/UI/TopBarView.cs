@@ -25,10 +25,11 @@ namespace IndieGame.Shell.Unity.UI
             Root.anchorMin=new Vector2(0,1); Root.anchorMax=Vector2.one; Root.pivot=new Vector2(.5f,1);
             Root.sizeDelta=new Vector2(0,110); Root.anchoredPosition=Vector2.zero;
             currency=factory.AppearanceImage(Root,"Currency pill","currencyPill",true).rectTransform;
-            Place(currency,new Vector2(.02f,0),new Vector2(.40f,1));
+            bool compact=factory.Style.CompactResourcePills;
+            Place(currency,new Vector2(.02f,0),new Vector2(compact?.30f:.40f,1));
             currency.offsetMin=new Vector2(0,15); currency.offsetMax=new Vector2(0,-15);
             lives=factory.AppearanceImage(Root,"Lives pill","livesPill",true).rectTransform;
-            Place(lives,new Vector2(.42f,0),new Vector2(.80f,1));
+            Place(lives,new Vector2(compact?.32f:.42f,0),new Vector2(compact?.66f:.80f,1));
             lives.offsetMin=new Vector2(0,15); lives.offsetMax=new Vector2(0,-15);
             currencyGroup=currency.gameObject.AddComponent<CanvasGroup>(); livesGroup=lives.gameObject.AddComponent<CanvasGroup>();
             GoldIcon=factory.AppearanceImage(currency,"Currency icon","currencyIcon").rectTransform; Place(GoldIcon,new Vector2(.02f,.1f),new Vector2(.25f,.9f));
