@@ -54,6 +54,12 @@ namespace IndieGame.Shell.Tests
                 { Assert.That(view.Snapshot.Play,Is.EqualTo("Level 8")); label="Level 9"; presenter.Refresh(); Assert.That(view.Snapshot.Play,Is.EqualTo("Level 9")); }
             }
         }
+        [Test] public void PlayLevelLabelIsLocalizedForBothLanguages()
+        {
+            var text=ScreenTestData.Text();
+            Assert.That(text.Format("en","shell.play.level",8).Value,Is.EqualTo("Level 8"));
+            Assert.That(text.Format("vi","shell.play.level",8).Value,Is.EqualTo("Màn 8"));
+        }
         [Test] public void CheckInCellsFollowSevenDayCycleAndWrap()
         {
             using(var f=new PopupFixture())

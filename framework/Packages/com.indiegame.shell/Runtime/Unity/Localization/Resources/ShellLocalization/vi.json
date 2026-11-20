@@ -21,6 +21,7 @@
   "shell.quest.row": "{0} {1}/{2} {3}",
   "shell.main.title": "Chào mừng bạn đến với hành trình phiêu lưu kỳ diệu và phần thưởng mỗi ngày",
   "shell.play": "Chơi",
+  "shell.play.level": "Màn {0}",
   "shell.lives.countdown": "+1 {0}",
   "shell.shop.title": "Cửa hàng",
   "shell.shop.empty": "Chưa có sản phẩm",

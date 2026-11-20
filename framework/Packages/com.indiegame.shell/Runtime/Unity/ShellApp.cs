@@ -97,7 +97,7 @@ namespace IndieGame.Shell.Unity
                 }
                 Main=new MainView(factory,Screens.SafeRoot);
                 if(config.HomeStageFactory!=null) HomeStage=HomeStageBuilder.Create(Main.Root,factory,config.HomeStageFactory);
-                MainPresenter=new MainPresenter(Session,Main,Text,clock,actions,Navigate,config.PlayLabel); owned.Add(MainPresenter);
+                MainPresenter=new MainPresenter(Session,Main,Text,clock,actions,Navigate,PlayLabelFor(config)); owned.Add(MainPresenter);
                 if(config.Style.EnableHomeChrome)
                 {
                     var chrome=new ChromePresenter(Session,Text,clock,factory,Screens,Main.Root,GameRoot,ShowMain,Navigate,()=>{ if(!Ready || Popups.Top!=null) return; if(Screens.Current==GameRoot) Flow.ShowPause(); else Flow.ShowSettings(); },error=>ErrorLabel.text=error,tabModals,rewardFly,()=>Popups.Top!=null);
@@ -181,6 +181,11 @@ namespace IndieGame.Shell.Unity
             if(Popups.Stack.Count>0) { Popups.Back(); return; }
             if(Screens.Current==GameRoot) { Flow.ShowPause(); return; }
             if(Screens.Current!=Main.Root) ShowMain();
+        }
+        Func<string> PlayLabelFor(ShellAppConfig c)
+        {
+            if(c.PlayLabel!=null||c.CurrentLevel==null) return c.PlayLabel;
+            return ()=>Text.Format(Session.Settings.Language,"shell.play.level",c.CurrentLevel()).Value;
         }
         void OfferHearts()
         {

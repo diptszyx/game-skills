@@ -21,6 +21,7 @@
   "shell.quest.row": "{0} {1}/{2} {3}",
   "shell.main.title": "Welcome to your extraordinary adventure and daily rewards hub",
   "shell.play": "Play",
+  "shell.play.level": "Level {0}",
   "shell.lives.countdown": "+1 {0}",
   "shell.shop.title": "Shop",
   "shell.shop.empty": "No products",

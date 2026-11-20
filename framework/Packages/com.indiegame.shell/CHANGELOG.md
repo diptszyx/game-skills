@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- `ShellAppConfig.CurrentLevel`: when set (and no `PlayLabel`), the Home play button reads "Level N" (`shell.play.level`, en and vi) instead of "Play"; without it the label stays "Play".
 - `ShellStyle.HideGoldPillOverGamePopups` (the gold pill no longer appears over the game HUD while a popup is open) and `ShellStyle.CompactResourcePills` (gold and hearts pills 28% / 34% wide instead of 38% each); both default off.
 - `ShellApp.OpenShopOverGame()`: pauses the game and opens the Shop popup above the game screen (needs `ShellStyle.ModalTabs`); for out-of-stock skill buttons.
 - Booster rewards from `ShellGameConfig.rewardBoosters` + `boosterPrice`: Quests win3/win5 grant one booster, Check-in days 3/5/7 grant boosters (day 7 all), Shop sells each booster for gold (`booster_<id>` product, title key `shell.product.booster_<id>`). Packs take the ids as an optional argument.
